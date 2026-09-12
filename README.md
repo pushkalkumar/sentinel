@@ -145,4 +145,4 @@ No hardware was fabricated for this event, per organiser guidance. The schematic
 
 ## License
 
-License not yet chosen. Until the team picks one after the event, all rights reserved.
+MIT. See [LICENSE](LICENSE).

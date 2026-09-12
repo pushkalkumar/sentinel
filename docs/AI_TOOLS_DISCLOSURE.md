@@ -7,8 +7,8 @@ Project: Sentinel. Event: Frontier Cascadia, September 12, 2026. This file is re
 | Tool | Vendor | Model | Tier | Used for |
 |---|---|---|---|---|
 | Claude Code (terminal agent) | Anthropic | Claude Opus 5 | Anthropic Max subscription (paid) | Drafting the planning documents from the human spec, generating backend, simulator and frontend code, the design system, the hardware schematic SVG and firmware sketch, and the first drafts of the submission text |
-| Firecrawl MCP server | Firecrawl | none (search and page fetch, no generation) | `[team to confirm: free or paid tier before upload]` | Web research for the prior-art section of `docs/NOVELTY.md`: fetching product pages, docs and news articles for Meshtastic, PurpleAir, Watch Duty, Genasys, Dryad and the others cited there |
-| Exa MCP server | Exa | none (search and page fetch, no generation) | `[team to confirm: free or paid tier before upload]` | Same research task: finding sources, FEMA IPAWS guidance, the RCW drill text, NFPA references |
+| Firecrawl MCP server | Firecrawl | none (search and page fetch, no generation) | Free tier | Web research for the prior-art section of `docs/NOVELTY.md`: fetching product pages, docs and news articles for Meshtastic, PurpleAir, Watch Duty, Genasys, Dryad and the others cited there |
+| Exa MCP server | Exa | none (search and page fetch, no generation) | Free tier | Same research task: finding sources, FEMA IPAWS guidance, the RCW drill text, NFPA references |
 
 No other AI tools were used. No image generators, no voice tools, no code completion plugins outside Claude Code, no AI in the demo video.
 

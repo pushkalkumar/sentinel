@@ -31,11 +31,16 @@ async def _count(session: AsyncSession, stmt) -> int:
 
 
 async def _decision_card(session: AsyncSession, site_id: int) -> dict | None:
+    """Judge item 3: the overview only ever carries this site's card, never the one a neighbouring tenant
+    happened to recompute last."""
     from app.alerts.decision import get_decision_card
     try:
-        return await get_decision_card(session, site_id)
+        card = await get_decision_card(session, site_id)
     except NotImplementedError:
         return None
+    if card is None or card.get("site_id") != site_id:
+        return None
+    return card
 
 
 async def _active_drill(session: AsyncSession, site_id: int) -> dict | None:

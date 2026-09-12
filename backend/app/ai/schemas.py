@@ -1,4 +1,4 @@
-"""Pydantic shapes for /api/ai (request bodies and the model's tool-use output)."""
+"""Pydantic shapes for /api/ai (request bodies and the model's JSON output; Gemini responseSchema is derived from these)."""
 from __future__ import annotations
 
 from typing import Literal, Optional
@@ -20,7 +20,7 @@ class TranslateRequest(BaseModel):
 
 
 class TriageOutput(BaseModel):
-    """What the model must return through the `report_triage` tool. Validated before it is trusted."""
+    """What the model must return as JSON. Validated before it is trusted."""
     type: IncidentType
     count: int = Field(ge=1, le=500)
     people_detail: str = Field(default="", max_length=300)
@@ -38,54 +38,3 @@ class TranslateOutput(BaseModel):
 
 class BriefOutput(BaseModel):
     brief: str = Field(min_length=1, max_length=1500)
-
-
-TRIAGE_TOOL = {
-    "name": "report_triage",
-    "description": "Return the structured triage reading for one civilian report.",
-    "strict": True,
-    "input_schema": {
-        "type": "object",
-        "additionalProperties": False,
-        "required": ["type", "count", "people_detail", "hazards", "access_notes", "urgency",
-                     "language_detected", "english_summary"],
-        "properties": {
-            "type": {"type": "string", "enum": list(IncidentType.__args__)},
-            "count": {"type": "integer", "description": "People affected. 1 if the text does not say."},
-            "people_detail": {"type": "string", "description": "Who: children, adults, injured, etc. Empty if unknown."},
-            "hazards": {"type": "array", "items": {"type": "string"}},
-            "access_notes": {"type": "string", "description": "Doors, stairs, blocked exits, room numbers."},
-            "urgency": {"type": "integer", "description": "1 = life at risk now, 4 = informational."},
-            "language_detected": {"type": "string", "description": "ISO 639-1 code of the reporter's text."},
-            "english_summary": {"type": "string",
-                                "description": "One or two sentences. Quote the reporter's exact words in double quotes."},
-        },
-    },
-}
-
-TRANSLATE_TOOL = {
-    "name": "report_translation",
-    "description": "Return the translation of the reporter's text.",
-    "strict": True,
-    "input_schema": {
-        "type": "object",
-        "additionalProperties": False,
-        "required": ["text", "language_detected"],
-        "properties": {
-            "text": {"type": "string", "description": "Faithful translation. Do not add or remove facts."},
-            "language_detected": {"type": "string", "description": "ISO 639-1 code of the source text."},
-        },
-    },
-}
-
-BRIEF_TOOL = {
-    "name": "report_brief",
-    "description": "Return the one-paragraph situation brief.",
-    "strict": True,
-    "input_schema": {
-        "type": "object",
-        "additionalProperties": False,
-        "required": ["brief"],
-        "properties": {"brief": {"type": "string", "description": "One plain-English paragraph, facts only."}},
-    },
-}

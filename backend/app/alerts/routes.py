@@ -35,14 +35,18 @@ POSITIVE_INT_KEYS = ("rolling_minutes", "sms_dedup_minutes", "all_clear_minutes"
 async def list_alerts(session: SessionDep, principal: Principal = Depends(require_roles("admin", "responder", "teacher")),
                       open: bool | None = Query(None), site_id: int | None = Query(None),
                       limit: int = Query(100, ge=1, le=1000)) -> dict:
+    """site_id alone answers with exactly what the banner shows: the site's open alerts, every zone, worst first
+    (judge item 9). `open=false` widens it to the history for that site."""
+    open_only = True if (open is None and site_id is not None) else bool(open)
     q = select(Alert)
-    if open:
+    if open_only:
         q = q.where(Alert.cleared_at.is_(None))
     if site_id is not None:
         q = q.where(Alert.site_id == site_id)
     if principal.role != "responder":
         q = q.where(Alert.tenant_id == principal.tenant_id)
-    rows = (await session.execute(q.order_by(Alert.id.desc()).limit(limit))).scalars().all()
+    order = (Alert.priority.asc(), Alert.id.desc()) if open_only else (Alert.id.desc(),)
+    rows = (await session.execute(q.order_by(*order).limit(limit))).scalars().all()
     return ok([await alert_to_dict(session, a) for a in rows])
 
 

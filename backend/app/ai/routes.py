@@ -1,4 +1,4 @@
-"""/api/ai: Claude second-opinion endpoints. Rules and humans decide; these annotate (spec §11.2)."""
+"""/api/ai: Gemini second-opinion endpoints. Rules and humans decide; these annotate (spec §11.2)."""
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Query

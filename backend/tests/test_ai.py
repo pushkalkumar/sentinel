@@ -1,14 +1,17 @@
 import os
 
 os.environ["SENTINEL_DB"] = "sqlite+aiosqlite:///:memory:"
-os.environ.pop("ANTHROPIC_API_KEY", None)
+os.environ.pop("GEMINI_API_KEY", None)
 
+import json
+
+import httpx
 import pytest
 from httpx import ASGITransport, AsyncClient
 from pydantic import ValidationError
 
 from app.ai import rules
-from app.ai.client import CALLS_PER_MINUTE, ClaudeClient
+from app.ai.client import API_BASE, CALLS_PER_MINUTE, GeminiClient, response_schema
 from app.ai.schemas import TriageOutput
 
 SPANISH = "Hay tres niños atrapados en el salón 12, hay humo y la puerta está bloqueada"
@@ -55,11 +58,11 @@ def test_rules_safe_and_count_words():
 # ---------------------------------------------------------------- client without a key
 
 async def test_client_without_key_is_fallback_everywhere():
-    c = ClaudeClient(api_key="")
+    c = GeminiClient(api_key="")
     assert c.live is False
     tri = await c.triage(SPANISH, reported_type="trapped")
     assert tri["basis"] == rules.FALLBACK_BASIS
-    assert tri["fallback_reason"] == "ANTHROPIC_API_KEY not set"
+    assert tri["fallback_reason"] == "GEMINI_API_KEY not set"
     assert tri["rules"]["type"] == "fire" and tri["reported_type"] == "trapped"
     tr = await c.translate(SPANISH, "en")
     assert tr["translated"] is False and tr["text"] == SPANISH and tr["basis"] == rules.FALLBACK_BASIS
@@ -70,33 +73,87 @@ async def test_client_without_key_is_fallback_everywhere():
     assert c.calls_used == 0
 
 
-class _BrokenSdk:
-    class messages:  # noqa: N801 - mimics sdk namespace
-        @staticmethod
-        async def create(**_kwargs):
-            raise RuntimeError("simulated network failure")
+def _mock_http(handler) -> httpx.AsyncClient:
+    """Stand-in for the live Gemini transport: `handler(request) -> httpx.Response` or raises."""
+    return httpx.AsyncClient(transport=httpx.MockTransport(handler), headers={"x-goog-api-key": "test"})
+
+
+def _gemini_json(payload: dict) -> httpx.Response:
+    return httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": json.dumps(payload)}]},
+                                                     "finishReason": "STOP"}]})
+
+
+def _network_down(_request):
+    raise httpx.ConnectError("simulated network failure")
 
 
 async def test_client_call_failure_falls_back_and_counts():
-    c = ClaudeClient(api_key="")
-    c._sdk = _BrokenSdk()
+    c = GeminiClient(api_key="")
+    c._http = _mock_http(_network_down)
     assert c.live is True
     out = await c.triage(ENGLISH)
     assert out["basis"] == rules.FALLBACK_BASIS
     assert out["type"] == "medical"
-    assert "RuntimeError" in out["fallback_reason"]
+    assert "ConnectError" in out["fallback_reason"]
     assert c.calls_used == 1 and c.failures == 1
     status = c.status()
-    assert status["live"] is True and status["calls_used"] == 1 and status["key_env"] == "ANTHROPIC_API_KEY"
+    assert status["live"] is True and status["calls_used"] == 1 and status["key_env"] == "GEMINI_API_KEY"
 
 
 async def test_client_rate_cap_stops_calling():
-    c = ClaudeClient(api_key="")
-    c._sdk = _BrokenSdk()
+    c = GeminiClient(api_key="")
+    c._http = _mock_http(_network_down)
     for i in range(CALLS_PER_MINUTE + 3):
         await c.triage(f"report number {i} fire")
     assert c.calls_used == CALLS_PER_MINUTE
     assert c.last_error == "rate cap"
+
+
+async def test_client_live_success_validates_and_caches():
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        body = json.loads(request.content)
+        assert body["generationConfig"]["responseMimeType"] == "application/json"
+        assert body["generationConfig"]["responseSchema"]["properties"]["type"]["enum"][0] == "fire"
+        return _gemini_json({"type": "trapped", "count": 3, "people_detail": "three children", "hazards": ["smoke"],
+                             "access_notes": "door blocked", "urgency": 1, "language_detected": "es",
+                             "english_summary": 'Reporter said "tres niños atrapados".'})
+
+    c = GeminiClient(api_key="")
+    c._http = _mock_http(handler)
+    out = await c.triage(SPANISH)
+    assert out["basis"].startswith("gemini-2.5-flash second opinion")
+    assert out["type"] == "trapped" and out["rules"]["type"] == "fire" and out["cached"] is False
+    assert out["human_decides"] == rules.HUMAN_DECIDES
+    assert str(seen[0].url) == f"{API_BASE}/gemini-2.5-flash:generateContent"
+    assert seen[0].headers["x-goog-api-key"] == "test" and "key=" not in str(seen[0].url)
+    again = await c.triage(SPANISH)
+    assert again["cached"] is True and c.calls_used == 1 and c.status()["cache_size"] == 1
+
+
+async def test_client_bad_model_json_falls_back():
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return _gemini_json({"type": "explosion", "count": 0, "urgency": 9, "language_detected": "e",
+                             "english_summary": ""})
+
+    c = GeminiClient(api_key="")
+    c._http = _mock_http(handler)
+    out = await c.triage(ENGLISH)
+    assert out["basis"] == rules.FALLBACK_BASIS and out["fallback_reason"].startswith("schema:")
+    assert c.failures == 1
+    c._http = _mock_http(lambda _r: httpx.Response(429, text="quota"))
+    out = await c.triage(SPANISH)
+    assert out["basis"] == rules.FALLBACK_BASIS and "HTTP 429" in out["fallback_reason"]
+
+
+def test_response_schema_is_gemini_shaped():
+    schema = response_schema(TriageOutput)
+    assert schema["type"] == "OBJECT" and "title" not in schema and "additionalProperties" not in schema
+    assert schema["properties"]["hazards"] == {"type": "ARRAY", "items": {"type": "STRING"}, "maxItems": 10}
+    assert schema["properties"]["count"] == {"type": "INTEGER", "minimum": 1, "maximum": 500}
+    assert set(schema["required"]) == {"type", "count", "urgency", "language_detected", "english_summary"}
 
 
 # ---------------------------------------------------------------- schema validation

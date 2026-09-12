@@ -1,1 +1,1 @@
-"""AI second-opinion package: rules decide, Claude annotates (spec §11.2)."""
+"""AI second-opinion package: rules decide, Gemini annotates (spec §11.2)."""

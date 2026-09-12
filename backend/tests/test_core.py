@@ -117,8 +117,11 @@ async def test_login_staff_me(client):
 
 
 async def test_nodes_and_overview(client):
+    from app.seed import load_topology
+
+    seeded_nodes = sum(len(s["nodes"]) for s in load_topology()["sites"])
     res = await client.get("/api/nodes")
-    assert res.status_code == 200 and len(res.json()["data"]) == 14
+    assert res.status_code == 200 and len(res.json()["data"]) == seeded_nodes
     assert all(n["status"] == "offline" for n in res.json()["data"])
 
     gym = await client.get("/api/nodes/gym")
@@ -131,7 +134,9 @@ async def test_nodes_and_overview(client):
     token = await _login(client, "admin@sentinel.demo")
     ov = await client.get("/api/sites/1/overview", headers={"Authorization": f"Bearer {token}"})
     body = ov.json()["data"]
-    assert len(body["nodes"]) == 8
+    site1_nodes = next(len(s["nodes"]) for s in load_topology()["sites"] if s["id"] == 1)
+    assert len(body["nodes"]) == site1_nodes
+    assert {n["site_id"] for n in body["nodes"]} == {1}
     assert ["hub", "library"] in body["links"] and ["library", "hub"] not in body["links"]
     assert body["stats"]["recipients"] == 24
     assert body["zones"][0]["node_ids"]

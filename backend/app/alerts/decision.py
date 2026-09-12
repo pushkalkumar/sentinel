@@ -155,6 +155,7 @@ async def get_decision_card(session: AsyncSession, site_id: int, log_limit: int 
     latest = rows[0]
     policy = await policy_for_site(session, site_id)
     nodes = await node_index(session)
+    site_node_ids = {nid for nid, n in nodes.items() if n["site_id"] == site_id}
     band = latest.band_to
     band_info = band_def(band, policy)
     node_id, pm, as_of = latest.node_id, latest.pm25, latest.changed_at
@@ -164,6 +165,12 @@ async def get_decision_card(session: AsyncSession, site_id: int, log_limit: int 
         worst = await worst_outdoor(session, site_id, now_iso, policy)
         if worst:
             node_id, pm, as_of = worst
+    if node_id not in site_node_ids:
+        # Judge item 3: a school's card never names another tenant's node. Fall back to the site's own worst.
+        fallback = await worst_outdoor(session, site_id, as_of, policy)
+        if fallback is None:
+            return None
+        node_id, pm, as_of = fallback
     return {
         "site_id": site_id,
         "band": band,

@@ -14,7 +14,7 @@ from app import ws
 from app.alerts import sms
 from app.alerts.bands import band_key
 from app.alerts.decision import policy_for_site, update_site_band
-from app.alerts.engine import AlertDecision, evaluate
+from app.alerts.engine import AlertDecision, clear_check, evaluate
 from app.alerts.serialize import alert_to_dict, node_index
 from app.deps import SessionDep, require_sim_key
 from app.envelope import ok
@@ -80,6 +80,35 @@ async def _apply(session: AsyncSession, node: dict, decisions: list[AlertDecisio
             for msg in await sms.fan_out(session, alert, policy):
                 events.append(("sms_sent", msg))
     return opened, cleared
+
+
+async def _sweep_clears(session: AsyncSession, site_id: int, nodes: dict[str, dict], reported: set[str],
+                        policy: dict, events: list[tuple[str, dict]], touched: list[str]) -> int:
+    """Run the clear check for open alerts at nodes that did not report in this batch (judge item 6).
+
+    A node goes quiet after a jump or a dropped tick while its last reading is already back in band; without
+    this the alert stays open forever and the banner contradicts the rail.
+    """
+    cleared = 0
+    for node_id, node in nodes.items():
+        if node["site_id"] != site_id or node_id in reported:
+            continue
+        latest = state.latest.get(node_id)
+        if latest is None:
+            continue
+        open_alerts = await _open_alerts(session, node_id)
+        if not open_alerts:
+            continue
+        ring = list(state.ring(node_id))
+        history = ring[:-1] if ring and ring[-1] is latest else ring
+        decisions = clear_check(latest, history, _neighbours(node, nodes), open_alerts, policy)
+        if not decisions:
+            continue
+        _opened, just_cleared = await _apply(session, node, decisions, open_alerts, policy, events)
+        cleared += just_cleared
+        if just_cleared:
+            touched.append(node_id)      # its rail status changed even though it did not report
+    return cleared
 
 
 async def _write_eval(session: AsyncSession, node: dict, record: dict) -> None:
@@ -171,8 +200,10 @@ async def ingest_telemetry(body: Union[ReadingIn, list[ReadingIn]], session: Ses
         events.append(("reading", {**reading, "site_id": node["site_id"], "band": band_key(reading["pm25"], policy)}))
         status_nodes.append(node["id"])
 
+    reported = set(status_nodes)
     for site_id, now_iso in touched_sites.items():
         policy = await _site_policy(session, site_id, policies)
+        cleared_total += await _sweep_clears(session, site_id, nodes, reported, policy, events, status_nodes)
         events.extend(await update_site_band(session, site_id, now_iso))
         for msg in await sms.check_all_clear(session, site_id, now_iso, policy):
             events.append(("sms_sent", msg))

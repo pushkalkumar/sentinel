@@ -1,4 +1,3 @@
-# OWNER: backend-alerts
 """PM2.5 bands and the default policy pack (CONTRACT §5.1). DEFAULT_POLICY is verbatim; seed uses it."""
 from __future__ import annotations
 
@@ -38,3 +37,24 @@ def band_key(pm25: float, policy: dict) -> str:
         if band["max"] is None or value <= band["max"]:
             return band["key"]
     return bands[-1]["key"]
+
+
+BAND_ORDER: tuple[str, ...] = ("good", "moderate", "usg", "unhealthy", "very_unhealthy", "hazardous")
+
+
+def band_index(key: str | None) -> int:
+    """good 0 ... hazardous 5; -1 for None/unknown so comparisons against a real band stay meaningful."""
+    return BAND_ORDER.index(key) if key in BAND_ORDER else -1
+
+
+def band_def(key: str | None, policy: dict) -> dict:
+    bands = policy.get("bands") or DEFAULT_POLICY["bands"]
+    for band in bands:
+        if band["key"] == key:
+            return band
+    return bands[0]
+
+
+def policy_with_defaults(policy: dict | None) -> dict:
+    """Tenant packs may be partial (the agency tenant is {}); every lookup goes through the defaults."""
+    return {**DEFAULT_POLICY, **(policy or {})}

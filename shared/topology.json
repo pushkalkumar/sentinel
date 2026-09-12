@@ -22,8 +22,8 @@
         {"id":"gym",       "label":"Gymnasium",           "zone_id":2, "lat":47.677777, "lng":-122.312385, "map_x":845, "map_y":137, "indoor":true,  "is_gateway":false, "floor":1, "neighbours":["science"]},
         {"id":"field",     "label":"Athletic Field",      "zone_id":2, "lat":47.677089, "lng":-122.314586, "map_x":432, "map_y":327, "indoor":false, "is_gateway":false, "floor":null, "neighbours":["cafeteria"]},
         {"id":"parking",   "label":"South Lot",           "zone_id":2, "lat":47.677714, "lng":-122.315027, "map_x":350, "map_y":155, "indoor":false, "is_gateway":false, "floor":null, "neighbours":["arts"]},
-        {"id":"xenon-a",   "label":"Xenon A · real hardware","zone_id":2, "lat":47.65191, "lng":-122.29968, "map_x":880, "map_y":620, "indoor":false, "is_gateway":false, "floor":null, "neighbours":["xenon-b"], "hardware":true},
-        {"id":"xenon-b",   "label":"Xenon B · real gateway", "zone_id":2, "lat":47.65329, "lng":-122.29968, "map_x":880, "map_y":500, "indoor":false, "is_gateway":false, "floor":null, "neighbours":["xenon-a","hub"], "hardware":true}
+        {"id":"xenon-a",   "label":"Xenon A · real hardware","zone_id":2, "lat":47.676031, "lng":-122.312198, "map_x":880, "map_y":620, "indoor":false, "is_gateway":false, "floor":null, "neighbours":["xenon-b"], "hardware":true},
+        {"id":"xenon-b",   "label":"Xenon B · real gateway", "zone_id":2, "lat":47.676465, "lng":-122.312198, "map_x":880, "map_y":500, "indoor":false, "is_gateway":false, "floor":null, "neighbours":["xenon-a","hub"], "hardware":true}
       ]
     },
     {

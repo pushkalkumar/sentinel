@@ -1,0 +1,7 @@
+backend
+simulator
+docs
+scripts
+frontend/node_modules
+frontend/dist
+*.md

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import ws
 from app.core.incidents import OPEN_STATUSES, incident_to_dict
-from app.core.nodes import _alert_dicts, node_to_dict
+from app.core.nodes import _alert_dicts, is_visible, node_to_dict
 from app.deps import Principal, SessionDep, require_roles, same_tenant_or_responder
 from app.envelope import ApiError, ok
 from app.models import Alert, Incident, Node, Site, SmsLog, SmsRecipient, Tenant, Zone
@@ -98,6 +98,7 @@ async def site_overview(site_id: int, session: SessionDep, principal: Principal 
     tenant = await session.get(Tenant, site.tenant_id)
 
     nodes = list((await session.execute(select(Node).where(Node.site_id == site_id).order_by(Node.id))).scalars().all())
+    nodes = [n for n in nodes if is_visible(n, nodes)]
     zones = list((await session.execute(select(Zone).where(Zone.site_id == site_id).order_by(Zone.id))).scalars().all())
     zone_ids = [z.id for z in zones]
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { DecisionCard } from '@/lib/types'
 import { useSiteStore } from '@/store/site'
 import { useDisplayAlerts, useDisplayCard } from '@/store/select'
+import { getDecisionCard } from '@/lib/api'
 import { Pill } from '@/components/ui/Pill'
 import { ALERT_META } from '@/lib/bands'
 
@@ -16,6 +17,15 @@ function useSiteCard(): DecisionCard | null {
   useEffect(() => {
     if (card && siteId !== undefined && card.site_id === siteId) setOwn(card)
   }, [card, siteId])
+  // The demo must never show a stale card; poll as a backstop for a missed WS frame.
+  useEffect(() => {
+    if (siteId === undefined) return
+    let alive = true
+    const tick = () => getDecisionCard(siteId).then((c) => { if (alive && c) setOwn(c) }).catch(() => {})
+    tick()
+    const id = setInterval(tick, 3000)
+    return () => { alive = false; clearInterval(id) }
+  }, [siteId])
   return own
 }
 

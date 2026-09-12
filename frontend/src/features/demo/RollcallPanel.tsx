@@ -16,7 +16,7 @@ function Tile({ cls }: { cls: DrillClass }) {
   const rc = cls.rollcall
   const missing = rc?.missing_refs.length ?? 0
   return (
-    <div className="relative min-h-[76px] rounded-md bg-raised overflow-hidden px-3.5 pt-2.5 pb-3 flex flex-col">
+    <div className="relative min-h-[56px] rounded-md bg-raised overflow-hidden px-3.5 pt-2.5 pb-3 flex flex-col">
       <span className="text-sm font-medium text-ink">{cls.name}</span>
       <span className="mt-auto flex items-baseline justify-between gap-2">
         <span className="font-mono text-base leading-none tabular-nums">
@@ -58,7 +58,7 @@ export function RollcallPanel({ kind }: RollcallPanelProps) {
         )}
       </div>
       {drill && classes.length > 0 ? (
-        <div className={clsx('mt-3 flex-1 min-h-0 grid grid-cols-3 auto-rows-fr gap-2 transition-opacity duration-[200ms]', closed && 'opacity-70')}>
+        <div className={clsx('mt-3 grid grid-cols-3 gap-2 transition-opacity duration-[200ms]', closed && 'opacity-70')}>
           {classes.map((c) => <Tile key={c.class_id} cls={c} />)}
         </div>
       ) : (

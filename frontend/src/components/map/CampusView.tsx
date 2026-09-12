@@ -24,7 +24,7 @@ export function CampusView({ drift = false, className, ...props }: CampusViewPro
   const active = useInView(box, three)
 
   return (
-    <div ref={box} className={clsx('relative min-w-0', className)}>
+    <div ref={box} className={clsx(!/\b(absolute|fixed)\b/.test(className ?? '') && 'relative', 'min-w-0', className)}>
       {three
         ? <CampusScene {...props} drift={drift} active={active} className="absolute inset-0" />
         : <CampusMap {...props} className="absolute inset-0 w-full h-full" />}

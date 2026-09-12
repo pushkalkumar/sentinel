@@ -31,7 +31,7 @@ function cellValue<T>(row: T, col: Column<T>): ReactNode {
   return v === null || v === undefined ? '' : String(v)
 }
 
-/** DESIGN §6.4: 32px rows, 28px signage header, hairline dividers, left signal bar on the selected row. */
+/** DESIGN_V2 §6: 36px rows, quiet header, hairline rows only, bone bar on the selected row. */
 export function DataTable<T>({
   columns, rows, rowKey, selectedKey = null, onSelect, empty, emptyAction, loading = false, error = null, sticky = true, className,
 }: DataTableProps<T>) {
@@ -40,13 +40,13 @@ export function DataTable<T>({
     <div className={clsx('overflow-auto min-w-0', className)}>
       <table className="w-full border-collapse text-sm">
         <thead className={clsx(sticky && 'sticky top-0 z-[1] bg-surface')}>
-          <tr className="h-7 border-b border-line-strong">
+          <tr className="h-8 border-b border-line">
             {columns.map((c) => (
               <th
                 key={c.key}
                 scope="col"
                 style={{ width: c.width }}
-                className={clsx('label-signage font-semibold px-3 whitespace-nowrap', c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left')}
+                className={clsx('text-xs font-normal text-ink-3 px-3 whitespace-nowrap', c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left')}
               >
                 {c.header}
               </th>
@@ -87,9 +87,9 @@ export function DataTable<T>({
                 onClick={interactive ? () => onSelect?.(row) : undefined}
                 onKeyDown={interactive ? (e) => { if (e.key === 'Enter') onSelect?.(row) } : undefined}
                 className={clsx(
-                  'h-8 border-b border-line relative transition-[background-color] duration-[120ms]',
+                  'h-9 border-b border-line last:border-b-0 relative transition-[background-color] duration-[120ms]',
                   interactive && 'cursor-pointer hover:bg-raised',
-                  selected && 'bg-signal-dim shadow-[inset_2px_0_0_var(--color-signal)]',
+                  selected && 'bg-accent-dim shadow-[inset_2px_0_0_var(--color-accent)]',
                 )}
               >
                 {columns.map((c) => (

@@ -10,9 +10,10 @@ export interface SegmentedProps<V extends string> {
   className?: string
 }
 
+/** DESIGN_V2 §6: borderless track, active segment is a raised chip. */
 export function Segmented<V extends string>({ options, value, onChange, label, className }: SegmentedProps<V>) {
   return (
-    <div role="radiogroup" aria-label={label} className={clsx('inline-flex p-0.5 rounded-sm bg-raised hairline', !/\bh-\d/.test(className ?? '') && 'h-9', className)}>
+    <div role="radiogroup" aria-label={label} className={clsx('inline-flex p-1 rounded-md bg-raised', !/\bh-\d/.test(className ?? '') && 'h-9', className)}>
       {options.map((o) => {
         const active = o.value === value
         return (
@@ -24,8 +25,8 @@ export function Segmented<V extends string>({ options, value, onChange, label, c
             disabled={o.disabled}
             onClick={() => onChange(o.value)}
             className={clsx(
-              'px-3 rounded-[3px] text-sm font-medium transition-[background-color,color] duration-[120ms] disabled:opacity-45',
-              active ? 'bg-surface text-ink shadow-[inset_0_0_0_1px_var(--color-line-strong)]' : 'text-ink-2 hover:text-ink',
+              'px-3 rounded-[5px] text-sm font-medium transition-[background-color,color] duration-[120ms] disabled:opacity-40',
+              active ? 'bg-overlay text-ink' : 'text-ink-3 hover:text-ink-2',
             )}
           >
             {o.label}

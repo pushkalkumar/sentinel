@@ -24,7 +24,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         ref={ref}
         id={inputId}
         aria-invalid={error ? true : undefined}
-        className={clsx(phone ? `${FIELD_BASE} h-16` : `${BASE} h-9 text-base`, error && (phone ? 'border-f-alarm' : 'border-[rgba(255,74,61,0.6)]'), className)}
+        className={clsx(phone ? `${FIELD_BASE} h-16` : `${BASE} h-9 text-base`, error && (phone ? 'border-f-alarm' : 'border-[rgba(224,87,75,0.6)]'), className)}
         {...rest}
       />
       {error ? (
@@ -56,7 +56,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
         id={inputId}
         rows={rows}
         aria-invalid={error ? true : undefined}
-        className={clsx(phone ? `${FIELD_BASE} py-3` : `${BASE} py-2 text-base`, 'resize-y', error && (phone ? 'border-f-alarm' : 'border-[rgba(255,74,61,0.6)]'), className)}
+        className={clsx(phone ? `${FIELD_BASE} py-3` : `${BASE} py-2 text-base`, 'resize-y', error && (phone ? 'border-f-alarm' : 'border-[rgba(224,87,75,0.6)]'), className)}
         {...rest}
       />
       {error ? (

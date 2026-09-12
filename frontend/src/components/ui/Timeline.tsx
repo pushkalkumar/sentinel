@@ -17,8 +17,8 @@ const ACTION_LABEL: Record<IncidentAction, string> = {
 }
 
 const ACTION_COLOR: Record<IncidentAction, string> = {
-  created: '#A9A39A', relayed: '#46D2E4', acknowledge: '#46D2E4', en_route: '#FFB224',
-  resolve: '#5AD46E', flag_false: '#FF4A3D', message: '#A9A39A',
+  created: '#A29C93', relayed: '#7F9FA0', acknowledge: '#7F9FA0', en_route: '#D9A441',
+  resolve: '#6DB87A', flag_false: '#E0574B', message: '#A29C93',
 }
 
 function isFull(e: IncidentEvent | PublicEvent): e is IncidentEvent {

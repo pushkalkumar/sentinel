@@ -23,7 +23,7 @@ export function Banner() {
       <div
         role={fire ? 'alert' : 'status'}
         className="h-9 flex items-center gap-4 px-6 text-sm font-medium"
-        style={fire ? { background: m.color, color: '#F2EEE8' } : { background: m.dimColor, color: m.color }}
+        style={fire ? { background: m.color, color: '#EDE8E0' } : { background: m.dimColor, color: m.color }}
       >
         <span className="truncate flex-1 min-w-0">{text}</span>
         <span className="font-mono text-xs opacity-80 shrink-0">{fmtSim(top.started_at, 'HH:mm:ss')}</span>

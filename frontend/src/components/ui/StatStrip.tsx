@@ -5,14 +5,14 @@ export interface StatStripProps {
   className?: string
 }
 
-/** Archivo 56px `stat-number` figures with signage labels; 2×2 under 900px. */
+/** DESIGN_V2 §6: no cell borders. Big quiet figures, small sentence-case labels, grouped by whitespace. */
 export function StatStrip({ items, className }: StatStripProps) {
   return (
-    <dl className={clsx('grid grid-cols-2 md:grid-cols-4 gap-px bg-line hairline rounded-md overflow-hidden', className)}>
+    <dl className={clsx('grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-12', className)}>
       {items.map((it) => (
-        <div key={it.label} className="bg-surface px-6 py-5 min-w-0">
-          <dd className="stat-number text-3xl text-ink truncate">{it.value}</dd>
-          <dt className="label-signage mt-2">{it.label}</dt>
+        <div key={it.label} className="min-w-0">
+          <dd className="stat-number text-3xl md:text-4xl text-ink truncate">{it.value}</dd>
+          <dt className="mt-3 text-sm text-ink-3 normal-case tracking-normal">{it.label}</dt>
         </div>
       ))}
     </dl>

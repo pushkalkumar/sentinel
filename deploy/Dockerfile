@@ -3,7 +3,7 @@ FROM python:3.13-slim
 WORKDIR /srv
 COPY backend/requirements.txt backend/requirements.txt
 COPY simulator/requirements.txt simulator/requirements.txt
-RUN pip install --no-cache-dir -r backend/requirements.txt -r simulator/requirements.txt
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/* && pip install --no-cache-dir -r backend/requirements.txt -r simulator/requirements.txt
 COPY shared shared
 COPY backend backend
 COPY simulator simulator

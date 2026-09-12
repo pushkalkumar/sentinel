@@ -11,6 +11,7 @@ import { StatStrip } from '@/components/ui/StatStrip'
 import { useLive } from '@/lib/live'
 import { getMeshLog, listNodes } from '@/lib/api'
 import { useMeshStore } from '@/store/mesh'
+import { useSessionStore } from '@/store/session'
 import { useSiteStore } from '@/store/site'
 import { useHardwareStore } from '@/store/hardware'
 import type { Node, NodeId } from '@/lib/types'
@@ -18,6 +19,7 @@ import { isPartId } from '@/three/node/parts'
 import { NodeScene } from '@/three/node/NodeScene'
 import { MeshScene } from '@/three/mesh/MeshScene'
 import { useExplodeDriver } from '@/three/node/useExplodeDriver'
+import { useIntroExplode } from '@/three/node/useIntroExplode'
 import { useDeviceTier, useReducedMotion } from '@/three/shared/motionPrefs'
 import { HardwareBar } from '@/features/hardware/HardwareBar'
 import { SpecRail } from '@/features/hardware/SpecRail'
@@ -83,27 +85,52 @@ function useHardwareData() {
       const map: Record<NodeId, Node> = Object.fromEntries(nodes.map((n) => [n.id, n]))
       useSiteStore.setState({ nodes: map })
     }).catch(() => undefined)
-    getMeshLog(100).then((r) => { if (alive) useMeshStore.getState().hydrate(r.entries) }).catch(() => undefined)
+    // The hop log needs a session; skip it for anonymous visitors instead of logging a 401.
+    if (useSessionStore.getState().token) {
+      getMeshLog(100).then((r) => { if (alive) useMeshStore.getState().hydrate(r.entries) }).catch(() => undefined)
+    }
     return () => { alive = false }
   }, [])
 }
 
 function ExplodeControls() {
   const explode = useHardwareStore((s) => s.explode)
+  const inputRef = useRef<HTMLInputElement>(null)
   const pct = Math.round(explode * 100)
+
+  // Uncontrolled input with a native listener so keyboard, pointer and synthetic `input` events all reach the store.
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    const onInput = () => {
+      const s = useHardwareStore.getState()
+      s.setManual(true)
+      s.setExplode(Number(el.value) / SLIDER_MAX)
+    }
+    const onPointerDown = () => useHardwareStore.getState().setManual(true)
+    el.addEventListener('input', onInput)
+    el.addEventListener('pointerdown', onPointerDown)
+    return () => {
+      el.removeEventListener('input', onInput)
+      el.removeEventListener('pointerdown', onPointerDown)
+    }
+  }, [])
+
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    const next = String(Math.round(explode * SLIDER_MAX))
+    if (el.value !== next) el.value = next
+  }, [explode])
+
   return (
     <div className="flex items-center gap-3">
       <label className="font-mono text-2xs text-ink-2 tabular-nums flex items-center gap-3">
         <span>EXPLODE {String(pct).padStart(3, '0')}</span>
         <input
-          type="range" min={0} max={SLIDER_MAX} value={Math.round(explode * SLIDER_MAX)}
-          aria-label="Explode"
-          onPointerDown={() => useHardwareStore.getState().setManual(true)}
-          onChange={(e) => {
-            const s = useHardwareStore.getState()
-            s.setManual(true)
-            s.setExplode(Number(e.target.value) / SLIDER_MAX)
-          }}
+          ref={inputRef}
+          type="range" min={0} max={SLIDER_MAX} step={1} defaultValue={0}
+          aria-label="Explode" aria-valuetext={`${pct} percent`}
           className="w-40 accent-signal"
         />
       </label>
@@ -112,11 +139,12 @@ function ExplodeControls() {
   )
 }
 
-function Hero({ tier }: { tier: 'full' | 'static' }) {
+function Hero({ tier, intro }: { tier: 'full' | 'static'; intro: boolean }) {
   const sectionRef = useRef<HTMLElement>(null)
   const inView = useInView(sectionRef)
   const full = tier === 'full'
   useExplodeDriver(sectionRef, full)
+  useIntroExplode(full && intro)
 
   return (
     <section ref={sectionRef} className={full ? 'h-[320vh]' : ''}>
@@ -190,7 +218,7 @@ export default function Hardware() {
       <Grain />
       <div className="relative z-[2]">
         <HardwareBar />
-        <Hero tier={tier} />
+        <Hero tier={tier} intro={!reducedMotion && !isPartId(params.get('part'))} />
         <main className="max-w-[1600px] mx-auto px-6 py-16 space-y-20">
           <StatStrip items={STATS} />
 

@@ -11,7 +11,9 @@ const localT = (t: number, delay: number) => THREE.MathUtils.clamp((t - delay) /
 const SMOOTH_RATE = 9
 const HOVER_SCALE = 1.03
 const SETTLE_EPS = 1e-3
-const TARGET_Y_REST = 2.2
+/** Orbit target: a touch above the closed box's centre so it sits low in the frame under the headline. */
+export const TARGET_Y_REST = 3.0
+/** Extra target rise at full explode; the stack grows upward to ~y 10.7. */
 const TARGET_Y_RISE = 2.6
 
 interface ControlsLike { target: THREE.Vector3; update: () => void }

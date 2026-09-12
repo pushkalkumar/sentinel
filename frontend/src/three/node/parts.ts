@@ -30,7 +30,7 @@ export const PART_REGISTRY: readonly Part[] = [
     spec: '120 × 70 mm mono cell, 6 V, 2 W peak',
     role: 'Keeps an outdoor node alive indefinitely in Seattle summer and fall. Indoor nodes skip it and run on USB.',
     cost1k: 2.60,
-    rest: [0, 5.06, 0], explode: [0, 5.5, 0], delay: 0.05, hotspot: [6.2, 0.2, 0],
+    rest: [0, 5.06, 0], explode: [0, 5.5, 0], delay: 0.0, hotspot: [6.2, 0.2, 0],
   },
   {
     id: 'lid', index: 2, name: 'IP65 lid',

@@ -14,16 +14,16 @@ export interface CampusMapProps {
   highlightCode?: IncidentCode;     // pulse the node of this incident
   ground: 'campus' | 'floorplan';   // which footprint layer
   compact?: boolean;                // landing hero card / incident detail crop
-  labels?: LabelMode;               // 'hover' keeps labels off until hover, focus or selection (INTEGRATION_NOTES: optional, added for DESIGN_V2)
+  labels?: LabelMode;               // 'hover' (default) shows labels for the gateway and selected, alerting or hovered nodes only; 'always' labels every node (INTEGRATION_NOTES: optional, added for DESIGN_V2)
   className?: string;
 }
 
 const FLASH_MS = 160
 const NO_HOPS: MeshLogEntry[] = []
 
-/** DESIGN §6.5 / §6.6: static footprints, dashed hairline links, band-coloured dots, signal hop dashes. */
+/** DESIGN §6.5 / §6.6 with real OSM footprints (MAP_DATA.md): solid hairline links, band-coloured dots, signal hop dashes. No dashed strokes. */
 export function CampusMap({
-  nodes, links, zones, mode, selectedId = null, onSelect, hops = NO_HOPS, highlightCode, ground, compact = false, labels = 'always', className,
+  nodes, links, zones, mode, selectedId = null, onSelect, hops = NO_HOPS, highlightCode, ground, compact = false, labels = 'hover', className,
 }: CampusMapProps) {
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
   const [flashes, setFlashes] = useState<Record<NodeId, number>>({})
@@ -61,13 +61,13 @@ export function CampusMap({
     >
       {ground === 'campus' ? <CampusGround /> : <FloorplanGround />}
       {zones && zones.length > 0 && (
-        <g fill="none" stroke="var(--color-line-faint)" strokeWidth={0.75} strokeDasharray="6 6" aria-hidden>
+        <g fill="none" stroke="var(--color-line-faint)" strokeWidth={1} aria-hidden>
           {zones.map((z) => (
             <polygon key={z.id} points={z.map_poly.map(([x, y]) => `${x},${y}`).join(' ')} />
           ))}
         </g>
       )}
-      <g stroke="var(--color-signal)" strokeOpacity={mode === 'mesh' ? 0.32 : 0.16} strokeDasharray="2 5" strokeWidth={0.75} fill="none" aria-hidden>
+      <g stroke="var(--color-signal)" strokeOpacity={mode === 'mesh' ? 0.22 : 0.12} strokeWidth={1} fill="none" aria-hidden>
         {links.map(([a, b]) => {
           const na = byId.get(a)
           const nb = byId.get(b)

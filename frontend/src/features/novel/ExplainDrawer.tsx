@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { NeighbourBars } from './NeighbourBars'
 import { CheckRows } from './CheckRows'
 import { RuleSource } from './RuleSource'
+import { SecondOpinion } from './SecondOpinion'
 
 const POLL_MS = 2000
 const DRAWER_W = 384
@@ -96,6 +97,17 @@ function DrawerBody({ nodeId, at }: { nodeId: string; at: string | null }) {
         {error && <p className="text-xs text-ink-3">{error}</p>}
       </div>
 
+      {/* Checks come straight after the verdict: the sentence has to be reconstructible from these rows. */}
+      <section>
+        <header className="flex items-baseline gap-3 mb-2">
+          <h3 className="label-signage">Checks</h3>
+          <span className="text-xs text-ink-3"><span className="font-mono">{passed}</span> of <span className="font-mono">{d.checks.length}</span> pass</span>
+        </header>
+        <CheckRows key={`${d.node.id}-${d.branch}`} checks={d.checks} />
+      </section>
+
+      <SecondOpinion nodeId={d.node.id} live={at === null} />
+
       <section>
         <header className="flex items-baseline gap-3 mb-3">
           <h3 className="label-signage">Sky vs building</h3>
@@ -104,15 +116,10 @@ function DrawerBody({ nodeId, at }: { nodeId: string; at: string | null }) {
         <NeighbourBars explain={d} />
       </section>
 
-      <section>
-        <header className="flex items-baseline gap-3 mb-1">
-          <h3 className="label-signage">Checks</h3>
-          <span className="text-xs text-ink-3"><span className="font-mono">{passed}</span> of <span className="font-mono">{d.checks.length}</span> pass</span>
-        </header>
-        <CheckRows key={`${d.node.id}-${d.branch}`} checks={d.checks} />
-      </section>
-
-      <RuleSource branch={d.branch} />
+      <div className="flex flex-col gap-2">
+        <RuleSource branch={d.branch} thresholds={d.thresholds} />
+        <p className="text-xs text-ink-3">Rules decide: every threshold is on this screen.</p>
+      </div>
     </div>
   )
 }

@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
-import { CampusMap } from '@/components/map/CampusMap'
+import type { MeshLogEntry } from '@/lib/types'
+import { CampusView, useCampus3D } from '@/components/map/CampusView'
 import { Pill } from '@/components/ui/Pill'
 import {
-  activeHops, HOP_MS, INCIDENT_CODE, LINKS, LOOP_MS, NODE_XY, STATIC_FRAME_MS, useHeroLoop,
+  activeHops, HOP_MS, HOPS, INCIDENT_CODE, LINKS, LOOP_MS, NODE_XY, STATIC_FRAME_MS, useHeroLoop,
   type FeedLine, type FeedTone, type HeroDecision, type HopEvent,
 } from './HeroLoop'
 
@@ -100,37 +101,59 @@ function HopOverlay({ origin }: { origin: number | null }) {
   )
 }
 
-function useCountUp(target: number, durationMs = 600): number {
-  const [value, setValue] = useState(target)
-  const fromRef = useRef(target)
+/**
+ * The scripted loop as mesh-log rows (CONTRACT §3.7), so the 3D scene flies the same hops the SVG
+ * overlay draws. Only the incident carries the code, which is what the map rings.
+ */
+function meshRow(hop: HopEvent, index: number, pass: number): MeshLogEntry {
+  const incident = hop.kind === 'incident'
+  return {
+    id: pass * HOPS.length + index,
+    msg_id: `${hop.id}-${pass}`,
+    origin_node: incident ? 'gym' : hop.from,
+    kind: hop.kind === 'telemetry' ? 'telemetry' : 'alarm',
+    hop_from: hop.from,
+    hop_to: hop.to,
+    attempt: 1,
+    status: hop.outcome === 'drop' ? 'dropped' : 'delivered',
+    path: [hop.from, hop.to],
+    ttl: 8,
+    payload: incident ? { code: INCIDENT_CODE } : {},
+    ts: new Date().toISOString(),
+  }
+}
+
+/** Emits each scripted hop once as it comes due; the 3D scene starts a pulse for every row it has not seen. */
+function useScriptedMeshHops(origin: number | null, enabled: boolean): MeshLogEntry[] {
+  const [rows, setRows] = useState<MeshLogEntry[]>([])
   useEffect(() => {
-    const from = fromRef.current
-    if (from === target) return
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduced) { fromRef.current = target; setValue(target); return }
-    const start = performance.now()
-    let raf = 0
-    const step = () => {
-      const p = Math.min(1, (performance.now() - start) / durationMs)
-      const e = 1 - Math.pow(1 - p, 3)
-      const v = Math.round(from + (target - from) * e)
-      setValue(v)
-      if (p < 1) raf = requestAnimationFrame(step)
-      else fromRef.current = target
+    if (!enabled || origin === null) {
+      setRows([])
+      return
     }
-    raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
-  }, [target, durationMs])
-  return value
+    let last = -1
+    let pass = 0
+    const id = window.setInterval(() => {
+      const now = (performance.now() - origin) % LOOP_MS
+      const wrapped = now < last
+      if (wrapped) pass += 1
+      const after = wrapped ? -1 : last
+      last = now
+      const due = HOPS.map((h, i) => [h, i] as const).filter(([h]) => h.startMs > after && h.startMs <= now)
+      if (due.length > 0) setRows((prev) => [...prev.slice(-24), ...due.map(([h, i]) => meshRow(h, i, pass))])
+    }, 80)
+    return () => window.clearInterval(id)
+  }, [origin, enabled])
+  return rows
 }
 
 /** One large reading, one line, one pill. The guidance sentence and the rule line live in the console, not here. */
 function Decision({ decision }: { decision: HeroDecision }) {
-  const value = useCountUp(decision.pm25)
+  // Number, headline and pill are one frame's state: the band is always bandOf(this number).
   return (
     <div>
       <div className="flex items-baseline gap-2">
-        <span className="stat-number text-ink tabular-nums leading-none" style={{ fontSize: 'clamp(56px, 8cqw, 88px)' }}>{value}</span>
+        <span className="stat-number text-ink tabular-nums leading-none" style={{ fontSize: 'clamp(56px, 8cqw, 88px)' }}>{decision.pm25}</span>
         <span className="text-sm text-ink-3">PM2.5, 10 min</span>
       </div>
       <div className="mt-5 min-h-[3.6rem]">
@@ -178,6 +201,9 @@ function Feed({ lines }: { lines: FeedLine[] }) {
 /** Live console preview (DESIGN_V2 §4): no header row, no SIM tag, no rules. Map, reading, two log lines. */
 export function HeroCard({ className }: { className?: string }) {
   const { frame, t, reduced, origin } = useHeroLoop()
+  // The 3D scene animates hops itself; the SVG map needs the dash overlay on the same viewBox.
+  const three = useCampus3D({ ground: 'campus' })
+  const meshHops = useScriptedMeshHops(origin, three)
   return (
     <section
       className={clsx('relative bg-surface rounded-lg overflow-hidden @container shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]', className)}
@@ -188,16 +214,19 @@ export function HeroCard({ className }: { className?: string }) {
       <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,56fr)_minmax(0,44fr)]">
         <div className="p-2 @[640px]:p-4">
           <div className="relative">
-            <CampusMap
-              compact
+            <CampusView
+              compact={!three}
+              drift
               ground="campus"
               mode="mesh"
+              labels="hover"
               nodes={frame.nodes}
               links={LINKS}
+              hops={three ? meshHops : undefined}
               highlightCode={frame.incidentStatus === 'received' ? INCIDENT_CODE : undefined}
-              className="w-full h-auto"
+              className="w-full aspect-[10/7] rounded-md overflow-hidden"
             />
-            <HopOverlay origin={origin} />
+            {!three && <HopOverlay origin={origin} />}
           </div>
         </div>
         <div className="min-w-0 p-6 @[640px]:pl-6 @[640px]:pr-10 @[640px]:py-10 flex flex-col gap-8 @[640px]:gap-0">

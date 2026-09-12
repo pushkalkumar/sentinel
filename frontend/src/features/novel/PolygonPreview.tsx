@@ -28,7 +28,7 @@ export function PolygonPreview({ zone, nodes, affectedIds, vertexCount, viewBox 
         </defs>
         <rect width="100%" height="100%" fill="url(#wea-grid)" />
         {points && (
-          <polygon points={points} fill="var(--color-alarm-dim)" stroke="var(--color-alarm)" strokeWidth={2} strokeDasharray="8 6" vectorEffect="non-scaling-stroke" />
+          <polygon points={points} fill="var(--color-alarm-dim)" stroke="var(--color-alarm)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
         )}
         {nodes.map((n) => {
           const hot = affected.has(n.id)

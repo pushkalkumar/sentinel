@@ -24,6 +24,7 @@ export function Transport({ collapsed, onToggleCollapsed, disabled = false }: Tr
   const setSpeed = useTimelineStore((s) => s.setSpeed)
   const goLive = useTimelineStore((s) => s.goLive)
   const liveTs = useSimStore((s) => s.simState?.sim_ts ?? null)
+  const simSpeed = useSimStore((s) => s.simState?.speed ?? null)
 
   const shown = active && t ? t : liveTs
 
@@ -45,7 +46,11 @@ export function Transport({ collapsed, onToggleCollapsed, disabled = false }: Tr
         {active ? 'Back to live' : 'Live'}
       </button>
       {active && <span className="text-xs text-ink-3">Replaying stored readings</span>}
-      <span className="ml-auto font-mono text-xs tabular-nums text-ink-2" title="Sim clock">{fmtSim(shown, 'HH:mm')}</span>
+      {/* The only clock in this row is the simulated one, and it says so; wall time is nowhere in the console. */}
+      <span className="ml-auto text-xs text-ink-2 whitespace-nowrap">
+        Sim <span className="font-mono tabular-nums">{fmtSim(shown, 'HH:mm')}</span>
+        {!active && simSpeed !== null && <span className="text-ink-3"> · <span className="font-mono">{simSpeed}x</span></span>}
+      </span>
       {!collapsed && (
         <>
           <button

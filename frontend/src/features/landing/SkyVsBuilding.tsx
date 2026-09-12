@@ -77,13 +77,13 @@ export function SkyVsBuilding() {
       <p className="prose-landing mt-8 max-w-[52ch]">
         Each node is compared with its radio neighbours, not with a county sensor miles away. Wildfire smoke never reads as a fire, and a fire never hides in the smoke.
       </p>
+      <p className="mt-4 text-base text-ink-3 max-w-[52ch]">
+        Four threshold comparisons, no model. Every alert shows the numbers it fired on.
+      </p>
       <figure className="mt-14 md:mt-20">
         <Chart width={1120} height={300} className="w-full h-auto hidden md:block" />
         <Chart width={560} height={300} className="w-full h-auto md:hidden" />
-        <figcaption className="mt-4 flex justify-between text-xs text-ink-3">
-          <span>PM2.5, µg/m³, eight nodes over 40 minutes</span>
-          <span className="hidden sm:inline">gym spikes at 15:11</span>
-        </figcaption>
+        <figcaption className="mt-4 text-xs text-ink-3">PM2.5, µg/m³, eight nodes over 40 minutes</figcaption>
       </figure>
     </section>
   )

@@ -2,46 +2,37 @@ import clsx from 'clsx'
 import { WRAP } from './layout'
 
 interface Step {
-  n: string
   title: string
   body: string
 }
 
 const STEPS: Step[] = [
   {
-    n: '1', title: "A phone joins the box's own WiFi.",
+    title: "A phone joins the box's own WiFi.",
     body: 'No internet, no app. The sign-in screen pops up like hotel WiFi and the report form is served from the node itself.',
   },
   {
-    n: '2', title: 'The report hops box to box over 915 MHz radio.',
-    body: 'Each hop covers 1 to 2 km. Drops are expected; every node deduplicates and retries until a gateway acknowledges.',
+    title: 'The report hops box to box over 915 MHz radio.',
+    body: 'A hop covers 1 to 2 km outdoors and 300 to 600 m through buildings. Drops are expected; every node deduplicates and retries until a gateway acknowledges.',
   },
   {
-    n: '3', title: "A gateway or the school's own edge server catches it.",
+    title: "A gateway or the school's own edge server catches it.",
     body: 'The edge server works on its own and syncs up when the internet is back. Nothing waits on the cloud.',
   },
   {
-    n: '4', title: 'A responder sees it on a map and is the only one who can close it.',
+    title: 'A responder sees it on a map and is the only one who can close it.',
     body: 'Only a phone standing next to the box can open a verified incident. Only a responder can close one.',
   },
 ]
 
 const LINE = { fill: 'none', stroke: 'var(--color-ink-3)', strokeWidth: 1.25, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
-const LINK = { stroke: 'var(--color-line-strong)', strokeWidth: 1, strokeDasharray: '2 4', fill: 'none' }
+const LINK = { stroke: 'var(--color-line-strong)', strokeWidth: 1, fill: 'none' }
 const LABEL = { fontFamily: 'var(--font-sans)', fontSize: 11, fill: 'var(--color-ink-3)', textAnchor: 'middle' as const }
-const NUMBER = { fontFamily: 'var(--font-display)', fontSize: 12, fill: 'var(--color-ink-4)', textAnchor: 'middle' as const }
 
-/** The whole path in one drawing: phone, three boxes, edge server, responder screen. Numerals tie each stage to its line. */
+/** The whole path in one drawing: phone, three boxes, edge server, responder screen. */
 function Journey() {
   return (
     <svg viewBox="0 0 640 220" className="w-full h-auto" role="img" aria-label="A phone reports to a node, the report hops across three nodes to a gateway, an edge server catches it, and a responder sees it on a map.">
-      <g {...NUMBER}>
-        <text x={78} y={40}>1</text>
-        <text x={210} y={40}>2</text>
-        <text x={384} y={40}>3</text>
-        <text x={531} y={40}>4</text>
-      </g>
-
       {/* phone */}
       <rect x={20} y={80} width={32} height={62} rx={6} {...LINE} />
       <rect x={25} y={88} width={22} height={44} rx={1.5} fill="var(--color-raised)" />
@@ -88,15 +79,12 @@ export function Steps() {
   return (
     <section id="how" className={clsx(WRAP, 'pt-section-sm md:pt-section scroll-mt-16')} aria-labelledby="how-title">
       <h2 id="how-title" className="display-h1 text-xl md:text-2xl text-ink">How a report gets out</h2>
-      <div className="mt-12 md:mt-16 grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-16 lg:items-center">
+      <div className="mt-12 md:mt-16 grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-16 lg:items-start">
         <ol className="lg:col-span-5 space-y-8 max-w-[44ch]">
           {STEPS.map((s) => (
-            <li key={s.n} className="grid grid-cols-[2rem_1fr] gap-x-2">
-              <span className="display-h2 text-lg text-ink-4 tabular-nums" aria-hidden>{s.n}</span>
-              <div className="min-w-0">
-                <h3 className="display-h2 text-lg text-ink">{s.title}</h3>
-                <p className="mt-1.5 text-base text-ink-2">{s.body}</p>
-              </div>
+            <li key={s.title} className="min-w-0">
+              <h3 className="display-h2 text-lg text-ink">{s.title}</h3>
+              <p className="mt-1.5 text-base text-ink-2">{s.body}</p>
             </li>
           ))}
         </ol>

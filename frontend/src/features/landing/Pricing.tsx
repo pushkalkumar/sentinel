@@ -9,6 +9,9 @@ interface Column {
   body: string
 }
 
+/** A figure sets in the stat face; words stay body sized, so the row keeps one numeric rhythm. */
+const isFigure = (price: string) => price.startsWith('$')
+
 // Numbers from spec §4.4.
 const COLUMNS: Column[] = [
   {
@@ -33,7 +36,7 @@ export function Pricing() {
         {COLUMNS.map((c) => (
           <article key={c.id} className="min-w-0">
             <h3 className="text-base font-medium text-ink">{c.title}</h3>
-            <p className="stat-number text-2xl md:text-3xl text-ink mt-4">{c.price}</p>
+            <p className={isFigure(c.price) ? 'stat-number text-2xl md:text-3xl text-ink mt-4' : 'text-lg text-ink mt-4'}>{c.price}</p>
             <p className="text-sm text-ink-3 mt-2">{c.priceNote}</p>
             <p className="text-base text-ink-2 mt-6 max-w-[40ch]">{c.body}</p>
           </article>

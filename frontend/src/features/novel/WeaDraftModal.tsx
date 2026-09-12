@@ -13,6 +13,9 @@ import { PolygonPreview } from './PolygonPreview'
 const LIMIT_90 = 90
 const LIMIT_360 = 360
 
+/** The promise the screen has to make, whatever the backend sends back with the draft. */
+const NOTHING_SENT = 'Nothing is sent from this screen. Sentinel only drafts; an authorised agency issues a WEA through FEMA IPAWS.'
+
 /** Fields backend-alerts adds beyond CONTRACT §3.6 (BUILD_PLAN §2.2); optional until lib/types.ts carries them. */
 type WeaDraftFull = WeaDraft & {
   cap_xml?: string
@@ -172,7 +175,9 @@ function ModalBody({ alertId }: { alertId: number }) {
         <PolygonPreview zone={zone} nodes={nodes} affectedIds={affectedIds} vertexCount={vertexCount} viewBox={viewBox} />
       </div>
       <footer className="shrink-0 flex flex-col gap-4 px-8 py-5 bg-raised md:flex-row md:items-center">
-        <p className="text-xs text-ink-3 md:flex-1 md:min-w-0 text-pretty">{draft.disclaimer}</p>
+        <p className="text-[13px] leading-5 text-ink-2 md:flex-1 md:min-w-0 text-pretty">
+          {draft.disclaimer?.toLowerCase().includes('nothing is sent') ? draft.disclaimer : NOTHING_SENT}
+        </p>
         <div className="flex flex-wrap items-center gap-1 shrink-0">
           <Button variant="ghost" onClick={() => void copy('the CAP XML', draft.cap_xml)} disabled={!draft.cap_xml}>Copy CAP XML</Button>
           <Button variant="ghost" onClick={() => void copy('the 90 character text', text90)}>Copy short text</Button>

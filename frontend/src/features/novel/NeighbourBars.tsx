@@ -10,7 +10,7 @@ const LABEL_W = 92
 const VALUE_W = 40
 const TOP_PAD = 4
 
-/** Horizontal PM2.5 bars: this node in signal, neighbours ink-2, dashed lines at median and 2× median. */
+/** Horizontal PM2.5 bars: this node in signal, neighbours ink-2, hairlines at the median and the 2x fire line. */
 export function NeighbourBars({ explain, width = 320 }: NeighbourBarsProps) {
   const median = explain.eval.regional
   const rows = [
@@ -34,7 +34,7 @@ export function NeighbourBars({ explain, width = 320 }: NeighbourBarsProps) {
         if (v <= 0 || v > max) return null
         return (
           <g key={k}>
-            <line x1={x(v)} x2={x(v)} y1={TOP_PAD - 2} y2={height - 2} stroke={k === 1 ? 'var(--color-ink-4)' : 'var(--color-warn)'} strokeOpacity={k === 1 ? 1 : 0.7} strokeDasharray="3 3" strokeWidth={1} />
+            <line x1={x(v)} x2={x(v)} y1={TOP_PAD - 2} y2={height - 2} stroke={k === 1 ? 'var(--color-ink-4)' : 'var(--color-warn)'} strokeOpacity={k === 1 ? 1 : 0.7} strokeWidth={1} />
           </g>
         )
       })}

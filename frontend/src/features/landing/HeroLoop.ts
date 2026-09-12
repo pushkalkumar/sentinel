@@ -88,9 +88,12 @@ export function simClock(t: number, withSeconds = true): string {
 interface TopoNode {
   id: string; label: string; zone_id: number; lat: number; lng: number; map_x: number; map_y: number
   indoor: boolean; is_gateway: boolean; floor: number | null; neighbours: string[]
+  /** Real Xenon boards live in the topology too; the scripted hero shows only the eight virtual nodes. */
+  hardware?: boolean
 }
 const SITE = topology.sites.find((s) => s.id === SITE_ID)!
-const TOPO_NODES = SITE.nodes as TopoNode[]
+const TOPO_NODES = (SITE.nodes as TopoNode[]).filter((n) => !n.hardware)
+const TOPO_IDS = new Set(TOPO_NODES.map((n) => n.id))
 
 export const NODE_IDS: NodeId[] = TOPO_NODES.map((n) => n.id)
 
@@ -100,6 +103,7 @@ export const LINKS: [NodeId, NodeId][] = (() => {
   const out: [NodeId, NodeId][] = []
   for (const n of TOPO_NODES) {
     for (const m of n.neighbours) {
+      if (!TOPO_IDS.has(m)) continue
       const key = [n.id, m].sort().join('|')
       if (seen.has(key)) continue
       seen.add(key)

@@ -2,9 +2,10 @@ import { useSiteStore } from '@/store/site'
 import { useMeshStore } from '@/store/mesh'
 import { useIncidentStore } from '@/store/incidents'
 import { useDisplayNodes } from '@/store/select'
-import { CampusMap } from '@/components/map/CampusMap'
+import { CampusView } from '@/components/map/CampusView'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { PhoneMock } from './PhoneMock'
+import { TriageCard } from './TriageCard'
 import type { ChapterKind } from './chapterKind'
 
 export interface MapStageProps { kind: ChapterKind }
@@ -27,7 +28,7 @@ export function MapStage({ kind }: MapStageProps) {
       {!loaded && !error && <Skeleton className="w-64" />}
       {error && nodes.length === 0 && <p className="text-sm text-alarm p-panel">{error}</p>}
       {nodes.length > 0 && (
-        <CampusMap
+        <CampusView
           nodes={nodes}
           links={links}
           mode={mesh ? 'mesh' : 'air'}
@@ -35,10 +36,11 @@ export function MapStage({ kind }: MapStageProps) {
           highlightCode={kind === 'report' || kind === 'respond' ? lastCode : undefined}
           ground={ground}
           labels="always"
-          className="w-full max-h-full p-4"
+          className="absolute inset-3 rounded-md overflow-hidden"
         />
       )}
       <PhoneMock visible={kind === 'report'} />
+      <TriageCard visible={kind === 'report'} />
     </section>
   )
 }

@@ -3,6 +3,9 @@ import clsx from 'clsx'
 import { listNodes, getMeshLog } from '@/lib/api'
 import { fmtWall } from '@/lib/time'
 import type { MeshLogEntry, Node } from '@/lib/types'
+import { useMeshStore } from '@/store/mesh'
+import { XenonToast } from '@/features/demo/XenonToast'
+import { isXenonPress } from '@/features/demo/xenonPress'
 
 const FIELD = 'xenon-a'
 const GATEWAY = 'xenon-b'
@@ -49,8 +52,11 @@ function useLiveHardware() {
     return () => { alive = false; window.clearInterval(timer); window.clearInterval(tick) }
   }, [])
 
+  // A press that arrives over the WS shows at once; the 5 s poll catches up for pages without the socket.
+  const livePress = useMeshStore((s) => (isXenonPress(s.lastHop) ? s.lastHop : null))
+  const shown = livePress && (!press || livePress.id > press.id) ? livePress : press
   const ageS = seenAt === null ? null : Math.round((now - seenAt) / 1000)
-  return { field: nodes[FIELD], gateway: nodes[GATEWAY], press, meshDenied, ageS }
+  return { field: nodes[FIELD], gateway: nodes[GATEWAY], press: shown, meshDenied, ageS }
 }
 
 function Row({ dot, label, value, sub }: { dot: 'live' | 'idle' | 'off'; label: string; value: string; sub?: string }) {
@@ -103,6 +109,7 @@ export function LiveHardware() {
         />
       </ul>
       <p className="mt-2 text-xs text-ink-3">{TAGLINE}</p>
+      <XenonToast />
     </section>
   )
 }

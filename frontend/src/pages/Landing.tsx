@@ -11,14 +11,16 @@ import { HeroCard } from '@/features/landing/HeroCard'
 import { Steps } from '@/features/landing/Steps'
 import { SkyVsBuilding } from '@/features/landing/SkyVsBuilding'
 import { Pricing } from '@/features/landing/Pricing'
+import { AiHonestly } from '@/features/landing/AiHonestly'
 
 const HEADLINE = ['The smoke alarm that', 'keeps talking when', 'the internet dies.']
 
+// Every figure here is from spec.md: §4.1 cost, §10.3 demo campus, §3.7 radio range, §3.6 power.
 const STATS = [
   { value: '$31', label: 'per node at 1,000 units' },
-  { value: '8', label: 'hops, 1 to 2 km each' },
-  { value: '0', label: 'internet required' },
-  { value: '3', label: 'days on one 18650, no sun' },
+  { value: '8', label: 'nodes on the demo campus' },
+  { value: '1–2 km', label: 'per hop outdoors, 300 to 600 m through buildings' },
+  { value: '3 days', label: 'on one 18650 with no sun' },
 ]
 
 /** Landing (DESIGN_V2 §4): one idea per section, grouped by whitespace, no section rules. */
@@ -47,7 +49,7 @@ export default function Landing() {
             </h1>
             <div className="lg:col-span-5 lg:pb-2 max-w-[42ch]">
               <p className="prose-landing">
-                A $31 box that measures smoke, heat and gas, relays over long-range radio, and lets any phone nearby report danger with a verified location.
+                A box that measures smoke, heat and gas, relays over long-range radio, and lets any phone nearby report danger with a verified location. $31 a node at 1,000 units, $60 for one.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-2">
                 <Button variant="primary" className="px-5" onClick={() => navigate(CONSOLE_PATH)}>Open the console</Button>
@@ -64,6 +66,7 @@ export default function Landing() {
 
         <Steps />
         <SkyVsBuilding />
+        <AiHonestly />
         <Pricing />
         <SafetyFooter />
       </div>

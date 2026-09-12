@@ -22,7 +22,8 @@ const SITE_ID = 1
 const RESPONDER_EMAIL = 'responder@sentinel.demo'
 const DEMO_PASSWORD = 'sentinel'
 const PACE_MS = 1200
-const REPORT = { type: 'trapped', count: 2, text: 'Gym storage room, door jammed' }
+/** The judge's report; the triage card on /demo runs the same text through Gemini. */
+export const REPORT = { type: 'trapped' as const, count: 2, text: 'Gym storage room, door jammed' }
 const EN_ROUTE_NOTE = 'Engine 17 on scene in 4 min, crew 3 entering from the south door'
 const RESOLVE_NOTE = 'Crew 3 walked both out'
 /** Submission order matters for the story: clean classes first, the one with two missing last. */
@@ -37,7 +38,7 @@ const sim = (action: SimAction) => demoRequest<SimState>('/api/sim/control', { b
 
 let responderToken: string | null = null
 /** Responder-only actions (acknowledge, en_route, resolve) need a responder bearer (CONTRACT §2.3). */
-async function responder(): Promise<string | null> {
+export async function responder(): Promise<string | null> {
   if (responderToken) return responderToken
   try {
     const r = await demoRequest<{ token: string }>('/api/auth/login', { body: { email: RESPONDER_EMAIL, password: DEMO_PASSWORD }, token: null })

@@ -58,7 +58,9 @@ export default function Login() {
     try {
       const res = await login(email.trim(), password)
       setAuth(res)
-      const target = next && (res.role === 'responder' || !next.startsWith('/responder')) ? next : HOME[res.role]
+      // Never bounce a responder back to an admin-only page (that loops through this form forever).
+      const canOpen = res.role === 'admin' ? !!next : !!next && !next.startsWith('/admin')
+      const target = canOpen && next ? next : HOME[res.role]
       navigate(target, { replace: true })
     } catch (err) {
       setError(isApiError(err, 'UNAUTHORIZED') ? 'That email and password do not match. Check both and try again.' : errorText(err))
@@ -85,7 +87,7 @@ export default function Login() {
           />
           {denied && !error && (
             <p className="text-sm text-warn" role="status">
-              That page needs a {next?.startsWith('/responder') ? 'responder' : 'different'} account. Sign in with one that has access.
+              That page needs {next?.startsWith('/admin') ? 'the admin' : next?.startsWith('/responder') ? 'a responder or admin' : 'a different'} account. Sign in below and you will land on your own console.
             </p>
           )}
           {/* Sentence-case labels: a sign-in form is not two signage labels (design item 25). */}

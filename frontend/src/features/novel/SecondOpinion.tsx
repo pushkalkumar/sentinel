@@ -108,7 +108,7 @@ export function SecondOpinion({ nodeId, live }: { nodeId: NodeId; live: boolean 
             </ul>
           )}
           {data.drift.flagged && (
-            <p className="text-xs text-warn">Drift: {data.drift.note}. Check the sensor before trusting this node.</p>
+            <p className="text-xs text-warn">Drift: {data.drift.note}</p>
           )}
           <p className="text-xs text-ink-4">{HONESTY}</p>
         </div>

@@ -124,7 +124,7 @@ async def test_client_live_success_validates_and_caches():
     c = GeminiClient(api_key="")
     c._http = _mock_http(handler)
     out = await c.triage(SPANISH)
-    assert out["basis"].startswith("gemini-2.5-flash second opinion")
+    assert out["basis"].startswith("gemini-flash-lite-latest second opinion")
     assert out["type"] == "trapped" and out["rules"]["type"] == "fire" and out["cached"] is False
     assert out["human_decides"] == rules.HUMAN_DECIDES
     assert str(seen[0].url) == f"{API_BASE}/gemini-flash-lite-latest:generateContent"

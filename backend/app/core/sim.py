@@ -1,12 +1,14 @@
 """Simulator proxy and sim-state cache (CONTRACT §3.7, §3.9 sim-state). /api/health lives in main.py."""
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from typing import Any
 
 import httpx
 from fastapi import APIRouter, Body, Depends
+from sqlalchemy.exc import OperationalError
 
 from app import ws
 from app.config import settings
@@ -25,6 +27,9 @@ router = APIRouter()
 SIM_TIMEOUT_S = 2.0
 RESET_NOTE = "Demo reset"
 DEMO_FP_PREFIXES = ("demo-", "smoke-")
+DRAIN_MAX_S = 2.0          # how long reset waits for telemetry already queued in the simulator to land
+DRAIN_QUIET_S = 0.35
+WIPE_ATTEMPTS = 3          # SQLite takes one writer: the ingest can hold the lock when the wipe starts
 
 
 def _unwrap(payload: Any) -> Any:
@@ -126,12 +131,41 @@ def _clear_runtime_state() -> None:
     ingest._eval_counter.clear()
 
 
+async def _drain_in_flight() -> None:
+    """Wait for telemetry the simulator had already queued to arrive, so the wipe removes it too.
+
+    The simulator holds up to 20 batches; with the clock paused they land in well under a second. Without this
+    wait they arrive after the reset and put 14:07 readings and advisories back on a 07:30 screen.
+    """
+    loop = asyncio.get_running_loop()
+    def newest() -> str:
+        return max((r.get("ts", "") for r in state.latest.values()), default="")
+    deadline = loop.time() + DRAIN_MAX_S
+    last, quiet_since = newest(), loop.time()
+    while loop.time() < deadline:
+        await asyncio.sleep(0.1)
+        current = newest()
+        if current != last:
+            last, quiet_since = current, loop.time()
+        elif loop.time() - quiet_since >= DRAIN_QUIET_S:
+            return
+
+
 async def _wipe_engine_rows(session) -> dict:
     """Everything the engine and the demo wrote today. The seed (tenants, sites, nodes, rosters) is untouched."""
     counts = {}
     for name, model in (("sms_log", SmsLog), ("alerts", Alert), ("decision_log", DecisionLog),
                         ("node_evals", NodeEval), ("readings", Reading), ("mesh_log", MeshLog)):
-        result = await session.execute(delete(model))
+        for attempt in range(1, WIPE_ATTEMPTS + 1):
+            try:
+                result = await session.execute(delete(model))
+                break
+            except OperationalError:
+                await session.rollback()
+                if attempt == WIPE_ATTEMPTS:
+                    raise
+                log.warning("reset: %s is locked by the ingest, retry %d", name, attempt)
+                await asyncio.sleep(0.25)
         counts[name] = result.rowcount or 0
     return counts
 
@@ -171,15 +205,18 @@ async def _end_open_drills(session) -> list[int]:
 async def reset_demo(session, principal: Principal) -> dict:
     """POST /sim/control {"action":"reset"}: the opening beat, with yesterday's run removed (judge item 2).
 
-    Order matters: incidents and drills close while their rows still exist, then the engine's output goes, then
-    the clock jumps back to 07:30 and plays so the first tick rebuilds the card from scratch.
+    Order matters: the clock pauses first and the telemetry already in flight is allowed to land, so the wipe
+    takes it with everything else; incidents and drills close while their rows still exist; then the clock jumps
+    back to 07:30 and plays, and the first tick rebuilds the card from scratch.
     """
+    await _drive_sim(session, {"action": "pause"})
+    await _drain_in_flight()
     codes = await _resolve_demo_incidents(session)
     drills = await _end_open_drills(session)
     counts = await _wipe_engine_rows(session)
     await session.commit()
     _clear_runtime_state()
-    data = await _drive_sim(session, {"action": "jump", "t": "calm"})
+    await _drive_sim(session, {"action": "jump", "t": "calm"})
     data = await _drive_sim(session, {"action": "play"})
     from app.alerts.decision import get_decision_card
     card = await get_decision_card(session, 1)

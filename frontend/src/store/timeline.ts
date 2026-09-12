@@ -1,7 +1,12 @@
 import { create } from 'zustand'
 import type { Alert, BandKey, DecisionCard, ISO, NodeId, TimelineResponse } from '@/lib/types'
+import { computeFrame, clampMs, dayBounds, latestReadingMs } from '@/features/novel/timelineMath'
 
 export type TimelineSpeed = 1 | 10
+
+/** 1x follows the simulator's own default pace (60 sim seconds per real second, CONTRACT §7). */
+const SIM_SECONDS_PER_REAL_SECOND = 60
+const TICK_MS = 100
 
 export interface TimelineFrame {
   nodes: Record<NodeId, { pm25: number; temp_c: number; band: BandKey }>
@@ -19,35 +24,102 @@ export interface TimelineState {
   frame: TimelineFrame | null
   load: (data: TimelineResponse) => void
   scrubTo: (iso: ISO) => void
+  /** Move by whole sim minutes from the current position (keyboard arrows). */
+  stepMinutes: (n: number) => void
   goLive: () => void
   setPlaying: (playing: boolean) => void
   setSpeed: (speed: TimelineSpeed) => void
 }
 
-export const useTimelineStore = create<TimelineState>()((set, get) => ({
-  active: false,
-  t: null,
-  data: null,
-  playing: false,
-  speed: 1,
-  frame: null,
+let ticker: ReturnType<typeof setInterval> | null = null
 
-  load: (data) => {
-    set({ data })
-    // Keep the current frame in sync with fresh data while scrubbing.
-    const { active, t } = get()
-    if (active && t) get().scrubTo(t)
-  },
+function stopTicker(): void {
+  if (ticker) clearInterval(ticker)
+  ticker = null
+}
 
-  // OWNER: fe-novel — compute `frame` from `data` at `iso`: nearest reading per node (bands via lib/bands),
-  // the latest decision at or before `iso`, and alerts open at `iso`. The scaffold leaves `frame` untouched.
-  scrubTo: (iso) => {
-    set({ active: true, t: iso })
-  },
+export const useTimelineStore = create<TimelineState>()((set, get) => {
+  /** Upper scrub bound: the latest stored reading, else the end of the axis. */
+  const ceilingMs = (data: TimelineResponse): number => {
+    const b = dayBounds(data)
+    const latest = latestReadingMs(data)
+    return latest === null ? b.endMs : Math.min(b.endMs, Math.max(b.startMs, latest))
+  }
 
-  goLive: () => set({ active: false, t: null, frame: null, playing: false }),
+  const startTicker = () => {
+    stopTicker()
+    ticker = setInterval(() => {
+      const { playing, t, data, speed } = get()
+      if (!playing || !data) return stopTicker()
+      const b = dayBounds(data)
+      const fromMs = t ? Date.parse(t) : b.startMs
+      const stepMs = (TICK_MS / 1000) * SIM_SECONDS_PER_REAL_SECOND * speed * 1000
+      const ceiling = ceilingMs(data)
+      const nextMs = Math.min(ceiling, fromMs + stepMs)
+      get().scrubTo(new Date(nextMs).toISOString())
+      if (nextMs >= ceiling) {
+        set({ playing: false })
+        stopTicker()
+      }
+    }, TICK_MS)
+  }
 
-  setPlaying: (playing) => set({ playing }),
+  return {
+    active: false,
+    t: null,
+    data: null,
+    playing: false,
+    speed: 1,
+    frame: null,
 
-  setSpeed: (speed) => set({ speed }),
-}))
+    load: (data) => {
+      set({ data })
+      // Keep the current frame in sync with fresh data while scrubbing.
+      const { active, t } = get()
+      if (active && t) get().scrubTo(t)
+    },
+
+    scrubTo: (iso) => {
+      const { data } = get()
+      if (!data) {
+        set({ active: true, t: iso })
+        return
+      }
+      const b = dayBounds(data)
+      const ms = clampMs(Date.parse(iso), b)
+      const t = Number.isFinite(ms) ? new Date(ms).toISOString() : iso
+      set({ active: true, t, frame: computeFrame(data, t) })
+    },
+
+    stepMinutes: (n) => {
+      const { data, t } = get()
+      if (!data) return
+      const b = dayBounds(data)
+      const fromMs = t ? Date.parse(t) : ceilingMs(data)
+      get().scrubTo(new Date(clampMs(fromMs + n * 60_000, b)).toISOString())
+    },
+
+    goLive: () => {
+      stopTicker()
+      set({ active: false, t: null, frame: null, playing: false })
+    },
+
+    setPlaying: (playing) => {
+      const { data, t } = get()
+      if (playing && !data) return
+      if (playing && data) {
+        const b = dayBounds(data)
+        const atEnd = t ? Date.parse(t) >= ceilingMs(data) : false
+        // Play from the start when idle at live or parked at the end.
+        get().scrubTo(t && !atEnd ? t : new Date(b.startMs).toISOString())
+        set({ playing: true })
+        startTicker()
+        return
+      }
+      stopTicker()
+      set({ playing: false })
+    },
+
+    setSpeed: (speed) => set({ speed }),
+  }
+})

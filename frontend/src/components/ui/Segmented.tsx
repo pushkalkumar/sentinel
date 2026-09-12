@@ -12,7 +12,7 @@ export interface SegmentedProps<V extends string> {
 
 export function Segmented<V extends string>({ options, value, onChange, label, className }: SegmentedProps<V>) {
   return (
-    <div role="radiogroup" aria-label={label} className={clsx('inline-flex h-9 p-0.5 rounded-sm bg-raised hairline', className)}>
+    <div role="radiogroup" aria-label={label} className={clsx('inline-flex p-0.5 rounded-sm bg-raised hairline', !/\bh-\d/.test(className ?? '') && 'h-9', className)}>
       {options.map((o) => {
         const active = o.value === value
         return (

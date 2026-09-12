@@ -24,9 +24,8 @@ export function RequireRole({ roles, children }: RequireRoleProps) {
     let cancelled = false
     setChecking(true)
     me()
-      .then((m) => { if (!cancelled) setAuth({ ...m, token }) })
-      .catch(() => { if (!cancelled) logout() })
-      .finally(() => { if (!cancelled) setChecking(false) })
+      .then((m) => { if (!cancelled) { setChecking(false); setAuth({ ...m, token }) } })
+      .catch(() => { if (!cancelled) { setChecking(false); logout() } })
     return () => { cancelled = true }
   }, [token, role, setAuth, logout])
 

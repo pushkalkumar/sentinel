@@ -18,7 +18,9 @@ DAY = "2026-09-12"
 DAY_START_H = 7
 DAY_END_T = 13 * 3600  # 20:00
 
-FIRE_RAMP_S = 60
+FIRE_RAMP_S = 240          # ignition to full fire: 8 ticks of 30 s, so the ramp is visible at every speed
+FIRE_SMOULDER_S = 180      # slow PM creep first (SIM_WORLD §8 shape), then flaming growth over the last 60 s
+FIRE_SMOULDER_LEVEL = 0.12  # fraction of the full fire reached when the smoulder turns into flame
 SMOKE_RAMP_S = 120
 CLEAR_DECAY_S = 120
 SMOKE_TARGET_PM = 240.0
@@ -120,6 +122,22 @@ def _clamp01(x: float) -> float:
     return min(1.0, max(0.0, x))
 
 
+def fire_curve(age_s: float) -> float:
+    """Fraction (0..1) of the full fire `age_s` sim seconds after ignition: a smoulder, then flaming growth.
+
+    The engine reads rates, not levels: temp_rise against the reading 120 s back, pm_rise against 300 s back
+    (CONTRACT §5.2). The smoulder stays under the pm_rise threshold (0.12 x 180 = 22 < 40) and the growth leg is
+    shorter than the temperature lookback, so the first rule a burning node trips is LOCAL_FIRE, never
+    LOCAL_SMOKE_SUSPECT, and it trips at 60x or 300x just as it does at 1x because every leg spans whole ticks.
+    """
+    if age_s <= 0.0:
+        return 0.0
+    if age_s < FIRE_SMOULDER_S:
+        return FIRE_SMOULDER_LEVEL * age_s / FIRE_SMOULDER_S
+    growth = (age_s - FIRE_SMOULDER_S) / (FIRE_RAMP_S - FIRE_SMOULDER_S)
+    return FIRE_SMOULDER_LEVEL + (1.0 - FIRE_SMOULDER_LEVEL) * _clamp01(growth)
+
+
 @dataclass
 class Overrides:
     fire: dict[str, float] = field(default_factory=dict)  # node_id -> sim t0
@@ -162,7 +180,7 @@ class Overrides:
         t0 = self.fire.get(node_id)
         if t0 is None:
             return 0.0
-        return _clamp01((t - t0) / FIRE_RAMP_S) * self._decay(t)
+        return fire_curve(t - t0) * self._decay(t)
 
     def smoke_boost(self, t: float, regional: float) -> float:
         if self.smoke_t0 is None:

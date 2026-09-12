@@ -11,7 +11,8 @@ log = logging.getLogger("sim.backend")
 
 BACKOFF_MIN_S = 0.5
 BACKOFF_MAX_S = 5.0
-REQUEST_TIMEOUT_S = 3.0
+REQUEST_TIMEOUT_S = 3.0        # heartbeat posts: a slow answer means the dashboard should say "offline" soon
+INGEST_TIMEOUT_S = 8.0         # telemetry and mesh hops: a busy backend is not a dead one (see _post)
 REJECT_LOG_EVERY_S = 30.0
 
 
@@ -39,20 +40,24 @@ class BackendClient:
 
     # ---- public posts -------------------------------------------------- #
     async def post_telemetry(self, readings: list[dict]) -> dict | None:
-        return await self._post("/api/ingest/telemetry", readings)
+        return await self._post("/api/ingest/telemetry", readings, timeout_s=INGEST_TIMEOUT_S)
 
     async def post_mesh_message(self, body: dict) -> dict | None:
-        return await self._post("/api/ingest/mesh-message", body)
+        return await self._post("/api/ingest/mesh-message", body, timeout_s=INGEST_TIMEOUT_S)
 
     async def post_sim_state(self, body: dict) -> dict | None:
         return await self._post("/api/ingest/sim-state", body)
 
     # ---- internals ------------------------------------------------------ #
-    async def _post(self, path: str, body: object) -> dict | None:
+    async def _post(self, path: str, body: object, timeout_s: float = REQUEST_TIMEOUT_S) -> dict | None:
+        """A dropped telemetry batch is a 30-sim-second hole in the engine's history, and the engine compares a
+        reading against ones 120 s and 300 s back, so holes delay or miss a fire. Ingest posts therefore wait
+        longer than the heartbeat does before giving up on a backend that is merely busy."""
         if self._session is None or time.monotonic() < self._down_until:
             return None
         try:
-            async with self._session.post(self.base_url + path, json=body) as resp:
+            async with self._session.post(self.base_url + path, json=body,
+                                          timeout=aiohttp.ClientTimeout(total=timeout_s)) as resp:
                 if resp.status >= 500:
                     self._mark_down(f"{path} -> HTTP {resp.status}")
                     return None

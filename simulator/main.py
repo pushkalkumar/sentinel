@@ -107,8 +107,9 @@ class Simulator:
             self.clock.playing = False
         elif action == "speed":
             self.clock.speed = float(parse_speed(body.get("speed")))
-        elif action == "jump":
-            target = body.get("t")
+        elif action in ("jump", "reset"):
+            # "reset" is the backend's demo-reset alias: jump calm, drop every override, play.
+            target = "calm" if action == "reset" else body.get("t")
             if target is None:
                 raise ValueError("jump needs t: calm|smoke|fire, seconds since 07:00, or HH:MM")
             self._jump(parse_jump(target))
@@ -131,7 +132,7 @@ class Simulator:
         elif action == "clear":
             self.overrides.clear(t)
         else:
-            raise ValueError("action must be play|pause|speed|jump|trigger_fire|trigger_smoke|clear")
+            raise ValueError("action must be play|pause|speed|jump|reset|trigger_fire|trigger_smoke|clear")
         log.info("control %s -> %s %s x%d phase=%s", action, self.clock.sim_clock(),
                  "playing" if self.clock.playing else "paused", int(self.clock.speed), phase(self.clock.sim_t, self.overrides))
         self._state_push_wanted.set()

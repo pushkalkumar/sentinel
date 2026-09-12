@@ -48,6 +48,7 @@ curl -s -XPOST 127.0.0.1:8001/control -H 'content-type: application/json' -d '{"
 curl -s -XPOST 127.0.0.1:8001/control -H 'content-type: application/json' -d '{"action":"trigger_fire","node_id":"w-a07"}'
 curl -s -XPOST 127.0.0.1:8001/control -H 'content-type: application/json' -d '{"action":"trigger_smoke"}'
 curl -s -XPOST 127.0.0.1:8001/control -H 'content-type: application/json' -d '{"action":"clear"}'
+curl -s -XPOST 127.0.0.1:8001/control -H 'content-type: application/json' -d '{"action":"reset"}'    # = jump calm (07:30, overrides gone, playing)
 curl -s -XPOST 127.0.0.1:8001/relay -H 'content-type: application/json' \
   -d '{"msg_id":"m-deadbeef","origin_node":"parking","kind":"incident","payload":{"code":"SN-TEST","type":"trapped","count":1}}'
 # 202 {"ok":true,"data":{"msg_id":"m-deadbeef","planned_path":["parking","arts","library","hub"],"ttl":8}}
@@ -61,7 +62,13 @@ The backend proxies `POST /api/sim/control` to `/control` verbatim; operators no
   shows the jumped-to state right away. Readings are idempotent on `(node_id, ts)` in the backend.
 - `jump "calm"` resets every override. Other jumps keep fire and smoke overrides; a fire lit later than
   the jump target is re-anchored to the target so the ramp never runs from negative time.
+- `reset` is an alias for `jump "calm"`, kept separate so the backend's demo reset has one verb to call.
 - `trigger_fire` also originates a `kind:"alarm"` mesh message from that node to its gateway.
+- A fire ramps over 240 sim s (8 ticks): a 180 s smoulder to 12 % of full strength, then 60 s of flaming growth
+  to +180 µg/m³, +6 °C and +300 MQ-2. The backend engine reads rates (temperature against 120 s back, PM2.5
+  against 300 s back), so the ramp must straddle whole ticks at every speed; a 60 s ramp finished inside the
+  engine's blind spot right after a jump and was reported as "smoke suspected, no heat". `simulator/tests`
+  replays the ramp through the engine at every tick phase and asserts LOCAL_FIRE opens first.
 - `clear` decays fire and smoke to zero over 120 sim seconds, then removes them. Alerts clear in the backend on its own schedule.
 - Warehouse nodes use an indoor factor of 0.5 (campus indoor 0.7, outdoor 1.0).
 - The mesh RNG is seeded from `SIM_SEED`; drops and back-off are repeatable in order, not per-bucket.
@@ -72,5 +79,5 @@ The backend proxies `POST /api/sim/control` to `/control` verbatim; operators no
 |---|---|---|---|---|
 | 07:30 | 6 | 1 to 9 | about 8 | calm, dashboard green |
 | 13:55 | 70 | about 49 | about 75 | decision card flips to cancel outdoor practice |
-| 14:30 + fire | 108 | about 75 | about 111 | gym climbs to about 255 within 60 sim s |
+| 14:30 + fire | 108 | about 75 | about 111 | gym smoulders to about 100 by +3 min, then climbs to about 260 by +4 min; the engine opens LOCAL_FIRE around +3.5 to +4 min (under 6 s wall at 60x) |
 | 15:00 | 140 | about 99 | about 142 | plateau |

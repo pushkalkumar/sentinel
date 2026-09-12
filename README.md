@@ -4,6 +4,8 @@ A roll-call and smoke-decision tool that schools and warehouses use every week, 
 
 Built in twelve hours at Frontier Cascadia (Seattle, September 12, 2026). The hardware is designed, not fabricated. Every sensor, radio hop and text message in this repo is simulated and labelled as such on screen. The alert engine, trust score, audit log and roll call are real code.
 
+**Live demo (frontend):** https://sentinel-seattle.vercel.app · **Repo:** https://github.com/pushkalkumar/sentinel
+
 ## What it is
 
 The Sentinel Node is a $31 box (at 1,000 units) built around an ESP32-S3. It measures particulates, temperature, humidity and combustible gas, relays readings and messages to neighbouring nodes over 915 MHz LoRa, and runs its own WiFi access point so any phone can reach it with no network at all.
@@ -54,7 +56,7 @@ The frontend never hardcodes a backend host. Vite proxies `/api` and `/live`, so
 Requirements: Python 3.13 with [uv](https://docs.astral.sh/uv/), Node 20 or newer, `make`, `curl` and `jq` for the smoke test.
 
 ```bash
-git clone <repo-url> sentinel && cd sentinel
+git clone https://github.com/pushkalkumar/sentinel.git && cd sentinel
 uv venv backend/.venv --python 3.13
 make install          # python deps into backend/.venv, npm ci in frontend/
 make seed             # fresh sentinel.db with the demo tenants, nodes, users, roster

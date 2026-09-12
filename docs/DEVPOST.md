@@ -62,7 +62,8 @@ Hardware is designed, not fabricated, per organiser guidance: schematic, BOM, pi
 
 ## Links
 
-- Repo: `<repo-url>`
+- Repo: https://github.com/pushkalkumar/sentinel
+- Live site: https://sentinel-seattle.vercel.app
 - Demo video: `<video-url>`
 - Schematic: `docs/schematic.png`
 - AI tools disclosure: `docs/AI_TOOLS_DISCLOSURE.md`

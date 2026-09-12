@@ -1,14 +1,130 @@
-// OWNER: fe-responder
-import { PageHeader } from '@/components/ui/PageHeader'
-import { Panel } from '@/components/ui/Panel'
+import { useEffect, useState, type FormEvent } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { Grain } from '@/components/shell/Grain'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Segmented } from '@/components/ui/Segmented'
+import { errorText, isApiError, login } from '@/lib/api'
+import { useSessionStore } from '@/store/session'
+
+type Tab = 'admin' | 'responder'
+
+const DEMO_EMAIL: Record<Tab, string> = {
+  admin: 'admin@sentinel.demo',
+  responder: 'responder@sentinel.demo',
+}
+
+const HOME: Record<'admin' | 'responder', string> = { admin: '/admin', responder: '/responder' }
+
+function safeNext(raw: string | null): string | null {
+  if (!raw) return null
+  // Only same-origin paths; never let ?next= send the browser elsewhere.
+  if (!raw.startsWith('/') || raw.startsWith('//')) return null
+  return raw
+}
+
 export default function Login() {
+  const [params] = useSearchParams()
+  const navigate = useNavigate()
+  const setAuth = useSessionStore((s) => s.setAuth)
+  const role = useSessionStore((s) => s.role)
+
+  const next = safeNext(params.get('next'))
+  const denied = params.get('denied') === '1'
+  const initialTab: Tab = next?.startsWith('/responder') ? 'responder' : 'admin'
+
+  const [tab, setTab] = useState<Tab>(initialTab)
+  const [email, setEmail] = useState(DEMO_EMAIL[initialTab])
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  // Already signed in with a desktop role and no explicit target: go home.
+  useEffect(() => {
+    if (!next && (role === 'admin' || role === 'responder')) navigate(HOME[role], { replace: true })
+  }, [role, next, navigate])
+
+  const switchTab = (t: Tab) => {
+    setTab(t)
+    setError(null)
+    if (email === DEMO_EMAIL.admin || email === DEMO_EMAIL.responder || email === '') setEmail(DEMO_EMAIL[t])
+  }
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (busy) return
+    if (!email.trim() || !password) {
+      setError('Enter your email and password.')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await login(email.trim(), password)
+      setAuth(res)
+      const target = next && (res.role === 'responder' || !next.startsWith('/responder')) ? next : HOME[res.role]
+      navigate(target, { replace: true })
+    } catch (err) {
+      setError(isApiError(err, 'UNAUTHORIZED') ? 'That email and password do not match. Check both and try again.' : errorText(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
-    <div className="min-h-dvh bg-canvas text-ink px-6 relative"><Grain /><div className="relative z-[2] max-w-[1600px] mx-auto">
-      <PageHeader title="/login" />
-      <Panel title="Login">
-        <p className="text-sm text-ink-2">stub</p>
-      </Panel>
-    </div></div>
+    <div className="min-h-dvh bg-canvas text-ink relative flex flex-col">
+      <Grain />
+      <header className="relative z-[2] h-14 flex items-center px-6 border-b border-line">
+        <Link to="/" className="display-h1 text-[17px] font-semibold tracking-tight text-ink">Sentinel</Link>
+        <span className="ml-3 text-sm text-ink-2">Console sign-in</span>
+      </header>
+
+      <main className="relative z-[2] flex-1 flex items-start justify-center px-4 py-16">
+        <form onSubmit={submit} noValidate className="w-full max-w-[400px] bg-surface hairline rounded-md">
+          <div className="h-10 flex items-center px-5 border-b border-line">
+            <h1 className="label-signage">Sign in</h1>
+          </div>
+          <div className="p-5 flex flex-col gap-5">
+            <Segmented<Tab>
+              label="Account type"
+              value={tab}
+              onChange={switchTab}
+              options={[{ value: 'admin', label: 'Admin' }, { value: 'responder', label: 'Responder' }]}
+              className="self-start"
+            />
+            {denied && !error && (
+              <p className="text-sm text-warn" role="status">
+                That page needs a {next?.startsWith('/responder') ? 'responder' : 'different'} account. Sign in with one that has access.
+              </p>
+            )}
+            <Input
+              label="Email"
+              type="email"
+              name="email"
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoFocus
+            />
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={error}
+              hint={tab === 'admin' ? 'Demo: admin@sentinel.demo, password sentinel' : 'Demo: responder@sentinel.demo, password sentinel'}
+            />
+            <Button type="submit" variant="primary" loading={busy} className="w-full">
+              {tab === 'admin' ? 'Open admin console' : 'Open responder console'}
+            </Button>
+            <p className="text-sm text-ink-2 text-center">
+              Staff? <Link to="/m/staff" className="text-ink underline underline-offset-2 decoration-line-strong hover:decoration-ink">Use the phone page</Link>
+            </p>
+          </div>
+        </form>
+      </main>
+    </div>
   )
 }

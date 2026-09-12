@@ -22,7 +22,7 @@ from app.ai.schemas import BriefOutput, TranslateOutput, TriageOutput
 
 log = logging.getLogger("sentinel.ai")
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-flash-lite-latest"
 API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 TIMEOUT_S = 8.0
 MAX_TOKENS = 1024

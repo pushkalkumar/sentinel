@@ -118,13 +118,16 @@ class Simulator:
             elif key == "fire":
                 self._trigger_fire("gym")
             self._emit_tick(self.clock.sim_t)
+            self.clock.playing = True  # a jump is a demo beat; the clock must move for ramps to play out
         elif action == "trigger_fire":
             node_id = body.get("node_id")
             if not isinstance(node_id, str) or node_id not in self.mesh.nodes:
                 raise ValueError(f"unknown node_id {node_id!r}")
             self._trigger_fire(node_id)
+            self.clock.playing = True
         elif action == "trigger_smoke":
             self.overrides.trigger_smoke(t)
+            self.clock.playing = True
         elif action == "clear":
             self.overrides.clear(t)
         else:

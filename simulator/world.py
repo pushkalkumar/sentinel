@@ -187,7 +187,8 @@ def reading(node: NodeInfo, t: float, ov: Overrides, seed: int, ts: str) -> dict
     h = clock_hours(t)
     regional = regional_pm25(t)
     if not node.indoor:
-        factor = 1.0
+        # Field sits in the open next to the highway; it reads worst on smoke days (SIM_WORLD §6).
+        factor = 1.08 if node.id == "field" else 1.0
     elif node.is_warehouse:
         factor = 0.5
     else:

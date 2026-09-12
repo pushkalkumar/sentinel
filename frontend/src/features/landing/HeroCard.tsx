@@ -3,8 +3,6 @@ import clsx from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
 import { CampusMap } from '@/components/map/CampusMap'
 import { Pill } from '@/components/ui/Pill'
-import { SimTag } from '@/components/ui/SimTag'
-import { BAND_META } from '@/lib/bands'
 import {
   activeHops, HOP_MS, INCIDENT_CODE, LINKS, LOOP_MS, NODE_XY, STATIC_FRAME_MS, useHeroLoop,
   type FeedLine, type FeedTone, type HeroDecision, type HopEvent,
@@ -126,35 +124,30 @@ function useCountUp(target: number, durationMs = 600): number {
   return value
 }
 
-function MiniDecision({ decision }: { decision: HeroDecision }) {
-  const m = BAND_META[decision.band]
+/** One large reading, one line, one pill. The guidance sentence and the rule line live in the console, not here. */
+function Decision({ decision }: { decision: HeroDecision }) {
   const value = useCountUp(decision.pm25)
   return (
-    <div className="p-5 border-b @[480px]:border-b-0 @[640px]:border-b border-line">
-      <div className="label-signage text-ink-3">Outdoor activity · field node</div>
-      <div className="mt-3 flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.h3
-              key={decision.headline}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.24, ease: [0.2, 0, 0, 1] }}
-              className="display-h1 text-lg text-ink"
-            >
-              {decision.headline}
-            </motion.h3>
-          </AnimatePresence>
-          <p className="mt-1 text-sm text-ink-2">{decision.guidance}</p>
-        </div>
-        <div className="text-right shrink-0">
-          <div className="font-mono text-xl leading-none tabular-nums" style={{ color: m.color }}>{value}</div>
-          <div className="font-mono text-2xs text-ink-3 mt-1">PM2.5 µg/m³ 10-min</div>
-          <div className="mt-2 flex justify-end"><Pill kind="band" value={decision.band} /></div>
-        </div>
+    <div>
+      <div className="flex items-baseline gap-2">
+        <span className="stat-number text-ink tabular-nums leading-none" style={{ fontSize: 'clamp(56px, 8cqw, 88px)' }}>{value}</span>
+        <span className="text-sm text-ink-3">PM2.5, 10 min</span>
       </div>
-      <p className="mt-4 pt-3 border-t border-line font-mono text-2xs text-ink-3 truncate" title={decision.rule}>{decision.rule}</p>
+      <div className="mt-5 min-h-[3.6rem]">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={decision.headline}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.24, ease: [0.2, 0, 0, 1] }}
+            className="display-h2 text-lg @[640px]:text-[22px] @[640px]:leading-[1.3] text-ink max-w-[20ch]"
+          >
+            {decision.headline}
+          </motion.p>
+        </AnimatePresence>
+      </div>
+      <div className="mt-3"><Pill kind="band" value={decision.band} /></div>
     </div>
   )
 }
@@ -163,22 +156,18 @@ const TONE: Record<FeedTone, string> = {
   ink: 'text-ink-2', warn: 'text-warn', alarm: 'text-alarm', ok: 'text-ok', signal: 'text-signal',
 }
 
+/** The last two log lines only. Time in ink-3, label carries the tone, detail in ink-2. */
 function Feed({ lines }: { lines: FeedLine[] }) {
+  const last = lines.slice(-2)
   return (
-    <ol className="p-5 font-mono text-xs space-y-2 min-h-[136px]" aria-label="Incident feed">
-      {lines.length === 0 && <li className="text-ink-3">Waiting for the first reading.</li>}
-      {lines.map((l) => (
+    <ol className="font-mono text-xs space-y-2" aria-label="Incident feed">
+      {last.length === 0 && <li className="text-ink-3">Waiting for the first reading.</li>}
+      {last.map((l) => (
         <li key={l.id} className="grid grid-cols-[auto_1fr] gap-x-3 leading-4">
           <span className="text-ink-3 tabular-nums">{l.clock}</span>
-          <span className="min-w-0">
+          <span className="min-w-0 truncate">
             <span className={clsx('font-medium', TONE[l.tone])}>{l.label}</span>
             <span className="text-ink-2"> {l.detail}</span>
-            {l.sub && (
-              <span className="mt-1 flex items-center gap-2 text-ink-3">
-                <span className="truncate">{l.sub.path}</span>
-                <Pill kind="trust" value={l.sub.trust} />
-              </span>
-            )}
           </span>
         </li>
       ))}
@@ -186,35 +175,19 @@ function Feed({ lines }: { lines: FeedLine[] }) {
   )
 }
 
+/** Live console preview (DESIGN_V2 §4): no header row, no SIM tag, no rules. Map, reading, two log lines. */
 export function HeroCard({ className }: { className?: string }) {
   const { frame, t, reduced, origin } = useHeroLoop()
-  const fire = frame.nodes.some((n) => n.open_alerts.length > 0)
   return (
-    <div className={clsx('relative', className)}>
-      <div
-        aria-hidden
-        className="absolute -inset-x-24 -inset-y-20 pointer-events-none"
-        style={{ background: 'radial-gradient(60% 50% at 50% 40%, rgba(70,210,228,0.06), transparent 70%)' }}
-      />
-      <section
-        className="relative bg-surface hairline rounded-lg overflow-hidden @container"
-        aria-label="Sentinel console preview"
-        data-phase={frame.phase}
-        data-loop-t={reduced ? STATIC_FRAME_MS : Math.round(t)}
-      >
-        <header className="h-10 flex items-center gap-3 px-5 border-b border-line">
-          <h2 className="label-signage truncate shrink-0"><span className="hidden sm:inline">Roosevelt High · </span>8 nodes</h2>
-          <div className="ml-auto flex items-center gap-4 min-w-0">
-            <span className="font-mono text-xs text-ink-2 tabular-nums hidden sm:inline shrink-0" aria-label="Simulated clock">{frame.clock} PDT</span>
-            <span className="inline-flex items-center gap-2 shrink-0" aria-hidden>
-              <i className={clsx('size-1.5 rounded-full bg-signal', !reduced && 'pulse-live')} />
-              <span className="label-signage">Live</span>
-            </span>
-            <SimTag kind="nodes" className="min-w-0" />
-          </div>
-        </header>
-        <div className="grid grid-cols-1 @[640px]:grid-cols-[62fr_38fr]">
-          <div className="relative border-b @[640px]:border-b-0 @[640px]:border-r border-line bg-canvas">
+    <section
+      className={clsx('relative bg-surface rounded-lg overflow-hidden @container shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]', className)}
+      aria-label="Sentinel console preview"
+      data-phase={frame.phase}
+      data-loop-t={reduced ? STATIC_FRAME_MS : Math.round(t)}
+    >
+      <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,56fr)_minmax(0,44fr)]">
+        <div className="p-2 @[640px]:p-4">
+          <div className="relative">
             <CampusMap
               compact
               ground="campus"
@@ -225,20 +198,15 @@ export function HeroCard({ className }: { className?: string }) {
               className="w-full h-auto"
             />
             <HopOverlay origin={origin} />
-            {fire && (
-              <span className="absolute left-4 bottom-3 inline-flex items-center gap-2 font-mono text-2xs text-alarm">
-                <i aria-hidden className="size-1.5 rounded-full bg-alarm" />
-                FIRE · gym
-              </span>
-            )}
-            <span className="absolute right-4 bottom-3 font-mono text-2xs text-ink-4 hidden sm:block">square = gateway · circles = mesh</span>
           </div>
-          <div className="min-w-0 grid grid-cols-1 @[480px]:grid-cols-2 @[640px]:grid-cols-1 @[480px]:divide-x @[640px]:divide-x-0 divide-line">
-            <MiniDecision decision={frame.decision} />
+        </div>
+        <div className="min-w-0 p-6 @[640px]:pl-6 @[640px]:pr-10 @[640px]:py-10 flex flex-col gap-8 @[640px]:gap-0">
+          <Decision decision={frame.decision} />
+          <div className="@[640px]:mt-auto @[640px]:pt-8">
             <Feed lines={frame.feed} />
           </div>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   )
 }

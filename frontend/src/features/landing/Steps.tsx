@@ -1,137 +1,109 @@
 import clsx from 'clsx'
-import type { ReactNode } from 'react'
+import { WRAP } from './layout'
 
 interface Step {
   n: string
   title: string
   body: string
-  visual: ReactNode
-  /** Text column width out of 12; the visual takes the rest. Weighted, not mirrored. */
-  textCols: 7 | 8
-  visualFirst: boolean
-}
-
-const STROKE = { fill: 'none', stroke: 'var(--color-ink-3)', strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
-const SIGNAL = 'var(--color-signal)'
-
-function PhoneJoin() {
-  return (
-    <svg viewBox="0 0 320 160" className="w-full h-auto" aria-hidden>
-      <rect x={28} y={28} width={56} height={104} rx={8} {...STROKE} />
-      <rect x={36} y={40} width={40} height={72} rx={2} fill="var(--color-raised)" />
-      <text x={56} y={80} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={9} fill="var(--color-ink-2)">SENTINEL-gym</text>
-      <path d="M130 96 a32 32 0 0 1 0 -32" stroke={SIGNAL} strokeWidth={1.5} fill="none" strokeLinecap="round" opacity={0.5} />
-      <path d="M142 106 a48 48 0 0 1 0 -52" stroke={SIGNAL} strokeWidth={1.5} fill="none" strokeLinecap="round" opacity={0.8} />
-      <path d="M154 118 a64 64 0 0 1 0 -76" stroke={SIGNAL} strokeWidth={1.5} fill="none" strokeLinecap="round" />
-      <rect x={210} y={52} width={80} height={56} rx={4} {...STROKE} />
-      <circle cx={250} cy={80} r={5} fill={SIGNAL} />
-      <text x={250} y={126} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink-2)">node · no internet</text>
-    </svg>
-  )
-}
-
-function Hop() {
-  return (
-    <svg viewBox="0 0 320 160" className="w-full h-auto" aria-hidden>
-      <g stroke="var(--color-line-strong)" strokeDasharray="2 4" strokeWidth={1} fill="none">
-        <line x1={40} y1={110} x2={130} y2={60} />
-        <line x1={130} y1={60} x2={220} y2={100} />
-        <line x1={220} y1={100} x2={284} y2={48} />
-      </g>
-      <circle cx={40} cy={110} r={6} fill="var(--color-alarm)" stroke="rgba(255,255,255,0.2)" />
-      <circle cx={130} cy={60} r={6} fill="var(--color-band-usg)" stroke="rgba(255,255,255,0.2)" />
-      <circle cx={220} cy={100} r={6} fill="var(--color-band-usg)" stroke="rgba(255,255,255,0.2)" />
-      <rect x={278} y={42} width={12} height={12} rx={2} fill="var(--color-band-moderate)" stroke="rgba(255,255,255,0.2)" />
-      <line x1={150} y1={69} x2={172} y2={79} stroke={SIGNAL} strokeWidth={2} strokeLinecap="round" />
-      <text x={40} y={136} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink-2)">gym</text>
-      <text x={284} y={30} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink-2)">hub</text>
-      <text x={160} y={140} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink-3)">915 MHz · 1 to 2 km per hop</text>
-    </svg>
-  )
-}
-
-function Gateway() {
-  return (
-    <svg viewBox="0 0 320 160" className="w-full h-auto" aria-hidden>
-      <rect x={36} y={66} width={14} height={14} rx={2} fill="var(--color-band-moderate)" stroke="rgba(255,255,255,0.2)" />
-      <text x={43} y={100} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink-2)">gateway</text>
-      <line x1={58} y1={73} x2={120} y2={73} stroke="var(--color-line-strong)" strokeDasharray="2 4" />
-      <rect x={124} y={52} width={72} height={42} rx={4} {...STROKE} />
-      <text x={160} y={77} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink-2)">edge server</text>
-      <line x1={200} y1={73} x2={250} y2={73} stroke="var(--color-line-strong)" strokeDasharray="2 4" />
-      <path d="M254 84 h40 a10 10 0 0 0 0 -20 a14 14 0 0 0 -26 -4 a10 10 0 0 0 -14 10 a7 7 0 0 0 0 14 z" {...STROKE} />
-      <text x={262} y={112} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink-3)">cloud, if it is up</text>
-    </svg>
-  )
-}
-
-function Responder() {
-  return (
-    <svg viewBox="0 0 320 160" className="w-full h-auto" aria-hidden>
-      <rect x={28} y={28} width={180} height={104} rx={4} {...STROKE} />
-      <g stroke="var(--color-line-faint)" strokeWidth={1}>
-        <line x1={28} y1={62} x2={208} y2={62} /><line x1={28} y1={96} x2={208} y2={96} />
-        <line x1={88} y1={28} x2={88} y2={132} /><line x1={148} y1={28} x2={148} y2={132} />
-      </g>
-      <circle cx={120} cy={80} r={6} fill="var(--color-alarm)" />
-      <circle cx={120} cy={80} r={12} fill="none" stroke="var(--color-alarm)" opacity={0.4} />
-      <text x={136} y={84} fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink)">SN-7K3F</text>
-      <rect x={224} y={64} width={70} height={18} rx={9} fill="rgba(90,212,110,0.14)" />
-      <circle cx={235} cy={73} r={3} fill="var(--color-ok)" />
-      <text x={243} y={77} fontFamily="var(--font-sans)" fontSize={10} fontWeight={500} fill="var(--color-ok)">Verified</text>
-      <text x={259} y={104} textAnchor="middle" fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink-3)">trust 78 / 100</text>
-    </svg>
-  )
 }
 
 const STEPS: Step[] = [
   {
     n: '1', title: "A phone joins the box's own WiFi.",
-    body: 'No internet, no app. The sign-in screen pops up like hotel WiFi, and the report form is served from the node itself.',
-    visual: <PhoneJoin />, textCols: 7, visualFirst: false,
+    body: 'No internet, no app. The sign-in screen pops up like hotel WiFi and the report form is served from the node itself.',
   },
   {
     n: '2', title: 'The report hops box to box over 915 MHz radio.',
     body: 'Each hop covers 1 to 2 km. Drops are expected; every node deduplicates and retries until a gateway acknowledges.',
-    visual: <Hop />, textCols: 8, visualFirst: true,
   },
   {
     n: '3', title: "A gateway or the school's own edge server catches it.",
-    body: 'The edge server works on its own. When the internet is back it syncs up. Nothing waits on the cloud.',
-    visual: <Gateway />, textCols: 7, visualFirst: false,
+    body: 'The edge server works on its own and syncs up when the internet is back. Nothing waits on the cloud.',
   },
   {
-    n: '4', title: 'A responder sees it on a map, scored for trust, and is the only one who can close it.',
-    body: 'Only a responder can close an incident. Only a phone standing next to the box can open a verified one.',
-    visual: <Responder />, textCols: 8, visualFirst: true,
+    n: '4', title: 'A responder sees it on a map and is the only one who can close it.',
+    body: 'Only a phone standing next to the box can open a verified incident. Only a responder can close one.',
   },
 ]
 
+const LINE = { fill: 'none', stroke: 'var(--color-ink-3)', strokeWidth: 1.25, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+const LINK = { stroke: 'var(--color-line-strong)', strokeWidth: 1, strokeDasharray: '2 4', fill: 'none' }
+const LABEL = { fontFamily: 'var(--font-sans)', fontSize: 11, fill: 'var(--color-ink-3)', textAnchor: 'middle' as const }
+const NUMBER = { fontFamily: 'var(--font-display)', fontSize: 12, fill: 'var(--color-ink-4)', textAnchor: 'middle' as const }
+
+/** The whole path in one drawing: phone, three boxes, edge server, responder screen. Numerals tie each stage to its line. */
+function Journey() {
+  return (
+    <svg viewBox="0 0 640 220" className="w-full h-auto" role="img" aria-label="A phone reports to a node, the report hops across three nodes to a gateway, an edge server catches it, and a responder sees it on a map.">
+      <g {...NUMBER}>
+        <text x={78} y={40}>1</text>
+        <text x={210} y={40}>2</text>
+        <text x={384} y={40}>3</text>
+        <text x={531} y={40}>4</text>
+      </g>
+
+      {/* phone */}
+      <rect x={20} y={80} width={32} height={62} rx={6} {...LINE} />
+      <rect x={25} y={88} width={22} height={44} rx={1.5} fill="var(--color-raised)" />
+      <path d="M64 101 a11 11 0 0 1 0 20" stroke="var(--color-signal)" strokeWidth={1.25} fill="none" strokeLinecap="round" opacity={0.55} />
+      <path d="M72 93 a19 19 0 0 1 0 36" stroke="var(--color-signal)" strokeWidth={1.25} fill="none" strokeLinecap="round" />
+      <text x={36} y={166} {...LABEL}>phone</text>
+
+      {/* mesh: gym, science, hub */}
+      <line x1={120} y1={118} x2={210} y2={96} {...LINK} />
+      <line x1={210} y1={96} x2={300} y2={116} {...LINK} />
+      <line x1={312} y1={116} x2={350} y2={112} {...LINK} />
+      <line x1={246} y1={104} x2={268} y2={109} stroke="var(--color-signal)" strokeWidth={2} strokeLinecap="round" />
+      <circle cx={120} cy={118} r={6} fill="var(--color-alarm)" stroke="rgba(255,255,255,0.2)" />
+      <circle cx={210} cy={96} r={6} fill="var(--color-ink-2)" stroke="rgba(255,255,255,0.2)" />
+      <rect x={294} y={110} width={12} height={12} rx={2} fill="var(--color-ink-2)" stroke="rgba(255,255,255,0.2)" />
+      <text x={120} y={150} {...LABEL}>gym</text>
+      <text x={210} y={80} {...LABEL}>science</text>
+      <text x={300} y={150} {...LABEL}>hub, gateway</text>
+
+      {/* edge server */}
+      <rect x={352} y={92} width={64} height={40} rx={4} {...LINE} />
+      <line x1={362} y1={106} x2={406} y2={106} stroke="var(--color-line-strong)" strokeWidth={1} />
+      <line x1={362} y1={118} x2={406} y2={118} stroke="var(--color-line-strong)" strokeWidth={1} />
+      <text x={384} y={166} {...LABEL}>edge server</text>
+      <line x1={418} y1={112} x2={454} y2={112} {...LINK} />
+
+      {/* responder screen */}
+      <rect x={456} y={72} width={150} height={84} rx={4} {...LINE} />
+      <g stroke="var(--color-line-faint)" strokeWidth={1}>
+        <line x1={456} y1={100} x2={606} y2={100} />
+        <line x1={456} y1={128} x2={606} y2={128} />
+        <line x1={506} y1={72} x2={506} y2={156} />
+        <line x1={556} y1={72} x2={556} y2={156} />
+      </g>
+      <circle cx={531} cy={114} r={5} fill="var(--color-alarm)" />
+      <circle cx={531} cy={114} r={11} fill="none" stroke="var(--color-alarm)" opacity={0.35} />
+      <text x={544} y={118} fontFamily="var(--font-mono)" fontSize={10} fill="var(--color-ink)">SN-7K3F</text>
+      <text x={531} y={180} {...LABEL}>responder</text>
+    </svg>
+  )
+}
+
 export function Steps() {
   return (
-    <section id="how" className="py-16 md:py-24 scroll-mt-14" aria-labelledby="how-title">
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
-        <h2 id="how-title" className="display-h1 text-2xl text-ink">How a report gets out</h2>
-        <p className="font-mono text-2xs text-ink-3">4 steps · none of them need the internet</p>
-      </div>
-      <ol className="mt-8 md:mt-10 divide-y divide-line border-y border-line">
-        {STEPS.map((s) => (
-          <li key={s.n} className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 py-6 md:py-7 items-center">
-            <div className={clsx('flex gap-5 min-w-0', s.textCols === 7 ? 'md:col-span-7' : 'md:col-span-8', s.visualFirst && 'md:order-2')}>
-              <span className="display-hero text-2xl text-ink-4 leading-none tabular-nums w-8 shrink-0" aria-hidden>{s.n}</span>
-              <div className="min-w-0 max-w-[56ch]">
+    <section id="how" className={clsx(WRAP, 'pt-section-sm md:pt-section scroll-mt-16')} aria-labelledby="how-title">
+      <h2 id="how-title" className="display-h1 text-xl md:text-2xl text-ink">How a report gets out</h2>
+      <div className="mt-12 md:mt-16 grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-16 lg:items-center">
+        <ol className="lg:col-span-5 space-y-8 max-w-[44ch]">
+          {STEPS.map((s) => (
+            <li key={s.n} className="grid grid-cols-[2rem_1fr] gap-x-2">
+              <span className="display-h2 text-lg text-ink-4 tabular-nums" aria-hidden>{s.n}</span>
+              <div className="min-w-0">
                 <h3 className="display-h2 text-lg text-ink">{s.title}</h3>
-                <p className="mt-2 text-base text-ink-2">{s.body}</p>
+                <p className="mt-1.5 text-base text-ink-2">{s.body}</p>
               </div>
-            </div>
-            <div className={clsx('min-w-0', s.textCols === 7 ? 'md:col-span-5' : 'md:col-span-4', s.visualFirst ? 'md:order-1 md:justify-self-start' : 'md:justify-self-end')}>
-              <div className="hairline rounded-md bg-surface p-3 w-full max-w-[300px]">
-                {s.visual}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ol>
+            </li>
+          ))}
+        </ol>
+        <div className="lg:col-span-7 min-w-0 hidden md:block">
+          <Journey />
+        </div>
+      </div>
     </section>
   )
 }

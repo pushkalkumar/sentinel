@@ -208,11 +208,11 @@ export function decisionAt(t: number): HeroDecision {
 // ---- feed -------------------------------------------------------------------
 const FEED: FeedLine[] = [
   { id: 'f0', atMs: 300, clock: simClock(300), label: 'telemetry', detail: '8 of 8 nodes', tone: 'ink' },
-  { id: 'f1', atMs: T_SMOKE - 1_200, clock: simClock(T_SMOKE - 1_200), label: 'band', detail: '→ Sensitive · field', tone: 'warn' },
-  { id: 'f2', atMs: T_SMOKE, clock: simClock(T_SMOKE), label: 'band', detail: '→ Unhealthy · field', tone: 'alarm' },
-  { id: 'f3', atMs: T_FIRE, clock: simClock(T_FIRE), label: 'LOCAL_FIRE', detail: 'gym · rest flat', tone: 'alarm' },
+  { id: 'f1', atMs: T_SMOKE - 1_200, clock: simClock(T_SMOKE - 1_200), label: 'band', detail: '→ Sensitive, field', tone: 'warn' },
+  { id: 'f2', atMs: T_SMOKE, clock: simClock(T_SMOKE), label: 'band', detail: '→ Unhealthy, field', tone: 'alarm' },
+  { id: 'f3', atMs: T_FIRE, clock: simClock(T_FIRE), label: 'LOCAL_FIRE', detail: 'gym, rest flat', tone: 'alarm' },
   {
-    id: 'f4', atMs: T_DELIVERED, clock: simClock(T_DELIVERED), label: INCIDENT_CODE, detail: 'Trapped · 2', tone: 'signal',
+    id: 'f4', atMs: T_DELIVERED, clock: simClock(T_DELIVERED), label: INCIDENT_CODE, detail: 'Trapped, 2', tone: 'signal',
     sub: { path: 'gym → science → hub', trust: 'verified' },
   },
   { id: 'f5', atMs: T_RESOLVED, clock: simClock(T_RESOLVED), label: INCIDENT_CODE, detail: 'Resolved', tone: 'ok' },

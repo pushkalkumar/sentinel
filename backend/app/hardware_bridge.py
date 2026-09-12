@@ -101,6 +101,7 @@ class Backend:
         self.client = httpx.Client(base_url=self.base_url, timeout=HTTP_TIMEOUT_S)
         self._sim: SimClock | None = None
         self._sim_polled_at = -SIM_STATE_MAX_AGE_S
+        self._backend_seen = False
 
     def _reset(self) -> None:
         try:
@@ -130,8 +131,10 @@ class Backend:
             data = self.client.get("/api/sim/state").json().get("data") or {}
         except (httpx.HTTPError, ValueError) as exc:
             log.warning("GET /api/sim/state failed: %s", exc)
+            self._backend_seen = False
             return
         self._sim_polled_at = time.monotonic()
+        self._backend_seen = True
         if not (data.get("connected") and data.get("sim_ts")):
             self._sim = None
             return
@@ -139,9 +142,11 @@ class Backend:
                              speed=float(data.get("speed") or 1), playing=bool(data.get("playing")),
                              seen_at=self._sim_polled_at)
 
-    def reading_ts(self) -> tuple[str, str]:
-        """(ts, clock_name). Sim clock while the simulator is connected, extrapolated through short backend
-        outages (uvicorn --reload windows); wall clock only when the simulator is really gone."""
+    def reading_ts(self) -> tuple[str, str] | None:
+        """(ts, clock_name), or None when no safe timestamp exists. Sim clock while the simulator is connected,
+        extrapolated through short backend outages (uvicorn --reload windows); wall clock only when the backend
+        answers and says the simulator is gone. A wall-clock reading next to live sim readings would flap the
+        site band, so with the backend unreachable and no recent sim clock the reading is dropped instead."""
         now = time.monotonic()
         if now - self._sim_polled_at >= SIM_STATE_MAX_AGE_S:
             self._refresh_sim()
@@ -151,7 +156,9 @@ class Backend:
             elapsed = (now - sim.seen_at) * sim.speed if sim.playing else 0.0
             ts = sim.ts + timedelta(seconds=elapsed)
             return ts.isoformat(timespec="milliseconds").replace("+00:00", "Z"), "sim"
-        return wall_now_iso(), "wall"
+        if self._backend_seen:
+            return wall_now_iso(), "wall"
+        return None
 
 
 def telemetry_reading(msg: dict, ts: str) -> dict:
@@ -198,7 +205,11 @@ def handle_line(line: str, backend: Backend) -> None:
         return
 
     if msg.get("node") == FIELD_NODE and "seq" in msg:
-        ts, clock = backend.reading_ts()
+        stamped = backend.reading_ts()
+        if stamped is None:
+            log.warning("telemetry seq=%s dropped: backend unreachable, no sim clock to stamp it with", msg.get("seq"))
+            return
+        ts, clock = stamped
         data = backend.post("/api/ingest/telemetry", telemetry_reading(msg, ts))
         outcome = "unreachable" if data is None else (
             "accepted" if data.get("accepted") else

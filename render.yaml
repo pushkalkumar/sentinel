@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sentinel-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./deploy/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: SENTINEL_SECRET
+        generateValue: true
+      - key: SENTINEL_RESET_DB
+        value: "1"

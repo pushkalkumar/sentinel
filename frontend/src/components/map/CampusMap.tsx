@@ -1,7 +1,10 @@
-// OWNER: fe-admin
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import type { IncidentCode, MeshLogEntry, Node, NodeId, Zone } from '@/lib/types'
-import { BAND_META } from '@/lib/bands'
+import { CampusGround } from './CampusGround'
+import { FloorplanGround } from './FloorplanGround'
+import { HopLayer } from './HopLayer'
+import { NodeDot } from './NodeDot'
 
 // Frozen interface (BUILD_PLAN §1.3). Add optional props only via INTEGRATION_NOTES.
 export interface CampusMapProps {
@@ -14,23 +17,56 @@ export interface CampusMapProps {
   className?: string;
 }
 
-const DOT_R = 6
-const OFFLINE_STROKE = '#46423D'
-const ALARM = '#FF4A3D'
+const FLASH_MS = 160
+const NO_HOPS: MeshLogEntry[] = []
 
-/** Minimal renderer: dashed hairline links, 12px band-coloured dots, squares for gateways, mono labels. */
-export function CampusMap({ nodes, links, mode, selectedId = null, onSelect, ground, compact = false, className }: CampusMapProps) {
-  const byId = new Map(nodes.map((n) => [n.id, n]))
+/** DESIGN §6.5 / §6.6: static footprints, dashed hairline links, band-coloured dots, signal hop dashes. */
+export function CampusMap({
+  nodes, links, zones, mode, selectedId = null, onSelect, hops = NO_HOPS, highlightCode, ground, compact = false, className,
+}: CampusMapProps) {
+  const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
+  const [flashes, setFlashes] = useState<Record<NodeId, number>>({})
+  const timers = useRef<number[]>([])
+
+  useEffect(() => () => { for (const t of timers.current) window.clearTimeout(t) }, [])
+
+  const onLanded = useCallback((id: NodeId) => {
+    setFlashes((f) => ({ ...f, [id]: Date.now() }))
+    timers.current.push(window.setTimeout(() => {
+      setFlashes((f) => {
+        const { [id]: _gone, ...rest } = f
+        return rest
+      })
+    }, FLASH_MS))
+  }, [])
+
+  // The incident's origin node comes from the hop log payload (CONTRACT §3.7).
+  const highlightNode = useMemo(() => {
+    if (!highlightCode) return null
+    for (let i = hops.length - 1; i >= 0; i -= 1) {
+      if (hops[i].payload?.code === highlightCode) return hops[i].origin_node
+    }
+    return null
+  }, [hops, highlightCode])
+
   return (
     <svg
       viewBox="0 0 1000 700"
-      className={clsx('w-full h-auto max-w-full', className)}
+      className={clsx('w-full h-auto max-w-full block', className)}
       role="img"
       aria-label={`${ground === 'campus' ? 'Campus' : 'Floor plan'} map, ${mode} mode`}
       data-ground-layer={ground}
       data-compact={compact || undefined}
     >
-      <g stroke="var(--color-line)" strokeDasharray="2 4" strokeWidth={1} fill="none">
+      {ground === 'campus' ? <CampusGround /> : <FloorplanGround />}
+      {zones && zones.length > 0 && (
+        <g fill="none" stroke="var(--color-line-faint)" strokeWidth={1} strokeDasharray="6 6" aria-hidden>
+          {zones.map((z) => (
+            <polygon key={z.id} points={z.map_poly.map(([x, y]) => `${x},${y}`).join(' ')} />
+          ))}
+        </g>
+      )}
+      <g stroke="var(--color-line)" strokeDasharray="2 4" strokeWidth={1} fill="none" aria-hidden>
         {links.map(([a, b]) => {
           const na = byId.get(a)
           const nb = byId.get(b)
@@ -38,48 +74,19 @@ export function CampusMap({ nodes, links, mode, selectedId = null, onSelect, gro
           return <line key={`${a}-${b}`} x1={na.map_x} y1={na.map_y} x2={nb.map_x} y2={nb.map_y} />
         })}
       </g>
-      {nodes.map((n) => {
-        const fire = n.open_alerts.some((a) => a.kind === 'LOCAL_FIRE')
-        const offline = n.status === 'offline'
-        const fill = fire ? ALARM : n.band ? BAND_META[n.band].color : OFFLINE_STROKE
-        const selected = selectedId === n.id
-        const common = {
-          fill: offline ? 'none' : fill,
-          stroke: offline ? OFFLINE_STROKE : 'rgba(255,255,255,0.2)',
-          strokeWidth: offline ? 1.5 : 1,
-        }
-        return (
-          <g
-            key={n.id}
-            transform={`translate(${n.map_x} ${n.map_y})`}
-            onClick={onSelect ? () => onSelect(n.id) : undefined}
-            className={clsx(onSelect && 'cursor-pointer')}
-            role={onSelect ? 'button' : undefined}
-            tabIndex={onSelect ? 0 : undefined}
-            onKeyDown={onSelect ? (e) => { if (e.key === 'Enter') onSelect(n.id) } : undefined}
-            aria-label={n.label}
-          >
-            {selected && <circle r={10} fill="none" stroke="var(--color-signal)" strokeWidth={1} />}
-            {n.is_gateway
-              ? <rect x={-DOT_R} y={-DOT_R} width={DOT_R * 2} height={DOT_R * 2} rx={2} {...common} />
-              : <circle r={DOT_R} {...common} />}
-            <text
-              x={DOT_R + 8}
-              y={4}
-              fontFamily="var(--font-mono)"
-              fontSize={11}
-              fill={fire ? ALARM : offline ? 'var(--color-ink-4)' : 'var(--color-ink-2)'}
-            >
-              {n.id}
-            </text>
-            {mode === 'air' && n.latest && (
-              <text x={DOT_R + 8} y={18} fontFamily="var(--font-mono)" fontSize={11} fill={fill}>
-                {Math.round(n.latest.pm25)}
-              </text>
-            )}
-          </g>
-        )
-      })}
+      <HopLayer hops={hops} byId={byId} onLanded={onLanded} />
+      {nodes.map((n) => (
+        <NodeDot
+          key={n.id}
+          node={n}
+          mode={mode}
+          selected={selectedId === n.id}
+          highlighted={highlightNode === n.id}
+          flash={n.id in flashes}
+          compact={compact}
+          onSelect={onSelect}
+        />
+      ))}
     </svg>
   )
 }

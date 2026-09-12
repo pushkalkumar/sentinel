@@ -53,6 +53,8 @@ def load_nodes(topology_path: Path) -> list[NodeInfo]:
     nodes: list[NodeInfo] = []
     for site in topology["sites"]:
         for raw in site["nodes"]:
+            if raw.get("hardware"):   # real boards (hardware/xenon) report through the serial bridge, not here
+                continue
             nodes.append(NodeInfo(
                 id=raw["id"], label=raw["label"], site_id=site["id"], site_kind=site["kind"],
                 indoor=bool(raw["indoor"]), is_gateway=bool(raw["is_gateway"]),

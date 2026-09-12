@@ -21,6 +21,8 @@ log = logging.getLogger("sentinel.seed")
 TOPOLOGY_PATH = Path(__file__).resolve().parents[2] / "shared" / "topology.json"
 DEMO_PASSWORD = "sentinel"
 BLOCKED_DEVICE_FP = "demo-blocked-device"
+SIM_FW_VERSION = "0.9.2-sim"
+HARDWARE_FW_VERSION = "xenon-ble-0.1"   # hardware/xenon firmware; real boards, BLE in place of LoRa
 
 TENANTS = [
     {"id": 1, "name": "Roosevelt High School", "type": "school", "policy_pack": DEFAULT_POLICY},
@@ -109,6 +111,17 @@ def _tenant_rows() -> list[Tenant]:
     return [Tenant(**t) for t in TENANTS]
 
 
+def _node_row(site_id: int, n: dict) -> Node:
+    hardware = bool(n.get("hardware"))
+    return Node(
+        id=n["id"], site_id=site_id, zone_id=n["zone_id"], label=n["label"],
+        lat=n["lat"], lng=n["lng"], map_x=n["map_x"], map_y=n["map_y"],
+        floor=n.get("floor"), indoor=n["indoor"], is_gateway=n["is_gateway"],
+        neighbours=n["neighbours"], fw_version=HARDWARE_FW_VERSION if hardware else SIM_FW_VERSION, last_seen=None,
+        battery_pct=100.0 if n["indoor"] else 92.0, rssi=-70,
+    )
+
+
 def _site_rows(topology: dict) -> tuple[list[Site], list[Zone], list[Node], dict[int, int]]:
     sites: list[Site] = []
     zones: list[Zone] = []
@@ -123,15 +136,22 @@ def _site_rows(topology: dict) -> tuple[list[Site], list[Zone], list[Node], dict
         for z in s["zones"]:
             zones.append(Zone(id=z["id"], site_id=s["id"], name=z["name"], geom=z["geom"], map_poly=z["map_poly"]))
             zone_tenant[z["id"]] = s["tenant_id"]
-        for n in s["nodes"]:
-            nodes.append(Node(
-                id=n["id"], site_id=s["id"], zone_id=n["zone_id"], label=n["label"],
-                lat=n["lat"], lng=n["lng"], map_x=n["map_x"], map_y=n["map_y"],
-                floor=n.get("floor"), indoor=n["indoor"], is_gateway=n["is_gateway"],
-                neighbours=n["neighbours"], fw_version="0.9.2-sim", last_seen=None,
-                battery_pct=100.0 if n["indoor"] else 92.0, rssi=-70,
-            ))
+        nodes.extend(_node_row(s["id"], n) for n in s["nodes"])
     return sites, zones, nodes, zone_tenant
+
+
+async def ensure_hardware_nodes(session: AsyncSession, topology: dict | None = None) -> int:
+    """Insert topology nodes flagged "hardware" that an already-seeded database lacks (the Xenon demo boards
+    were added after the first deploys). Returns how many were inserted."""
+    topology = topology or load_topology()
+    existing = set((await session.execute(select(Node.id))).scalars().all())
+    missing = [_node_row(s["id"], n) for s in topology["sites"] for n in s["nodes"]
+               if n.get("hardware") and n["id"] not in existing]
+    if missing:
+        session.add_all(missing)
+        await session.commit()
+        log.info("added %d hardware node(s): %s", len(missing), ", ".join(n.id for n in missing))
+    return len(missing)
 
 
 def _user_rows() -> list[User]:
@@ -172,6 +192,7 @@ async def seed_if_empty(session: AsyncSession) -> bool:
     """Returns True when seed data was written."""
     count = (await session.execute(select(func.count()).select_from(Tenant))).scalar_one()
     if count:
+        await ensure_hardware_nodes(session)
         return False
     seed_time = now_iso()
     topology = load_topology()

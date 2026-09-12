@@ -1,0 +1,2 @@
+// OWNER: fe-novel
+export {}

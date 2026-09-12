@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { Grain } from '@/components/shell/Grain'
 import { Button } from '@/components/ui/Button'
@@ -27,7 +27,6 @@ export default function Login() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const setAuth = useSessionStore((s) => s.setAuth)
-  const role = useSessionStore((s) => s.role)
 
   const next = safeNext(params.get('next'))
   const denied = params.get('denied') === '1'
@@ -39,10 +38,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  // Already signed in with a desktop role and no explicit target: go home.
-  useEffect(() => {
-    if (!next && (role === 'admin' || role === 'responder')) navigate(HOME[role], { replace: true })
-  }, [role, next, navigate])
+  // Always show the form: switching from the admin to the responder account happens here.
 
   const switchTab = (t: Tab) => {
     setTab(t)

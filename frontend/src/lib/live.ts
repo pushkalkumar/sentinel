@@ -21,12 +21,15 @@ export interface ConnectLiveOpts {
 }
 
 function liveUrl(opts: ConnectLiveOpts): string {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws'
+  const base = (import.meta.env.VITE_API_BASE ?? '').replace(/\/$/, '')
+  const host = base ? base.replace(/^https?:\/\//, '') : location.host
+  const secure = base ? base.startsWith('https') : location.protocol === 'https:'
+  const proto = secure ? 'wss' : 'ws'
   const sp = new URLSearchParams()
   if (opts.token) sp.set('token', opts.token)
   if (opts.deviceFp) sp.set('device_fp', opts.deviceFp)
   const q = sp.toString()
-  return `${proto}://${location.host}/live${q ? `?${q}` : ''}`
+  return `${proto}://${host}/live${q ? `?${q}` : ''}`
 }
 
 export function connectLive(opts: ConnectLiveOpts): () => void {

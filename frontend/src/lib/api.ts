@@ -36,7 +36,8 @@ export function errorText(e: unknown): string {
   return 'Something went wrong. Try again.'
 }
 
-const BASE = ''
+// Empty in dev (Vite proxies /api); set VITE_API_BASE for hosted builds.
+const BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/$/, '')
 
 type Query = Record<string, string | number | boolean | undefined | null>
 

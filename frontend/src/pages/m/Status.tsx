@@ -1,14 +1,115 @@
-// OWNER: fe-phone
-import { PageHeader } from '@/components/ui/PageHeader'
-import { Panel } from '@/components/ui/Panel'
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router'
+import { ArrowLeft } from 'lucide-react'
+import type { IncidentPublic } from '@/lib/types'
+import { errorText, getIncidentPublic, isApiError } from '@/lib/api'
+import { fmtWall, fmtWallZoned } from '@/lib/time'
+import { useIncidentStore } from '@/store/incidents'
+import { StatusTimeline } from '@/features/phone/StatusTimeline'
+import { FieldButton } from '@/features/phone/FieldButton'
+
+const POLL_MS = 10_000
+
+function normaliseCode(raw: string): string {
+  const c = raw.trim().toUpperCase().replace(/\s+/g, '')
+  return c.startsWith('SN-') ? c : c.startsWith('SN') ? `SN-${c.slice(2)}` : `SN-${c}`
+}
 
 export default function Status() {
+  const [params] = useSearchParams()
+  const code = normaliseCode(params.get('code') ?? '')
+  const hasCode = code.length > 3
+
+  const [incident, setIncident] = useState<IncidentPublic | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  // WS incident_event lands in the incident store; any change for our code triggers a refetch.
+  const liveUpdatedAt = useIncidentStore((s) => s.byCode[code]?.updated_at)
+  const liveStatus = useIncidentStore((s) => s.byCode[code]?.status)
+
+  const load = useCallback(async (manual = false) => {
+    if (!hasCode) return
+    if (manual) setRefreshing(true)
+    try {
+      setIncident(await getIncidentPublic(code))
+      setError(null)
+    } catch (e) {
+      if (isApiError(e, 'NOT_FOUND')) setError(`No report with code ${code}. Check the letters: the alphabet has no zero, no letter O, no 1, no I.`)
+      else setError(errorText(e))
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [code, hasCode])
+
+  useEffect(() => { void load() }, [load, liveUpdatedAt])
+
+  useEffect(() => {
+    if (!hasCode) return
+    const id = setInterval(() => { void load() }, POLL_MS)
+    return () => clearInterval(id)
+  }, [hasCode, load])
+
+  if (!hasCode) {
+    return (
+      <div className="flex flex-col gap-4 pt-6 font-field">
+        <h1 className="text-[28px] font-bold leading-tight text-f-ink">No code given</h1>
+        <p className="text-[16px] text-f-ink-2">Go back and enter the code from your report.</p>
+        <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 text-[18px] font-semibold text-f-signal">
+          <ArrowLeft size={20} strokeWidth={1.5} aria-hidden /> Back
+        </Link>
+      </div>
+    )
+  }
+
+  const status = incident ? (liveStatus ?? incident.status) : null
+  const messages = incident?.timeline.filter((e) => e.action === 'message') ?? []
+
   return (
-    <>
-      <PageHeader title="/m/status" />
-      <Panel title="Status">
-        <p className="text-sm text-ink-2">stub</p>
-      </Panel>
-    </>
+    <div className="flex flex-col gap-6 pt-3 font-field">
+      <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 -ml-1 px-1 text-[16px] text-f-ink-2 self-start">
+        <ArrowLeft size={20} strokeWidth={1.5} aria-hidden /> Back
+      </Link>
+
+      <h1 className="font-field-mono text-[40px] font-bold leading-none text-f-ink tabular-nums">{code}</h1>
+
+      {loading && !incident && <p className="text-[16px] text-f-ink-2">Looking up your report...</p>}
+
+      {error && !incident && (
+        <p role="alert" className="text-[16px] text-f-alarm">{error}</p>
+      )}
+
+      {incident && status && (
+        <>
+          <StatusTimeline status={status} timeline={incident.timeline} />
+
+          {status === 'false' && (
+            <p className="text-[16px] text-f-alarm">A responder flagged this report as false. Find a staff member if you still need help.</p>
+          )}
+          {status === 'resolved' && (
+            <p className="text-[18px] font-semibold text-f-ink">Resolved. If you still need help, send a new report.</p>
+          )}
+
+          {messages.length > 0 && (
+            <section className="flex flex-col gap-3" aria-label="Messages from responders">
+              {messages.map((m, i) => (
+                <blockquote key={`${m.at}-${i}`} className="rounded-md bg-f-surface border border-f-line px-4 py-3">
+                  <p className="text-[18px] text-f-ink leading-snug">"{m.note}"</p>
+                  <footer className="mt-1 font-field-mono text-[14px] text-f-ink-2 tabular-nums">
+                    Responder · <time dateTime={m.at} title={fmtWallZoned(m.at)}>{fmtWall(m.at)}</time>
+                  </footer>
+                </blockquote>
+              ))}
+            </section>
+          )}
+
+          {error && <p className="text-[14px] text-f-alarm">{error}</p>}
+        </>
+      )}
+
+      <FieldButton onClick={() => void load(true)} loading={refreshing}>Refresh</FieldButton>
+    </div>
   )
 }

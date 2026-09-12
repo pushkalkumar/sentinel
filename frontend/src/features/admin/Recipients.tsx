@@ -9,6 +9,16 @@ import { DataTable, type Column } from '@/components/ui/DataTable'
 /** CONTRACT §3.5: `^\+[1-9]\d{7,14}$`. */
 const E164 = /^\+[1-9]\d{7,14}$/
 
+/** A principal types "206 555 0100"; normalise common US shapes to E.164 before the POST (ux item 35). */
+function normalisePhone(raw: string): string {
+  const trimmed = raw.trim()
+  if (trimmed.startsWith('+')) return `+${trimmed.slice(1).replace(/\D/g, '')}`
+  const digits = trimmed.replace(/\D/g, '')
+  if (digits.length === 10) return `+1${digits}`
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`
+  return digits ? `+${digits}` : ''
+}
+
 const COLUMNS: Column<Recipient>[] = [
   { key: 'zone_name', header: 'Zone' },
   { key: 'phone_e164', header: 'Phone', mono: true },
@@ -43,8 +53,8 @@ export function Recipients() {
 
   const submit = async () => {
     if (zoneId === null) return
-    const p = phone.trim()
-    if (!E164.test(p)) { setFormError('Use the international format, like +12065550123.'); return }
+    const p = normalisePhone(phone)
+    if (!E164.test(p)) { setFormError('Enter a mobile number, like 206 555 0123.'); return }
     if (!label.trim()) { setFormError('Add a label so staff know who this is.'); return }
     setSaving(true)
     setFormError(null)
@@ -80,8 +90,14 @@ export function Recipients() {
         {zones.length === 0 && <li className="text-sm text-ink-3">No zones on this site.</li>}
       </ul>
       <form className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3 items-end" onSubmit={(e) => { e.preventDefault(); submit() }}>
-        <Input label="Phone (E.164)" placeholder="+12065550123" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} error={formError} />
-        <Input label="Label" placeholder="Parent · 4B" value={label} onChange={(e) => setLabel(e.target.value)} />
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <label htmlFor="rc-phone" className="text-[13px] text-ink-2">Mobile number</label>
+          <Input id="rc-phone" placeholder="206 555 0123" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} error={formError} />
+        </div>
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <label htmlFor="rc-label" className="text-[13px] text-ink-2">Who is this</label>
+          <Input id="rc-label" placeholder="Parent, 4B" value={label} onChange={(e) => setLabel(e.target.value)} />
+        </div>
         <Button type="submit" variant="secondary" loading={saving} disabled={zoneId === null}>Add recipient</Button>
       </form>
       <DataTable

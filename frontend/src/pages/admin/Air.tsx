@@ -51,10 +51,10 @@ export default function Air() {
         right={<Segmented label="Range" options={rangeOptions} value={range} onChange={setRange} />}
       />
       <div className="flex flex-col gap-4">
-        <Panel title="PM2.5" meta={data ? `µg/m³, ${data.step}-min steps` : 'µg/m³'}>
+        <Panel title="PM2.5" meta={data ? `µg/m³, ${data.step}-min steps, hairlines are EPA band edges` : 'µg/m³'}>
           {loading && !data && <Skeleton className="w-64" />}
           {error && !data && <p className="text-sm text-alarm">{error}</p>}
-          {data && <AirChart data={data} selected={selected} onSelect={selectNode} />}
+          {data && <AirChart data={data} selected={selected} onSelect={selectNode} rangeMinutes={Number(range)} />}
         </Panel>
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-4 items-start">
           <Panel title="Band history" meta={data ? `last ${data.minutes} min` : undefined}>

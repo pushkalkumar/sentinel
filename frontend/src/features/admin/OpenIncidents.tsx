@@ -34,6 +34,8 @@ export function OpenIncidents() {
         </li>
       ))}
       {hidden > 0 && <li className="text-xs text-ink-4">{hidden} more in the responder queue</li>}
+      {/* Say where the rule bites, not only on the landing page (judge item 15). */}
+      <li className="text-xs text-ink-4">Read-only. Only a responder can close an incident.</li>
     </ul>
   )
 }

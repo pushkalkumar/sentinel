@@ -31,7 +31,7 @@ export function SoundToggle({ className }: SoundToggleProps) {
       )}
     >
       <Icon size={16} strokeWidth={1.5} aria-hidden />
-      <span>{on ? 'Tone on' : 'Tone off'}</span>
+      <span>{on ? 'Sound on' : 'Sound off'}</span>
     </button>
   )
 }

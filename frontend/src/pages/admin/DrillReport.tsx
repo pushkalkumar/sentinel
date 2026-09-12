@@ -153,7 +153,7 @@ function ReportBody({ report }: { report: DrillReportT }) {
               <tr>
                 <th className={TH}>Student</th>
                 <th className={TH}>Class</th>
-                <th className={TH}>Last muster point</th>
+                <th className={TH}>Class mustered at</th>
               </tr>
             </thead>
             <tbody>

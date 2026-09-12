@@ -92,25 +92,32 @@ export default function Login() {
               That page needs a {next?.startsWith('/responder') ? 'responder' : 'different'} account. Sign in with one that has access.
             </p>
           )}
-          <Input
-            label="Email"
-            type="email"
-            name="email"
-            autoComplete="username"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoFocus
-          />
-          <Input
-            label="Password"
-            type="password"
-            name="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={error}
-            hint="Demo password: sentinel"
-          />
+          {/* Sentence-case labels: a sign-in form is not two signage labels (design item 25). */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="login-email" className="text-[13px] text-ink-2">Email</label>
+            <Input
+              id="login-email"
+              type="email"
+              name="email"
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="login-password" className="text-[13px] text-ink-2">Password</label>
+            <Input
+              id="login-password"
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={error}
+              hint="Demo password: sentinel"
+              autoFocus
+            />
+          </div>
           <Button type="submit" variant="primary" loading={busy} className="w-full mt-2">
             {tab === 'admin' ? 'Open admin console' : 'Open responder console'}
           </Button>

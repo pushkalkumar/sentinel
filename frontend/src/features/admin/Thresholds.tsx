@@ -12,10 +12,10 @@ type NumericKey = 'pm_rise' | 'temp_rise' | 'gas_delta' | 'regional_factor' | 'h
 
 /** CONTRACT §3.5 validation ranges, checked client-side before the PUT. */
 const FIELDS: { key: NumericKey; label: string; hint: string; min: number; max: number; step: number }[] = [
-  { key: 'pm_rise', label: 'PM2.5 rise in 2 min', hint: 'Fire branch, µg/m³. 5 to 200.', min: 5, max: 200, step: 1 },
-  { key: 'temp_rise', label: 'Temperature rise (°C in 2 min)', hint: 'Fire branch. 0.5 to 20.', min: 0.5, max: 20, step: 0.1 },
-  { key: 'gas_delta', label: 'MQ-2 gas delta (raw)', hint: 'Fire branch. 20 to 1000.', min: 20, max: 1000, step: 10 },
-  { key: 'regional_factor', label: 'Local vs regional ratio', hint: 'Local smoke suspect when a node exceeds the regional median by this factor. 1.1 to 5.', min: 1.1, max: 5, step: 0.1 },
+  { key: 'pm_rise', label: 'PM2.5 rise in 5 min', hint: 'Fire branch, µg/m³. 5 to 200.', min: 5, max: 200, step: 1 },
+  { key: 'temp_rise', label: 'Temperature rise in 2 min', hint: 'Fire branch, °C. 0.5 to 20.', min: 0.5, max: 20, step: 0.1 },
+  { key: 'gas_delta', label: 'MQ-2 gas delta', hint: 'Fire branch, raw counts over baseline. 20 to 1000.', min: 20, max: 1000, step: 10 },
+  { key: 'regional_factor', label: 'Local vs regional ratio', hint: 'Used by both the fire and the smoke-suspect branches. 1.1 to 5.', min: 1.1, max: 5, step: 0.1 },
   { key: 'hazardous_pm25', label: 'Hazardous SMS threshold', hint: 'PM2.5 in µg/m³. Fan-out to registered phones above this level.', min: 50, max: 1000, step: 5 },
 ]
 
@@ -77,18 +77,21 @@ export function Thresholds() {
   return (
     <form className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); save() }}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Sentence-case field labels: the panel's one signage label is its title (DESIGN_V2 §2.2). */}
         {FIELDS.map((f) => (
-          <Input
-            key={f.key}
-            label={f.label}
-            hint={f.hint}
-            error={errors[f.key]}
-            type="number"
-            inputMode="decimal"
-            step={f.step}
-            value={draft[f.key]}
-            onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
-          />
+          <div key={f.key} className="flex flex-col gap-1.5 min-w-0">
+            <label htmlFor={`th-${f.key}`} className="text-[13px] text-ink-2">{f.label}</label>
+            <Input
+              id={`th-${f.key}`}
+              hint={f.hint}
+              error={errors[f.key]}
+              type="number"
+              inputMode="decimal"
+              step={f.step}
+              value={draft[f.key]}
+              onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
+            />
+          </div>
         ))}
       </div>
       <div className="flex items-center gap-3">

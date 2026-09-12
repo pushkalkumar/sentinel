@@ -21,8 +21,9 @@ export function SafetyFooter({ className, repoUrl, devpostUrl }: SafetyFooterPro
         <p className="text-base text-ink max-w-[52ch]">
           Need help right now? Call 911. Sentinel does not replace 911 or code-required smoke detection.
         </p>
-        <p className="text-xs text-ink-4 max-w-[76ch]">
-          Hardware designed, not fabricated, per organizer guidance. In this demo the sensors are 8 virtual nodes, the mesh radio is local UDP and SMS is disabled; the alert logic, trust score and store-and-forward are real. Schematic, BOM and power budget are in the submission.
+        {/* DESIGN_V2 §2.4: one honesty line, quiet but readable. ink-4 on canvas is 1.9:1 and unreadable on a projector. */}
+        <p className="text-[13px] leading-5 text-ink-3 max-w-[76ch]">
+          What is real today: the alert rules, the trust score and the store-and-forward edge server. Simulated: 8 virtual nodes, a mesh over local UDP, SMS disabled. Hardware designed, not fabricated, per organizer guidance; schematic, BOM and power budget are in the submission.
         </p>
         <p className="text-xs text-ink-3 flex flex-wrap gap-x-5 gap-y-1">
           <span>Frontier Cascadia, September 2026</span>

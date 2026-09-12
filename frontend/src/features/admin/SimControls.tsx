@@ -13,6 +13,8 @@ import { fmtSim } from '@/lib/time'
 const SPEEDS: { value: `${SimSpeed}`; label: string }[] = [
   { value: '1', label: '1x' }, { value: '10', label: '10x' }, { value: '60', label: '60x' }, { value: '300', label: '300x' },
 ]
+/** The node the stage demo burns when the admin has not selected one. */
+const FIRE_DEFAULT_NODE = 'gym'
 const JUMPS = [
   { t: 'calm', label: 'Calm morning' },
   { t: 'smoke', label: 'Regional smoke' },
@@ -97,7 +99,7 @@ export function SimControls({ className }: { className?: string }) {
         onClick={() => setOpen((v) => !v)}
         className="h-9 px-3 text-sm"
       >
-        <span className="text-ink-2">{offline ? 'Scenario' : `${phase}, ${sim?.speed ?? 60}x`}</span>
+        <span className="text-ink-2">{offline ? 'Scenario' : `Scenario: ${phase}, ${sim?.speed ?? 60}x`}</span>
         <ChevronDown size={14} strokeWidth={1.5} className={clsx('text-ink-3 transition-transform duration-[160ms]', !open && 'rotate-180')} aria-hidden />
       </Button>
       {open && (
@@ -130,16 +132,17 @@ export function SimControls({ className }: { className?: string }) {
             </MenuRow>
           ))}
           <div className="my-1 h-px bg-line" aria-hidden />
+          {/* Never a dead end: with nothing selected the row starts a fire at the gym, the demo's node. */}
           <MenuRow
             tone="danger"
-            disabled={offline || !selected}
+            disabled={offline}
             loading={busy === 'fire'}
             onClick={() => {
-              if (!selected) return
-              send('fire', { action: 'trigger_fire', node_id: selected }).then(() => { toast(`Fire curve started at ${selected}`); setOpen(false) })
+              const target = selected ?? FIRE_DEFAULT_NODE
+              send('fire', { action: 'trigger_fire', node_id: target }).then(() => { toast(`Fire curve started at ${target}`); setOpen(false) })
             }}
           >
-            {selected ? `Start a fire at ${selected}` : 'Start a fire (select a node first)'}
+            {`Start a fire at ${selected ?? FIRE_DEFAULT_NODE}`}
           </MenuRow>
           <MenuRow disabled={offline} loading={busy === 'clear'} onClick={() => send('clear', { action: 'clear' })}>
             Clear overrides

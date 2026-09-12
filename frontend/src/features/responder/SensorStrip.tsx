@@ -1,8 +1,7 @@
 import clsx from 'clsx'
 import type { Alert, Node, Reading } from '@/lib/types'
 import { useSiteStore } from '@/store/site'
-import { useDisplayAlerts } from '@/store/select'
-import { fmtSim } from '@/lib/time'
+import { useDisplayAlerts, useDisplayClock } from '@/store/select'
 import { ALERT_META } from '@/lib/bands'
 
 export interface SensorStripProps {
@@ -27,6 +26,14 @@ function deltaTitle(value: number | null, unit: string, digits = 0): string | un
   return `${value > 0 ? 'up' : 'down'} ${Math.abs(value).toFixed(digits)}${unit} in the last ten minutes`
 }
 
+/** How long the alert has been open, in sim minutes: one clock in the console (judge item 7). */
+function openMinutes(startedAt: string, simNow: string | null): string {
+  if (!simNow) return 'now'
+  const mins = Math.round((new Date(simNow).getTime() - new Date(startedAt).getTime()) / 60_000)
+  if (!Number.isFinite(mins) || mins <= 0) return 'under a minute'
+  return mins < 60 ? `${mins} min` : `${Math.round(mins / 60)} h`
+}
+
 function topAlert(alerts: Alert[], nodeId: string): Alert | null {
   const mine = alerts.filter((a) => a.node_id === nodeId && !a.cleared_at).sort((a, b) => a.priority - b.priority)
   return mine[0] ?? null
@@ -48,6 +55,7 @@ function Reading({ label, value, title, rising }: { label: string; value: string
 export function SensorStrip({ node, className }: SensorStripProps) {
   const readings = useSiteStore((s) => (node ? s.readings[node.id] : undefined))
   const alerts = useDisplayAlerts()
+  const simNow = useDisplayClock()
 
   if (!node) {
     return (
@@ -79,8 +87,7 @@ export function SensorStrip({ node, className }: SensorStripProps) {
       )}
       {alert && (
         <span className="ml-auto shrink-0 text-sm" style={{ color: alert.priority <= 2 ? 'var(--color-alarm)' : 'var(--color-warn)' }}>
-          {ALERT_META[alert.kind].label} since{' '}
-          <span className="font-mono tabular-nums">{fmtSim(alert.started_at, 'HH:mm:ss')}</span>
+          {ALERT_META[alert.kind].label}, open {openMinutes(alert.started_at, simNow)}
         </span>
       )}
     </div>

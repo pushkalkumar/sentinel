@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { RefreshCw } from 'lucide-react'
 import type { AuditEntry } from '@/lib/types'
 import { errorText, getAudit } from '@/lib/api'
 import { useIncidentStore } from '@/store/incidents'
-import { Button } from '@/components/ui/Button'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Panel } from '@/components/ui/Panel'
 import { AuditTable } from '@/features/responder/AuditTable'
@@ -12,14 +10,14 @@ export default function Audit() {
   const [entries, setEntries] = useState<AuditEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [fetchedAt, setFetchedAt] = useState<number | null>(null)
+  const [loadedOnce, setLoadedOnce] = useState(false)
   // Any incident change (WS incident_event) means a new audit row; refetch on it.
   const byCode = useIncidentStore((s) => s.byCode)
 
   const load = useCallback(() => {
     setLoading(true)
     getAudit(200)
-      .then((r) => { setEntries(r.events); setError(null); setFetchedAt(Date.now()) })
+      .then((r) => { setEntries(r.events); setError(null); setLoadedOnce(true) })
       .catch((e) => setError(errorText(e)))
       .finally(() => setLoading(false))
   }, [])
@@ -28,13 +26,12 @@ export default function Audit() {
 
   return (
     <>
-      <PageHeader
-        title="Audit log"
-        right={<Button variant="ghost" icon={RefreshCw} onClick={load} loading={loading && entries.length > 0}>Refresh</Button>}
-      />
+      {/* No Refresh button: the socket updates the log (design item 26). */}
+      <PageHeader title="Audit log" />
       <Panel
-        title="Every action, with actor and IP"
-        meta={fetchedAt ? `${entries.length} events, newest first` : undefined}
+        title="Actions"
+        live
+        meta={loadedOnce ? `${entries.length} events, newest first` : undefined}
         padded={false}
       >
         <AuditTable entries={entries} loading={loading} error={error} />

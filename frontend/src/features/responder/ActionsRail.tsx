@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import clsx from 'clsx'
-import { Check, Flag, GitMerge, Navigation, Radio } from 'lucide-react'
+import { Check, Eye, Flag, Navigation, Radio } from 'lucide-react'
 import type { Incident, IncidentEvent, ResponderAction } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { fmtWall, fmtWallZoned } from '@/lib/time'
+import { fmtWallZoned, relative } from '@/lib/time'
 
 export interface ActionsRailProps {
   incident: Incident
@@ -46,8 +46,7 @@ export function ActionsRail({ incident: inc, canAct, weaAlertId, onAction, onDra
     const verb = closing.action === 'resolve' ? 'Resolved' : 'Flagged false'
     return (
       <p className={clsx('text-sm text-ink-2', className)}>
-        {verb} by {who} at{' '}
-        <time dateTime={closing.at} title={fmtWallZoned(closing.at)} className="font-mono text-xs">{fmtWall(closing.at)}</time>.
+        {verb} by {who} <time dateTime={closing.at} title={fmtWallZoned(closing.at)}>{relative(closing.at)}</time>.
         {' '}This cannot be undone.
       </p>
     )
@@ -79,7 +78,7 @@ export function ActionsRail({ incident: inc, canAct, weaAlertId, onAction, onDra
         <p className="text-sm text-ink-3">Only a responder can change the status. You can still message the reporter.</p>
       )}
       <div className="flex flex-wrap gap-2">
-        <Button icon={Check} disabled={!canAck} loading={busy === 'acknowledge'} onClick={() => run('acknowledge', '')}
+        <Button icon={Eye} disabled={!canAck} loading={busy === 'acknowledge'} onClick={() => run('acknowledge', '')}
           title={inc.status !== 'received' ? 'Already acknowledged' : undefined}>
           Acknowledge
         </Button>
@@ -112,22 +111,24 @@ export function ActionsRail({ incident: inc, canAct, weaAlertId, onAction, onDra
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2 pt-1 border-t border-line">
-        <Button variant="danger" icon={Flag} disabled={!canAct} onClick={() => setFlagging((v) => !v)} aria-expanded={flagging}>
-          Flag as false
-        </Button>
-        <Button variant="ghost" icon={GitMerge} disabled title="Merge duplicates is not in the demo" aria-disabled>
-          Merge
-        </Button>
-        <Button
-          variant="secondary"
-          icon={Radio}
-          disabled={weaAlertId === null}
-          onClick={() => { if (weaAlertId !== null) onDraftWea(weaAlertId) }}
-          title={weaAlertId === null ? WEA_DISABLED_TIP : 'Draft a wireless emergency alert from the open alert at this node'}
-        >
-          Draft WEA
-        </Button>
+      <div className="flex flex-col gap-2 pt-2 border-t border-line">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="danger" icon={Flag} disabled={!canAct} onClick={() => setFlagging((v) => !v)} aria-expanded={flagging}>
+            Flag as false
+          </Button>
+          <Button
+            variant="secondary"
+            icon={Radio}
+            disabled={weaAlertId === null}
+            onClick={() => { if (weaAlertId !== null) onDraftWea(weaAlertId) }}
+            title={weaAlertId === null ? WEA_DISABLED_TIP : 'Draft a wireless emergency alert from the open alert at this node'}
+          >
+            Draft WEA
+          </Button>
+        </div>
+        {/* A grey button with no reason reads as broken (explain item 18). */}
+        {weaAlertId === null && <p className="text-xs text-ink-3">{WEA_DISABLED_TIP}.</p>}
+        <p className="text-xs text-ink-3">Merging duplicates is not in the demo.</p>
       </div>
 
       {flagging && canAct && (

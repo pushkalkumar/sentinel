@@ -35,15 +35,21 @@ export function RollcallGrid({ drill }: RollcallGridProps) {
   }
   firstRender.current = false
 
+  const ended = drill.ended_at !== null
   return (
-    <div className="flex flex-wrap gap-4" role="list" aria-label="Classes">
+    <div
+      className="grid gap-4"
+      style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}
+      role="list"
+      aria-label="Classes"
+    >
       <style>{ARRIVE_CSS}</style>
       {drill.classes.map((c) => {
         const a = arrivals.current.get(c.class_id)
         const fresh = a && tick - a.at < ARRIVAL_WINDOW_MS
         return (
-          <div key={c.class_id} role="listitem">
-            <ClassTile cls={c} arrivalIndex={fresh ? a.index : undefined} />
+          <div key={c.class_id} role="listitem" className="min-w-0">
+            <ClassTile cls={c} ended={ended} arrivalIndex={fresh ? a.index : undefined} />
           </div>
         )
       })}

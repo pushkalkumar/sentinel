@@ -37,6 +37,7 @@ export function NodeList() {
               type="button"
               onClick={() => { selectNode(n.id); openExplain(n.id) }}
               aria-pressed={active}
+              title={`Why this reading at ${n.label}: one node spiking while its neighbours stay flat is a fire in that room, every node rising together is wildfire smoke`}
               className={clsx(
                 'h-9 -mx-2 px-2 w-[calc(100%+1rem)] rounded-md flex items-center gap-3 text-left',
                 'transition-[background-color] duration-[120ms] hover:bg-raised',

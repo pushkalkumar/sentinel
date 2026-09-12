@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Drill as DrillT, DrillKind } from '@/lib/types'
 import { createDrill, endDrill, errorText, drillCsvUrl, getActiveDrill } from '@/lib/api'
 import { elapsed } from '@/lib/time'
@@ -14,6 +14,47 @@ import { MissingList } from '@/features/drill/MissingList'
 import { ByMuster } from '@/features/drill/ByMuster'
 import { StartDrill } from '@/features/drill/StartDrill'
 
+/** One ghost button with a menu, instead of two unlabelled ghost links (design item 14). */
+function ExportMenu({ onReport, onCsv }: { onReport: () => void; onCsv: () => void }) {
+  const [open, setOpen] = useState(false)
+  const root = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: PointerEvent) => { if (root.current && !root.current.contains(e.target as Node)) setOpen(false) }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    window.addEventListener('pointerdown', onDown)
+    window.addEventListener('keydown', onKey)
+    return () => { window.removeEventListener('pointerdown', onDown); window.removeEventListener('keydown', onKey) }
+  }, [open])
+
+  return (
+    <div ref={root} className="relative">
+      <Button variant="ghost" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>Export</Button>
+      {open && (
+        <div role="menu" aria-label="Export" className="absolute right-0 top-full mt-1 w-56 z-30 p-2 rounded-lg bg-overlay shadow-overlay flex flex-col gap-1">
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => { setOpen(false); onReport() }}
+            className="w-full h-9 px-3 rounded-md text-sm text-left text-ink-2 hover:text-ink hover:bg-[rgba(255,255,255,0.05)]"
+          >
+            Printable report
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => { setOpen(false); onCsv() }}
+            className="w-full h-9 px-3 rounded-md text-sm text-left text-ink-2 hover:text-ink hover:bg-[rgba(255,255,255,0.05)]"
+          >
+            Roll call as CSV
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function LiveHeader({ drill, onEnd, ending, onDismiss }: { drill: DrillT; onEnd: () => void; ending: boolean; onDismiss: () => void }) {
   const running = drill.ended_at === null
   const now = useNowTick(1000, running)
@@ -26,7 +67,7 @@ function LiveHeader({ drill, onEnd, ending, onDismiss }: { drill: DrillT; onEnd:
           {s.submitted} of {s.classes} classes in
         </h1>
         <p className="text-base text-ink-3 mt-2">
-          {DRILL_KIND_LABEL[drill.kind]}{running ? ' running' : ' ended'}
+          Drill: {DRILL_KIND_LABEL[drill.kind].toLowerCase().replace(' drill', '')}{running ? ', running' : ', ended'}
           {s.missing_total > 0 && <span className="text-warn">, {s.missing_total} missing</span>}
         </p>
       </div>
@@ -98,6 +139,12 @@ export default function Drill() {
 
   const end = async () => {
     if (!active) return
+    // Ending with classes still out loses the roll call, so ask first (ux item 13).
+    const pending = active.summary.pending
+    if (pending > 0) {
+      const ok = window.confirm(`${pending} ${pending === 1 ? 'class has' : 'classes have'} not reported. End the drill anyway?`)
+      if (!ok) return
+    }
     setEnding(true)
     try {
       const d = await endDrill(active.id)
@@ -139,9 +186,8 @@ export default function Drill() {
   const csvName = `sentinel-drill-${drill.id}.csv`
 
   // A plain <a download> cannot carry the bearer header, so fetch with it and hand the bytes to the browser.
-  const downloadCsv = async (e: MouseEvent<HTMLAnchorElement>) => {
+  const downloadCsv = async () => {
     if (!token) return
-    e.preventDefault()
     try {
       const res = await fetch(csvHref, { headers: { Authorization: `Bearer ${token}` } })
       if (!res.ok) throw new Error(String(res.status))
@@ -171,17 +217,7 @@ export default function Drill() {
           <MissingList missing={drill.missing} />
           <ByMuster classes={drill.classes} />
           <div className="flex items-center gap-1 pt-2">
-            <Button variant="ghost" onClick={() => window.open(reportHref, '_blank', 'noopener')}>
-              Export report
-            </Button>
-            <a
-              href={csvHref}
-              download={csvName}
-              onClick={downloadCsv}
-              className="inline-flex items-center justify-center h-10 px-4 rounded-md text-base font-medium text-ink-2 hover:text-ink hover:bg-[rgba(255,255,255,0.04)]"
-            >
-              CSV
-            </a>
+            <ExportMenu onReport={() => window.open(reportHref, '_blank', 'noopener')} onCsv={downloadCsv} />
           </div>
         </aside>
       </div>

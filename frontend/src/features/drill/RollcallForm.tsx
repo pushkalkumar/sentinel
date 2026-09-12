@@ -3,7 +3,6 @@ import { ChevronDown } from 'lucide-react'
 import type { ClassInfo, Drill, Node, NodeId, Rollcall } from '@/lib/types'
 import { errorText, submitRollcall } from '@/lib/api'
 import { elapsed, fmtWall, fmtWallZoned } from '@/lib/time'
-import { Stepper } from '@/components/ui/Stepper'
 import { FieldButton } from '@/features/phone/FieldButton'
 import { FIELD_INPUT, SLAB } from '@/features/phone/surface'
 import { RosterChips } from './RosterChips'
@@ -18,7 +17,7 @@ export interface RollcallFormProps {
   onSubmitted: (drill: Drill) => void
 }
 
-const NODE_PICKER_NOTE = 'In production the node stamps this automatically; pick the node you are standing next to.'
+const MUSTER_NOTE = 'Where your class is standing now.'
 
 function existingRollcall(drill: Drill, classId: number): Rollcall | null {
   return drill.classes.find((c) => c.class_id === classId)?.rollcall ?? null
@@ -29,8 +28,6 @@ export function RollcallForm({ drill, classInfo, nodes, onSubmitted }: RollcallF
   const submitted = existingRollcall(drill, classInfo.id)
   const [editing, setEditing] = useState(submitted === null)
   const [missing, setMissing] = useState<string[]>(() => submitted?.missing_refs ?? [])
-  const [present, setPresent] = useState<number>(() => submitted?.present ?? classInfo.roster_size)
-  const [presentTouched, setPresentTouched] = useState(false)
   const [nodeId, setNodeId] = useState<NodeId>(() => submitted?.node_id ?? classInfo.muster_node_id)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -43,16 +40,10 @@ export function RollcallForm({ drill, classInfo, nodes, onSubmitted }: RollcallF
     if (submitted) setEditing(false)
   }, [submitted?.submitted_at]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const toggleMissing = (ref: string) => {
-    const next = missing.includes(ref) ? missing.filter((r) => r !== ref) : [...missing, ref]
-    setMissing(next)
-    if (!presentTouched) setPresent(Math.max(0, classInfo.roster_size - next.length))
-    if (error) setError(null)
-  }
+  const present = Math.max(0, classInfo.roster_size - missing.length)
 
-  const changePresent = (v: number) => {
-    setPresent(v)
-    setPresentTouched(true)
+  const toggleMissing = (ref: string) => {
+    setMissing(missing.includes(ref) ? missing.filter((r) => r !== ref) : [...missing, ref])
     if (error) setError(null)
   }
 
@@ -63,7 +54,6 @@ export function RollcallForm({ drill, classInfo, nodes, onSubmitted }: RollcallF
       const d = await submitRollcall(drill.id, { class_id: classInfo.id, node_id: nodeId, present, missing_refs: missing })
       onSubmitted(d)
       setEditing(false)
-      setPresentTouched(false)
     } catch (e) {
       setError(errorText(e))
     } finally {
@@ -73,14 +63,10 @@ export function RollcallForm({ drill, classInfo, nodes, onSubmitted }: RollcallF
 
   const startResubmit = () => {
     setMissing(submitted?.missing_refs ?? missing)
-    setPresent(submitted?.present ?? present)
     setNodeId(submitted?.node_id ?? nodeId)
-    setPresentTouched(false)
     setEditing(true)
   }
 
-  const total = present + missing.length
-  const mismatch = total !== classInfo.roster_size
   const nodeOptions: Node[] = nodes.length > 0 ? nodes : []
   const defaultLabel = nodes.find((n) => n.id === classInfo.muster_node_id)?.label ?? classInfo.muster_node_id
 
@@ -112,9 +98,13 @@ export function RollcallForm({ drill, classInfo, nodes, onSubmitted }: RollcallF
         </div>
       ) : (
         <>
-          <section className="flex items-center justify-between gap-4">
-            <span className="text-[17px] text-f-ink" id="present-label">Present</span>
-            <Stepper value={present} onChange={changePresent} min={0} max={classInfo.roster_size} label="Present" />
+          {/* Present is derived from the roster minus the names tapped: two ways to enter it let a
+              teacher double count (ux item 12). */}
+          <section className="flex items-baseline justify-between gap-4">
+            <span className="text-[17px] text-f-ink">Present</span>
+            <span className="font-field-mono tabular-nums text-[26px] text-f-ink">
+              {present} <span className="text-f-ink-2 text-[19px]">/ {classInfo.roster_size}</span>
+            </span>
           </section>
 
           <section>
@@ -143,17 +133,17 @@ export function RollcallForm({ drill, classInfo, nodes, onSubmitted }: RollcallF
                 <ChevronDown size={22} strokeWidth={1.5} aria-hidden className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-f-ink-2" />
               </span>
             </label>
-            <p className="text-[14px] leading-5 text-f-ink-2 mt-2 text-pretty">{NODE_PICKER_NOTE}</p>
+            <p className="text-[14px] leading-5 text-f-ink-2 mt-2 text-pretty">{MUSTER_NOTE}</p>
           </section>
 
-          {mismatch && !error && (
-            <p className="text-[15px] leading-5 text-f-ink-2 text-pretty">
-              {present} present + {missing.length} missing = {total}. The roster has {classInfo.roster_size}; the office will reject a count that does not add up.
-            </p>
-          )}
           {error && <p className="text-[16px] text-f-alarm" role="alert">{error}</p>}
 
-          <FieldButton variant="ink" onClick={submit} loading={busy}>Submit roll call</FieldButton>
+          {/* Sticky so the primary action is never below the roster (ux item 12). */}
+          <div className="sticky bottom-0 -mx-5 px-5 pb-5 pt-3 bg-gradient-to-t from-f-canvas via-f-canvas to-transparent">
+            <FieldButton variant="ink" onClick={submit} loading={busy}>
+              Submit: {present} present, {missing.length} missing
+            </FieldButton>
+          </div>
         </>
       )}
     </div>

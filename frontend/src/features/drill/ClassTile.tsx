@@ -5,6 +5,8 @@ import { elapsed } from '@/lib/time'
 
 export interface ClassTileProps {
   cls: DrillClass
+  /** After the drill ends, an unreported class is "not submitted", not "waiting". */
+  ended?: boolean
   /** Index in the current arrival batch; drives the 40 ms stagger. Undefined = no arrival animation. */
   arrivalIndex?: number
 }
@@ -18,8 +20,11 @@ const BAR: Record<DrillClass['state'], string> = {
   missing: 'bg-warn',
 }
 
-/** 132×96 tile, no border, state by the bottom bar. No per-tile timestamp (the header carries elapsed). */
-export function ClassTile({ cls, arrivalIndex }: ClassTileProps) {
+/**
+ * Fills its grid cell (design item 14) and carries what the principal needs to act:
+ * class, teacher, present of roster, missing count. State by the bottom bar, no border.
+ */
+export function ClassTile({ cls, ended = false, arrivalIndex }: ClassTileProps) {
   const rc = cls.rollcall
   const missingCount = rc?.missing_refs.length ?? 0
   const style: CSSProperties = {}
@@ -27,11 +32,17 @@ export function ClassTile({ cls, arrivalIndex }: ClassTileProps) {
 
   return (
     <div
-      className={clsx('relative w-[132px] h-[96px] shrink-0 rounded-md bg-surface overflow-hidden px-4 pt-3.5 pb-4 flex flex-col', arrivalIndex !== undefined && 'drill-arrive')}
+      className={clsx(
+        'relative w-full min-h-[116px] rounded-md bg-surface overflow-hidden px-4 pt-3.5 pb-5 flex flex-col',
+        arrivalIndex !== undefined && 'drill-arrive',
+      )}
       style={style}
-      title={rc ? `${cls.teacher_name}, submitted ${elapsed(rc.elapsed_s)} in at ${rc.node_label}` : `${cls.teacher_name}, not submitted`}
+      title={rc ? `Submitted ${elapsed(rc.elapsed_s)} in at ${rc.node_label}` : ended ? 'Never submitted' : 'Not submitted yet'}
     >
-      <span className="text-base font-medium text-ink truncate">{cls.name}</span>
+      <div className="flex items-baseline gap-2 min-w-0">
+        <span className="text-base font-medium text-ink truncate">{cls.name}</span>
+        <span className="text-xs text-ink-3 truncate">{cls.teacher_name}</span>
+      </div>
       <span className="mt-auto leading-none">
         {rc ? (
           <span className="font-mono text-lg leading-none tabular-nums">
@@ -39,12 +50,16 @@ export function ClassTile({ cls, arrivalIndex }: ClassTileProps) {
             <span className="text-ink-4"> / {cls.roster_size}</span>
           </span>
         ) : (
-          <span className="text-sm text-ink-4">waiting</span>
+          <span className="text-sm text-ink-4">{ended ? 'not submitted' : 'waiting'}</span>
         )}
       </span>
-      {rc && missingCount > 0 && (
-        <span className="mt-1.5 text-xs leading-none text-warn tabular-nums">{missingCount} missing</span>
-      )}
+      <span className="mt-1.5 text-xs leading-none tabular-nums">
+        {rc
+          ? missingCount > 0
+            ? <span className="text-warn">{missingCount} missing</span>
+            : <span className="text-ink-3">all present, {rc.node_label}</span>
+          : <span className="text-ink-4">{cls.roster_size} on roster</span>}
+      </span>
       <i aria-hidden className={clsx('absolute inset-x-0 bottom-0 h-[3px]', BAR[cls.state])} />
     </div>
   )

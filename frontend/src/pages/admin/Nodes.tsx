@@ -18,7 +18,8 @@ export default function Nodes() {
   const selectNode = useUiStore((s) => s.selectNode)
   const openExplain = useUiStore((s) => s.openExplain)
   const online = nodes.filter((n) => n.status !== 'offline').length
-  const picked = nodes.find((n) => n.id === selected) ?? null
+  // Default to the gateway so the provisioning panel is never an empty column (design item 33).
+  const picked = nodes.find((n) => n.id === selected) ?? nodes.find((n) => n.is_gateway) ?? nodes[0] ?? null
 
   return (
     <>
@@ -26,9 +27,12 @@ export default function Nodes() {
       <div className="flex flex-col gap-4">
         <Panel title="Fleet" meta={site?.name} padded={false}>
           <NodeTable />
+          <p className="px-5 py-3 text-xs text-ink-3">
+            Watch means battery under 30% or signal under -95 dBm. Alerting means an engine alert is open at that node.
+          </p>
         </Panel>
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4 items-start">
-          <Panel title="Placement" padded={false}>
+          <Panel title="Placement" meta={site?.address} padded={false}>
             {!loaded && !error && <div className="p-5"><Skeleton className="w-64" /></div>}
             {error && nodes.length === 0 && <p className="p-5 text-sm text-alarm">{error}</p>}
             {nodes.length > 0 && (
@@ -43,6 +47,11 @@ export default function Nodes() {
                 className="p-2"
               />
             )}
+            {/* The rule the console is built on, where the console offers to explain it. */}
+            <p className="px-5 pb-4 pt-1 text-xs text-ink-3">
+              Click a node for why this reading: one node spiking while its neighbours stay flat is a fire in that room,
+              every node rising together is wildfire smoke.
+            </p>
           </Panel>
           <Panel title="Provisioning">
             {picked ? (

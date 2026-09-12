@@ -1,17 +1,19 @@
 import { MATERIALS as M } from '../materials'
+import { mm } from '../parts'
+import { Cyl } from './primitives'
 import { PartHit, type PartMeshProps } from './PartHit'
 
-/** Local z = 0 is the outer face of the front wall; the cap sits on it, the switch body goes into the wall. */
-const FACE = [Math.PI / 2, 0, 0] as const
-
+/** Sealed 16 mm dome on the front wall. Local z = 0 is the wall's outer face; the switch body sits behind it. */
 export function Button(props: PartMeshProps) {
   return (
     <group>
-      <mesh rotation={FACE} position={[0, 0, 0.05]} material={M.plasticBlack}><cylinderGeometry args={[0.82, 0.82, 0.1, 32]} /></mesh>
-      <mesh rotation={FACE} position={[0, 0, 0.16]} material={M.accent}><cylinderGeometry args={[0.66, 0.7, 0.14, 32]} /></mesh>
-      <mesh position={[0, 0, 0.22]} scale={[1, 1, 0.22]} material={M.accent}><sphereGeometry args={[0.64, 32, 12]} /></mesh>
-      <mesh rotation={FACE} position={[0, 0, -0.25]} material={M.plasticBlack}><cylinderGeometry args={[0.3, 0.3, 0.5, 16]} /></mesh>
-      <PartHit {...props} size={[1.8, 1.8, 0.8]} center={[0, 0, 0.1]} />
+      <Cyl r={9.6} h={0.8} at={[0, 0, 0.4]} axis="z" mat={M.aluminium} segments={40} />
+      <Cyl r={8.6} h={1.6} at={[0, 0, 1.2]} axis="z" mat={M.plastic} segments={40} />
+      <mesh position={[0, 0, mm(2)]} scale={[1, 1, 0.42]} material={M.buttonCap} castShadow>
+        <sphereGeometry args={[mm(7.2), 40, 20]} />
+      </mesh>
+      <Cyl r={5} h={12} at={[0, 0, -6]} axis="z" mat={M.plastic} segments={24} />
+      <PartHit {...props} size={[20, 20, 8]} center={[0, 0, 2]} />
     </group>
   )
 }

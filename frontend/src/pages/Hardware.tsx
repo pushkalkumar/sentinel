@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
-import { Download } from 'lucide-react'
 import schematicUrl from '@hardware/schematic.svg'
 import { Grain } from '@/components/shell/Grain'
 import { SafetyFooter } from '@/components/SafetyFooter'
@@ -31,37 +30,23 @@ const SITE_ID = 1
 const DEEP_LINK_EXPLODE = 0.85
 const SLIDER_MAX = 1000
 const IN_VIEW_THRESHOLD = 0.15
+const HINT_MS = 3000
+/** The headline dissolves as the stack opens so the part labels have the left margin to themselves. */
+const HEADLINE_FADE = { from: 0.3, to: 0.62 } as const
 
 const STATS = [
-  { value: '$31', label: 'per node at 1k' },
-  { value: '3 days', label: 'battery, no sun' },
-  { value: '1 to 2 km', label: 'LoRa line of sight' },
-  { value: '12 to 18 h', label: 'full disaster mode' },
+  { value: '$31', label: 'per node at 1,000 units' },
+  { value: '3 days', label: 'on one 18650, no sun' },
+  { value: '2 km', label: 'per LoRa hop with line of sight' },
+  { value: '18 h', label: 'in full disaster mode, 12 h worst case' },
 ]
 
 const ALIVE = [
-  'Solar or USB in, ORed through Schottky diodes to one VIN.',
-  'TP4056 charges the 18650 behind a DW01 protection IC.',
-  '3.3 V stays on for the ESP32-S3 and the LoRa radio, always.',
-  'MT3608 makes 5 V for the fan and heater, cut by a MOSFET in sleep.',
+  'Solar or USB comes in and is ORed through Schottky diodes to one input rail.',
+  'A TP4056 charges the 18650 behind a DW01 protection IC, so a bad cell cannot take the node with it.',
+  'The 3.3 V rail for the ESP32-S3 and the LoRa radio never switches off.',
+  'An MT3608 makes 5 V for the fan and the gas heater, and a MOSFET cuts it in sleep.',
 ]
-
-const BLOCK_DIAGRAM = `                     +----------------------------------------+
-   6 V 2 W solar --->| TP4056 charger + protection            |
-                     |      |                                 |
-   18650 3400 mAh <--+------+                                 |
-        |                                                     |
-        v                                                     |
-   3.3 V buck/LDO ---> ESP32-S3 (WiFi AP + BLE + MCU)         |
-                          |  UART2 <-- PMS5003 (PM1/2.5/10)   |
-                          |  I2C   <-- BME280 (temp/RH/press) |
-                          |  ADC   <-- MQ-2 (smoke/LPG/CO-ish)|
-                          |  SPI   <-> SX1262 LoRa 915 MHz    |
-                          |  GPIO  <-- tactile button         |
-                          |  GPIO  --> WS2812 RGB LED         |
-                          |  GPIO  --> piezo buzzer           |
-                     +----------------------------------------+
-                     IP65 enclosure, vented sensor chamber, wall mount`
 
 function useInView(ref: React.RefObject<HTMLElement | null>): boolean {
   const [inView, setInView] = useState(false)
@@ -93,10 +78,15 @@ function useHardwareData() {
   }, [])
 }
 
+const RANGE =
+  'w-44 h-5 appearance-none bg-transparent cursor-pointer ' +
+  '[&::-webkit-slider-runnable-track]:h-px [&::-webkit-slider-runnable-track]:bg-accent-line [&::-webkit-slider-runnable-track]:rounded-full ' +
+  '[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-webkit-slider-thumb]:-mt-[5.5px] ' +
+  '[&::-moz-range-track]:h-px [&::-moz-range-track]:bg-accent-line [&::-moz-range-thumb]:size-3 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-accent'
+
 function ExplodeControls() {
   const explode = useHardwareStore((s) => s.explode)
   const inputRef = useRef<HTMLInputElement>(null)
-  const pct = Math.round(explode * 100)
 
   // Uncontrolled input with a native listener so keyboard, pointer and synthetic `input` events all reach the store.
   useEffect(() => {
@@ -107,7 +97,7 @@ function ExplodeControls() {
       s.setManual(true)
       s.setExplode(Number(el.value) / SLIDER_MAX)
     }
-    const onPointerDown = () => useHardwareStore.getState().setManual(true)
+    const onPointerDown = () => { useHardwareStore.getState().setManual(true); useHardwareStore.getState().markInteracted() }
     el.addEventListener('input', onInput)
     el.addEventListener('pointerdown', onPointerDown)
     return () => {
@@ -124,17 +114,61 @@ function ExplodeControls() {
   }, [explode])
 
   return (
-    <div className="flex items-center gap-3">
-      <label className="font-mono text-2xs text-ink-2 tabular-nums flex items-center gap-3">
-        <span>EXPLODE {String(pct).padStart(3, '0')}</span>
+    <div className="flex items-center gap-5">
+      <label className="flex items-center gap-4">
+        <span className="text-xs text-ink-3">Explode</span>
         <input
           ref={inputRef}
           type="range" min={0} max={SLIDER_MAX} step={1} defaultValue={0}
-          aria-label="Explode" aria-valuetext={`${pct} percent`}
-          className="w-40 accent-signal"
+          aria-label="Explode" aria-valuetext={`${Math.round(explode * 100)} percent`}
+          className={RANGE}
         />
       </label>
       <Button variant="ghost" onClick={() => useHardwareStore.getState().resetView()}>Reset view</Button>
+    </div>
+  )
+}
+
+/** One 3 s hint after the first drag, wheel or slider touch. Never again this visit. */
+function HintToast() {
+  const interacted = useHardwareStore((s) => s.interacted)
+  const [phase, setPhase] = useState<'idle' | 'shown' | 'done'>('idle')
+  useEffect(() => {
+    if (!interacted || phase !== 'idle') return
+    setPhase('shown')
+    const t = setTimeout(() => setPhase('done'), HINT_MS)
+    return () => clearTimeout(t)
+  }, [interacted, phase])
+  return (
+    <div
+      aria-live="polite"
+      className={
+        'absolute left-1/2 bottom-7 -translate-x-1/2 h-10 px-4 rounded-md bg-overlay text-sm text-ink flex items-center whitespace-nowrap pointer-events-none ' +
+        'transition-[opacity,translate] duration-[200ms] ease-[var(--ease-enter)] ' +
+        (phase === 'shown' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1')
+      }
+      style={{ boxShadow: 'var(--shadow-overlay)' }}
+    >
+      {phase === 'shown' ? 'Drag to orbit. Scroll to open it up.' : ''}
+    </div>
+  )
+}
+
+function Headline({ full }: { full: boolean }) {
+  const explode = useHardwareStore((s) => s.explode)
+  const t = Math.min(1, Math.max(0, (explode - HEADLINE_FADE.from) / (HEADLINE_FADE.to - HEADLINE_FADE.from)))
+  const opacity = full ? 1 - t * t : 1
+  return (
+    <div
+      className={full ? 'absolute left-8 top-10 max-w-[30ch] pointer-events-none' : 'px-6 pt-10 pb-6'}
+      style={full ? { opacity, transform: `translateY(${(-8 * t).toFixed(1)}px)` } : undefined}
+    >
+      <h1 className="display-hero text-ink" style={{ fontSize: 'clamp(36px, 4.1vw, 60px)' }}>
+        Thirteen parts.<br />Thirty-one dollars.<br />No internet required.
+      </h1>
+      <p className="text-md text-ink-2 mt-6 max-w-[38ch]">
+        Designed for this submission, not yet fabricated; every part is off the shelf.
+      </p>
     </div>
   )
 }
@@ -148,28 +182,19 @@ function Hero({ tier, intro }: { tier: 'full' | 'static'; intro: boolean }) {
 
   return (
     <section ref={sectionRef} className={full ? 'h-[320vh]' : ''}>
-      <div className={full ? 'sticky top-14 h-[calc(100dvh-56px)] flex' : 'flex flex-col lg:flex-row'}>
-        <div className={full ? 'relative flex-1 min-w-0' : 'relative w-full aspect-[4/3] lg:flex-1 lg:aspect-auto lg:min-h-[70vh]'}>
-          <div className="absolute inset-0">
-            <NodeScene inView={inView} tier={tier} />
-          </div>
-          <div className="absolute left-6 top-6 max-w-[34ch] pointer-events-none">
-            <div className="label-signage mb-3">Hardware · Sentinel Node</div>
-            <h1 className="display-hero text-ink" style={{ fontSize: 'clamp(36px, 4.4vw, 64px)' }}>
-              Thirteen parts.<br />Thirty-one dollars.<br />No internet required.
-            </h1>
-            <p className="text-sm text-ink-2 mt-4 max-w-[48ch]">
-              Designed today, not fabricated, per organiser guidance. Every sensor and radio on this page is simulated in the demo.
-            </p>
-          </div>
+      <div className={full ? 'sticky top-14 h-[calc(100dvh-56px)] flex' : 'flex flex-col'}>
+        {!full && <Headline full={false} />}
+        <div className={full ? 'relative flex-1 min-w-0' : 'relative w-full aspect-[4/5] sm:aspect-[4/3]'}>
+          <NodeScene inView={inView} tier={tier} />
           {full && (
             <>
-              <div className="absolute left-6 bottom-6"><ExplodeControls /></div>
-              <div className="absolute right-6 bottom-6 font-mono text-2xs text-ink-3">drag to orbit · scroll to explode</div>
+              <Headline full />
+              <div className="absolute left-8 bottom-7"><ExplodeControls /></div>
+              <HintToast />
             </>
           )}
         </div>
-        <SpecRail className={full ? 'w-[320px] shrink-0' : 'w-full lg:w-[320px]'} compact={!full} />
+        <SpecRail className={full ? 'w-[320px] shrink-0' : 'w-full'} compact={!full} />
       </div>
     </section>
   )
@@ -179,10 +204,10 @@ function MeshSection({ tier, reducedMotion }: { tier: 'full' | 'static'; reduced
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref)
   return (
-    <section ref={ref} className="space-y-6">
-      <h2 className="display-h1 text-2xl text-ink">Eight boxes, one radio channel, no tower.</h2>
-      <div className="grid lg:grid-cols-[1fr_380px] gap-4">
-        <Panel title="Campus mesh" meta="Roosevelt High School" padded={false} right={<SimTag kind="mesh" />}>
+    <section ref={ref}>
+      <h2 className="display-h1 text-xl text-ink">Eight boxes, one radio channel, no tower.</h2>
+      <div className="grid lg:grid-cols-[1fr_360px] gap-6 mt-10">
+        <Panel title="Campus mesh" meta="Roosevelt High School" padded={false}>
           <div className="aspect-[16/10] w-full">
             <MeshScene inView={inView} tier={tier} reducedMotion={reducedMotion} />
           </div>
@@ -191,6 +216,7 @@ function MeshSection({ tier, reducedMotion }: { tier: 'full' | 'static'; reduced
           <HopLog3d />
         </Panel>
       </div>
+      <div className="mt-6"><SimTag kind="mesh" /></div>
     </section>
   )
 }
@@ -219,49 +245,41 @@ export default function Hardware() {
       <div className="relative z-[2]">
         <HardwareBar />
         <Hero tier={tier} intro={!reducedMotion && !isPartId(params.get('part'))} />
-        <main className="max-w-[1600px] mx-auto px-6 py-16 space-y-20">
+        <main className="max-w-[1200px] mx-auto px-6 py-section-sm md:py-section space-y-section-sm md:space-y-section">
           <StatStrip items={STATS} />
 
-          <section className="grid lg:grid-cols-[320px_1fr] gap-8">
+          <section className="grid lg:grid-cols-[280px_1fr] gap-x-16 gap-y-8">
             <h2 className="display-h1 text-xl text-ink">How it stays alive</h2>
-            <ol className="divide-y divide-line">
-              {ALIVE.map((line, i) => (
-                <li key={i} className="flex items-baseline gap-5 py-3">
-                  <span className="font-mono text-2xs text-signal tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-                  <span className="text-base text-ink-2">{line}</span>
-                </li>
+            <div className="space-y-5 max-w-[60ch]">
+              {ALIVE.map((line) => (
+                <p key={line} className="text-md text-ink-2">{line}</p>
               ))}
-            </ol>
-          </section>
-
-          <section className="space-y-4">
-            <div className="flex items-end justify-between gap-4 flex-wrap">
-              <h2 className="display-h1 text-xl text-ink">Bill of materials</h2>
-              <span className="font-mono text-2xs text-ink-3">Rows link to the part above</span>
             </div>
-            <BomTable />
           </section>
 
-          <section className="space-y-4">
-            <div className="flex items-end justify-between gap-4 flex-wrap">
-              <h2 className="display-h1 text-xl text-ink">Schematic</h2>
-              <a href={schematicUrl} download="sentinel-node-schematic.svg" className="inline-flex items-center gap-2 h-9 px-3.5 rounded-sm bg-raised border border-line-strong text-base font-medium text-ink hover:bg-overlay">
-                <Download size={20} strokeWidth={1.5} />Download schematic
+          <section>
+            <h2 className="display-h1 text-xl text-ink">Bill of materials</h2>
+            <p className="text-md text-ink-2 mt-3 max-w-[60ch]">Spec §4.1, per node. Hover a row to find the part in the model.</p>
+            <div className="mt-10"><BomTable /></div>
+          </section>
+
+          <section>
+            <div className="flex items-end justify-between gap-6 flex-wrap">
+              <div>
+                <h2 className="display-h1 text-xl text-ink">Schematic</h2>
+                <p className="text-md text-ink-2 mt-3 max-w-[60ch]">Block level, rev A. Pin numbers per spec §3.2.</p>
+              </div>
+              <a
+                href={schematicUrl} download="sentinel-node-schematic.svg"
+                className="inline-flex items-center h-10 px-4 rounded-md border border-line-strong text-base font-medium text-ink hover:bg-[rgba(255,255,255,0.04)] transition-colors duration-[120ms]"
+              >
+                Download SVG
               </a>
             </div>
-            <figure className="hairline rounded-md overflow-hidden bg-surface">
+            <figure className="mt-10 rounded-lg overflow-hidden bg-surface" style={{ outline: '1px solid rgba(255,255,255,0.06)', outlineOffset: -1 }}>
               <img src={schematicUrl} alt="Sentinel Node block schematic, rev A" className="w-full h-auto block" />
-              <figcaption className="font-mono text-2xs text-ink-3 px-5 h-10 flex items-center border-t border-line">
-                Block-level schematic. Pin numbers per spec §3.2.
-              </figcaption>
             </figure>
-          </section>
-
-          <section className="grid lg:grid-cols-2 gap-4 items-start">
-            <Panel title="Block diagram" meta="spec §3.1" padded={false}>
-              <pre className="font-mono text-xs leading-4 text-ink-2 p-5 overflow-x-auto">{BLOCK_DIAGRAM}</pre>
-            </Panel>
-            <PinMap />
+            <div className="mt-8"><PinMap /></div>
           </section>
 
           <MeshSection tier={tier} reducedMotion={reducedMotion} />

@@ -1,21 +1,23 @@
-import { Edges } from '@react-three/drei'
 import { MATERIALS as M } from '../materials'
+import { PCB_MM } from '../parts'
+import { Cyl, PlateBox, Rbox } from './primitives'
 import { PartHit, type PartMeshProps } from './PartHit'
 
-const PADS: [number, number][] = [[-3.0, -2.3], [-3.0, 1.2], [-0.6, -2.6], [2.6, 3.3], [-0.6, 0.2], [-0.6, 3.9]]
-const HOLES: [number, number][] = [[6.2, 3.7], [-6.2, 3.7], [6.2, -3.7], [-6.2, -3.7]]
+const HOLES: [number, number][] = [[-61, -36], [61, -36], [-61, 36], [61, 36]]
+const FACES = [M.pcb, M.pcb, M.pcbTop, M.pcb, M.pcb, M.pcb]
 
+/** Main board: textured top, bare edges, plated holes, a battery JST on the underside edge. Origin at the underside. */
 export function Pcb(props: PartMeshProps) {
   return (
     <group>
-      <mesh material={M.pcb}><boxGeometry args={[13, 0.16, 8]} /><Edges threshold={40} color="#1f3d2c" /></mesh>
-      {PADS.map(([x, z]) => (
-        <mesh key={`${x}${z}`} position={[x, 0.085, z]} material={M.pad}><boxGeometry args={[0.9, 0.01, 0.9]} /></mesh>
-      ))}
+      <PlateBox size={[PCB_MM.w, PCB_MM.t, PCB_MM.d]} at={[0, PCB_MM.t / 2, 0]} mat={FACES} />
       {HOLES.map(([x, z]) => (
-        <mesh key={`${x}${z}`} position={[x, 0, z]} material={M.vent}><cylinderGeometry args={[0.16, 0.16, 0.2, 12]} /></mesh>
+        <Cyl key={`${x}${z}`} r={1.7} h={PCB_MM.t + 0.2} at={[x, PCB_MM.t / 2, z]} mat={M.aluminium} segments={16} />
       ))}
-      <PartHit {...props} size={[13.2, 0.3, 8.2]} />
+      {/* Battery connector and a debug header, the two things that are on the board itself. */}
+      <Rbox size={[7.5, 5, 4.5]} at={[-30, PCB_MM.t + 2.5, 34]} r={0.5} mat={M.nylon} />
+      <Rbox size={[12, 2.4, 2.5]} at={[-58, PCB_MM.t + 1.2, -10]} r={0.3} mat={M.plastic} />
+      <PartHit {...props} size={[PCB_MM.w + 2, PCB_MM.t + 1, PCB_MM.d + 2]} center={[0, PCB_MM.t / 2, 0]} />
     </group>
   )
 }

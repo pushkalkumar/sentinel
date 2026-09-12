@@ -21,20 +21,22 @@ const ROWS: BomRow[] = [
   { part: 'Assembly / test', q1: '$0 (hand)', q100: '$4.00', q1000: '$2.50' },
 ]
 
-const TH = 'label-signage text-left px-4 h-10 border-b border-line-strong'
-const TD = 'px-4 h-10 border-b border-line'
+const TH = 'text-xs font-normal text-ink-3 text-left px-3 h-10'
+const TD = 'px-3 h-11 border-t border-line'
+const NUM = 'font-mono text-xs tabular-nums text-right'
 
+/** Hairline rows only, no container, no header rule. Hovering a row lights the part in the model above. */
 export function BomTable() {
   const hover = useHardwareStore((s) => s.hoverPartId)
   return (
-    <div className="overflow-x-auto hairline rounded-md bg-surface">
+    <div className="overflow-x-auto">
       <table className="w-full min-w-[640px] text-sm">
         <thead>
           <tr>
             <th className={TH}>Part</th>
             <th className={clsx(TH, 'text-right')}>Qty 1</th>
             <th className={clsx(TH, 'text-right')}>Qty 100</th>
-            <th className={clsx(TH, 'text-right')}>Qty 1000</th>
+            <th className={clsx(TH, 'text-right')}>Qty 1,000</th>
           </tr>
         </thead>
         <tbody onPointerLeave={() => useHardwareStore.getState().hover(null)}>
@@ -42,23 +44,21 @@ export function BomTable() {
             <tr
               key={r.part}
               onPointerEnter={() => r.id && useHardwareStore.getState().hover(r.id)}
-              className={clsx('transition-colors duration-[120ms]', r.id && hover === r.id ? 'bg-signal-dim' : 'hover:bg-raised')}
+              className={clsx('transition-colors duration-[120ms]', r.id && hover === r.id ? 'bg-raised' : 'hover:bg-raised')}
             >
               <td className={clsx(TD, 'text-ink')}>
-                {r.id ? (
-                  <Link to={`?part=${r.id}`} className="underline decoration-line-strong underline-offset-[3px] hover:decoration-signal">{r.part}</Link>
-                ) : r.part}
+                {r.id ? <Link to={`?part=${r.id}`} className="hover:underline decoration-line-strong underline-offset-[3px]">{r.part}</Link> : r.part}
               </td>
-              <td className={clsx(TD, 'font-mono text-xs tabular-nums text-right text-ink-2')}>{r.q1}</td>
-              <td className={clsx(TD, 'font-mono text-xs tabular-nums text-right text-ink-2')}>{r.q100}</td>
-              <td className={clsx(TD, 'font-mono text-xs tabular-nums text-right text-ink')}>{r.q1000}</td>
+              <td className={clsx(TD, NUM, 'text-ink-3')}>{r.q1}</td>
+              <td className={clsx(TD, NUM, 'text-ink-3')}>{r.q100}</td>
+              <td className={clsx(TD, NUM, 'text-ink')}>{r.q1000}</td>
             </tr>
           ))}
           <tr>
-            <td className="px-4 h-11 text-ink font-medium">Total</td>
-            <td className="px-4 h-11 font-mono text-xs tabular-nums text-right text-ink">~$60</td>
-            <td className="px-4 h-11 font-mono text-xs tabular-nums text-right text-ink">~$42</td>
-            <td className="px-4 h-11 font-mono text-xs tabular-nums text-right text-ink">~$31</td>
+            <td className={clsx(TD, 'text-ink font-medium')}>Total</td>
+            <td className={clsx(TD, NUM, 'text-ink-2')}>~$60</td>
+            <td className={clsx(TD, NUM, 'text-ink-2')}>~$42</td>
+            <td className={clsx(TD, NUM, 'text-ink')}>~$31</td>
           </tr>
         </tbody>
       </table>

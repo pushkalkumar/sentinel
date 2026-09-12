@@ -11,21 +11,25 @@ interface Props {
   watchStore?: boolean
 }
 
-/** HARDWARE_3D §6: demand loop by default, `always` only when in view and continuous, `never` on static tier. */
+/** Static tier renders a handful of frames by hand: the environment map, contact shadows and textures settle over the first few. */
+const STATIC_FRAMES_MS = [0, 120, 400, 900, 1600]
+
+/** Demand loop by default, `always` only when in view and continuous, `never` (manual frames) on the static tier. */
 export function FrameloopController({ inView, tier, continuous = false, watchStore = false }: Props) {
   const setFrameloop = useThree((s) => s.setFrameloop)
   const invalidate = useThree((s) => s.invalidate)
+  const advance = useThree((s) => s.advance)
+  const size = useThree((s) => s.size)
 
   useEffect(() => {
     if (tier === 'static') {
       setFrameloop('never')
-      invalidate()
-      const t = setTimeout(invalidate, 600)
-      return () => clearTimeout(t)
+      const timers = STATIC_FRAMES_MS.map((ms) => setTimeout(() => advance(performance.now()), ms))
+      return () => timers.forEach(clearTimeout)
     }
     setFrameloop(inView && continuous ? 'always' : 'demand')
     invalidate()
-  }, [inView, tier, continuous, setFrameloop, invalidate])
+  }, [inView, tier, continuous, setFrameloop, invalidate, advance, size.width, size.height])
 
   useEffect(() => {
     if (!watchStore) return

@@ -9,7 +9,7 @@ const HANDBACK_DELTA = 24
 /** 0..0.08 holds at 0, 0.08..0.92 maps to 0..1, 0.92..1 holds at 1. */
 export const remapScroll = (v: number) => Math.min(1, Math.max(0, (v - HOLD_START) / (HOLD_END - HOLD_START)))
 
-/** Scroll progress of the sticky hero section drives explode unless the slider owns it (HARDWARE_3D §4.5). */
+/** Scroll progress of the sticky hero section drives explode unless the slider owns it. */
 export function useExplodeDriver(sectionRef: RefObject<HTMLElement | null>, enabled: boolean) {
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end end'] })
 
@@ -25,6 +25,7 @@ export function useExplodeDriver(sectionRef: RefObject<HTMLElement | null>, enab
     let touchY: number | null = null
     const handBack = () => {
       const s = useHardwareStore.getState()
+      s.markInteracted()
       if (s.manual) {
         s.setManual(false)
         s.setExplode(remapScroll(scrollYProgress.get()))

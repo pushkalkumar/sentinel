@@ -11,7 +11,7 @@ const DROP_FALL_MS = 300
 const Y = 0.35
 const ARC = 0.35
 const WHITE = new THREE.Color('#ffffff')
-const RED = new THREE.Color('#FF4A3D')
+const RED = new THREE.Color('#E0574B')
 const easeOutQuad = (p: number) => 1 - (1 - p) * (1 - p)
 
 interface Pulse { from: THREE.Vector3; to: THREE.Vector3; start: number; dropped: boolean; active: boolean }

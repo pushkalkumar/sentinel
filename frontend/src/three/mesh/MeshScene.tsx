@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Grid } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import type { DeviceTier } from '@/store/hardware'
 import { FrameloopController } from '../shared/FrameloopController'
 import { StaticMapFallback } from '../shared/Fallbacks'
@@ -14,7 +14,7 @@ function Ground() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[26, 26]} />
-      <meshStandardMaterial color="#0d0f12" roughness={1} />
+      <meshStandardMaterial color="#100F0E" roughness={1} />
     </mesh>
   )
 }
@@ -33,12 +33,8 @@ export function MeshScene({ inView, tier, reducedMotion }: Props) {
     >
       <FrameloopController inView={inView} tier={tier} continuous={continuous} />
       <ambientLight intensity={0.4} />
-      <directionalLight position={[6, 10, 4]} intensity={1.2} color="#dfe6ff" />
+      <directionalLight position={[6, 10, 4]} intensity={1.1} color="#EDE8E0" />
       <Ground />
-      <Grid
-        position={[0, 0.005, 0]} args={[26, 26]} cellSize={1} cellThickness={0.5} cellColor="#1a1d22"
-        sectionSize={5} sectionThickness={1} sectionColor="#262a31" fadeDistance={40} fadeStrength={1.5} infiniteGrid={false}
-      />
       <CampusOutline />
       <Links continuous={continuous} />
       <Pillars continuous={continuous} labels={full} />

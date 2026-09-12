@@ -21,30 +21,31 @@ const PINS: [string, string, string, string][] = [
   ['Battery sense', 'ADC', 'GPIO35', '2:1 divider'],
 ]
 
+/** Collapsed by default; a quiet disclosure, not a panel. */
 export function PinMap() {
   return (
-    <details className="group bg-surface hairline rounded-md">
-      <summary className="h-10 px-5 flex items-center gap-2 cursor-pointer list-none select-none">
+    <details className="group">
+      <summary className="h-10 flex items-center gap-3 cursor-pointer list-none select-none">
         <ChevronRight size={16} strokeWidth={1.5} className="text-ink-3 transition-transform duration-[120ms] group-open:rotate-90" />
-        <span className="label-signage">Pin map</span>
-        <span className="font-mono text-2xs text-ink-3 ml-auto">ESP32 DevKit numbering, S3 remap pending</span>
+        <span className="text-base text-ink">Pin map</span>
+        <span className="text-sm text-ink-3">ESP32 DevKit numbering, S3 remap pending</span>
       </summary>
-      <div className="border-t border-line overflow-x-auto">
-        <table className="w-full min-w-[560px] font-mono text-xs">
+      <div className="overflow-x-auto pt-4 pl-7">
+        <table className="w-full min-w-[560px] text-sm">
           <thead>
             <tr>
               {['Peripheral', 'Signal', 'ESP32 pin', 'Notes'].map((h) => (
-                <th key={h} className="label-signage text-left px-5 h-9 border-b border-line-strong">{h}</th>
+                <th key={h} className="text-xs font-normal text-ink-3 text-left px-3 h-9">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {PINS.map((p, i) => (
               <tr key={i} className="hover:bg-raised">
-                <td className="px-5 h-8 border-b border-line text-ink">{p[0]}</td>
-                <td className="px-5 h-8 border-b border-line text-ink-2">{p[1]}</td>
-                <td className="px-5 h-8 border-b border-line text-ink tabular-nums">{p[2]}</td>
-                <td className="px-5 h-8 border-b border-line text-ink-3">{p[3]}</td>
+                <td className="px-3 h-9 border-t border-line text-ink">{p[0]}</td>
+                <td className="px-3 h-9 border-t border-line font-mono text-xs text-ink-2">{p[1]}</td>
+                <td className="px-3 h-9 border-t border-line font-mono text-xs text-ink tabular-nums">{p[2]}</td>
+                <td className="px-3 h-9 border-t border-line text-ink-3">{p[3]}</td>
               </tr>
             ))}
           </tbody>

@@ -1,17 +1,20 @@
 import { MATERIALS as M } from '../materials'
+import { Cyl, Rbox } from './primitives'
 import { PartHit, type PartMeshProps } from './PartHit'
 
+/** Charger, protection and boost on a 22 × 28 daughterboard; USB-C faces the back wall. Origin at the underside. */
 export function Power(props: PartMeshProps) {
   return (
     <group>
-      <mesh material={M.pcbBlue}><boxGeometry args={[1.6, 0.16, 2.6]} /></mesh>
-      <mesh position={[0.3, 0.14, 0.6]} material={M.plasticBlack}><boxGeometry args={[0.5, 0.12, 0.6]} /></mesh>
-      <mesh position={[-0.35, 0.28, 0.2]} material={M.plasticBlack}><cylinderGeometry args={[0.35, 0.35, 0.4, 20]} /></mesh>
-      <mesh position={[0.4, 0.33, -0.3]} material={M.plasticBlack}><cylinderGeometry args={[0.22, 0.22, 0.5, 16]} /></mesh>
-      <mesh position={[0.4, 0.33, -0.85]} material={M.plasticBlack}><cylinderGeometry args={[0.22, 0.22, 0.5, 16]} /></mesh>
-      <mesh position={[0, 0.24, -1.55]} material={M.steel}><boxGeometry args={[0.9, 0.32, 0.7]} /></mesh>
-      <mesh position={[-0.4, 0.13, -0.8]} material={M.plasticBlack}><boxGeometry args={[0.3, 0.1, 0.3]} /></mesh>
-      <PartHit {...props} size={[1.8, 0.8, 3.4]} center={[0, 0.2, -0.1]} />
+      <Rbox size={[22, 1, 28]} at={[0, 0.5, 0]} r={0.4} mat={M.module} />
+      <Rbox size={[9, 3.2, 7.4]} at={[0, 1 + 1.6, -10.4]} r={1.4} mat={M.aluminium} />
+      <Rbox size={[5, 1.2, 4]} at={[-5, 1.6, -1]} r={0.2} mat={M.plastic} />
+      <Rbox size={[3, 1.1, 3]} at={[5.5, 1.55, -2]} r={0.2} mat={M.plastic} />
+      <Cyl r={3.2} h={3.2} at={[4, 1 + 1.6, 6]} mat={M.plastic} segments={32} />
+      <Rbox size={[2.8, 1, 1.6]} at={[-5, 1.5, 7]} r={0.15} mat={M.plastic} />
+      <Rbox size={[2.8, 1, 1.6]} at={[-5, 1.5, 10]} r={0.15} mat={M.plastic} />
+      <Cyl r={2} h={5} at={[-3, 1 + 2.5, 3.5]} mat={M.plastic} segments={24} />
+      <PartHit {...props} size={[23, 8, 29]} center={[0, 3.5, 0]} />
     </group>
   )
 }

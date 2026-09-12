@@ -1,19 +1,15 @@
 import { MATERIALS as M } from '../materials'
+import { Cyl } from './primitives'
 import { PartHit, type PartMeshProps } from './PartHit'
 
-const LEGS = Array.from({ length: 6 }, (_, i) => (i * Math.PI * 2) / 6)
-
+/** Bakelite base, stainless mesh can. Origin at the underside. */
 export function Mq2(props: PartMeshProps) {
   return (
     <group>
-      <mesh material={M.steelMesh}><cylinderGeometry args={[1.0, 1.0, 1.6, 32]} /></mesh>
-      <mesh position={[0, -0.7, 0]} material={M.plasticBlack}><cylinderGeometry args={[1.05, 1.05, 0.25, 32]} /></mesh>
-      {LEGS.map((a) => (
-        <mesh key={a} position={[0.6 * Math.cos(a), -0.95, 0.6 * Math.sin(a)]} material={M.steel}>
-          <cylinderGeometry args={[0.04, 0.04, 0.35, 6]} />
-        </mesh>
-      ))}
-      <PartHit {...props} size={[2.2, 2.0, 2.2]} center={[0, -0.1, 0]} />
+      <Cyl r={9} h={5.5} at={[0, 2.75, 0]} mat={M.plastic} segments={40} />
+      <Cyl r={9.3} h={1} at={[0, 5.5, 0]} mat={M.aluminium} segments={40} />
+      <Cyl r={8.6} h={11} at={[0, 6 + 5.5, 0]} mat={M.steelMesh} segments={40} />
+      <PartHit {...props} size={[20, 18, 20]} center={[0, 8.5, 0]} />
     </group>
   )
 }

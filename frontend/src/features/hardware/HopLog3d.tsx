@@ -18,17 +18,16 @@ export function HopLog3d() {
   const recent = hops.slice(-SHOW).reverse()
   return (
     <div className="flex flex-col min-h-0 h-full">
-      <div className="flex items-baseline gap-4 px-5 h-10 border-b border-line font-mono text-2xs">
+      <div className="flex items-baseline gap-4 px-6 pb-3 text-sm">
         <span className="text-ink-3">{hops.length} hops seen</span>
         <span className={clsx('tabular-nums', dropCount > 0 ? 'text-alarm' : 'text-ink-3')}>{dropCount} dropped</span>
-        <span className="text-ink-3 ml-auto">15% simulated packet loss</span>
       </div>
-      <ol className="font-mono text-xs divide-y divide-line overflow-y-auto min-h-0 flex-1">
-        {recent.length === 0 && <li className="px-5 h-10 flex items-center text-ink-3">Waiting for the first hop.</li>}
+      <ol className="font-mono text-xs overflow-y-auto min-h-0 flex-1">
+        {recent.length === 0 && <li className="px-6 h-9 flex items-center text-ink-3">Waiting for the first hop.</li>}
         {recent.map((h) => {
           const dropped = h.status === 'dropped'
           return (
-            <li key={h.id} className={clsx('px-5 h-8 flex items-center gap-3 whitespace-nowrap', dropped ? 'text-alarm' : 'text-ink-2')}>
+            <li key={h.id} className={clsx('px-6 h-9 flex items-center gap-3 whitespace-nowrap border-t border-line', dropped ? 'text-alarm' : 'text-ink-2')}>
               <span className="text-ink tabular-nums">{code(h)}</span>
               <span>{h.hop_from} → {h.hop_to}</span>
               <span className="text-ink-3">hop {Math.max(1, h.path.length - 1)}</span>

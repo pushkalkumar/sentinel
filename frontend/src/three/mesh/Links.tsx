@@ -8,7 +8,7 @@ import { CAMPUS_LINKS, NODE_POS, linkKey } from './campusGeometry'
 
 const Y = 0.35
 const BASE = new THREE.Color('#3a4150')
-const HOT = new THREE.Color('#46D2E4')
+const HOT = new THREE.Color('#7F9FA0')
 const DASH_SPEED = 0.6
 const HEAT_DECAY = 1 / 0.5
 const HEAT_RISE = 1 / 0.12

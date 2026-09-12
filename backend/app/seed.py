@@ -51,9 +51,53 @@ CLASSES = [
 ]
 
 RECIPIENTS_PER_ZONE = 12
-SCHOOL_LABELS = ["Parent · 3A", "Parent · 3B", "Staff", "Parent · 4A", "Parent · 4B", "Staff",
-                 "Parent · 5A", "Parent · 5B", "Staff"]
-WAREHOUSE_LABELS = ["Crew lead", "Shift supervisor", "Night crew"]
+
+# 12 recipients per zone, keyed by zone id (CONTRACT §1.3). Numbers sit in the 555-01xx block reserved for
+# fiction so a simulated fan-out can never reach a real phone; area codes are Seattle (206) and Eastside (425).
+RECIPIENTS: dict[int, list[tuple[str, str]]] = {
+    1: [  # Campus North: main hall, library, science wing
+        ("+12065550147", "Principal, D. Whitfield"),
+        ("+12065550112", "Office manager, L. Tran"),
+        ("+14255550163", "Custodial lead, G. Morales"),
+        ("+12065550138", "School nurse, B. Feld"),
+        ("+12065550129", "Librarian, H. Park"),
+        ("+14255550171", "Science dept head, E. Sorensen"),
+        ("+12065550104", "Teacher 3A, A. Okafor"),
+        ("+14255550156", "Teacher 3B, J. Lindqvist"),
+        ("+12065550183", "Parent, 3A (Nguyen)"),
+        ("+14255550117", "Parent, 3A (Alvarez)"),
+        ("+12065550166", "Parent, 3B (Kim)"),
+        ("+12065550191", "Parent, 3B (Osei)"),
+    ],
+    2: [  # Campus South: cafeteria, arts, gym, field, south lot
+        ("+12065550122", "Athletic director, C. Ruiz"),
+        ("+14255550134", "Cafeteria manager, R. Singh"),
+        ("+12065550158", "Night custodian, P. Abebe"),
+        ("+12065550175", "Teacher 4A, R. Patel"),
+        ("+14255550142", "Teacher 4B, M. Castillo"),
+        ("+12065550109", "Teacher 5A, K. Nakamura"),
+        ("+14255550187", "Teacher 5B, S. Haddad"),
+        ("+12065550151", "Parent, 4A (Johansson)"),
+        ("+14255550126", "Parent, 4B (Delgado)"),
+        ("+12065550194", "Parent, 5A (Mbeki)"),
+        ("+14255550108", "Parent, 5B (Chen)"),
+        ("+12065550133", "Parent, 5B (Walsh)"),
+    ],
+    3: [  # Harbor Island DC-4, floor 1
+        ("+12065550176", "Ops manager, P. Venkat"),
+        ("+14255550119", "Day shift supervisor, T. Nguyen"),
+        ("+12065550143", "Night shift supervisor, E. Kowalski"),
+        ("+14255550188", "Crew lead, aisle A, J. Ortiz"),
+        ("+12065550162", "Crew lead, aisle B, M. Haile"),
+        ("+14255550137", "Dock lead, S. Brandt"),
+        ("+12065550185", "Forklift lead, D. Achebe"),
+        ("+14255550154", "Safety officer, L. Moreau"),
+        ("+12065550116", "Facilities, R. Dunne"),
+        ("+14255550172", "Night crew, A. Petrov"),
+        ("+12065550198", "Night crew, K. Yamada"),
+        ("+14255550103", "Security desk, truck gate"),
+    ],
+}
 
 
 def load_topology(path: Path = TOPOLOGY_PATH) -> dict:
@@ -114,13 +158,13 @@ def _class_rows() -> tuple[list[SchoolClass], list[RosterEntry]]:
 def _recipient_rows(zone_tenant: dict[int, int], seed_time: str) -> list[SmsRecipient]:
     rows = []
     for zone_id in sorted(zone_tenant):
-        labels = WAREHOUSE_LABELS if zone_tenant[zone_id] == 2 else SCHOOL_LABELS
-        for i in range(1, RECIPIENTS_PER_ZONE + 1):
-            rows.append(SmsRecipient(
-                tenant_id=zone_tenant[zone_id], zone_id=zone_id,
-                phone_e164=f"+1206555{zone_id:02d}{i:02d}",
-                label=labels[(i - 1) % len(labels)], consent_at=seed_time,
-            ))
+        entries = RECIPIENTS[zone_id]
+        assert len(entries) == RECIPIENTS_PER_ZONE, f"zone {zone_id} needs {RECIPIENTS_PER_ZONE} recipients"
+        rows.extend(
+            SmsRecipient(tenant_id=zone_tenant[zone_id], zone_id=zone_id, phone_e164=phone, label=label,
+                         consent_at=seed_time)
+            for phone, label in entries
+        )
     return rows
 
 

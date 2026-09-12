@@ -222,6 +222,7 @@ def main(argv: list[str] | None = None) -> int:
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s bridge %(levelname)s %(message)s",
                         datefmt="%H:%M:%S")
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     from app.config import settings
     backend = Backend(args.backend, args.sim_key or settings.sim_key)
     try:

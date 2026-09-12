@@ -1,8 +1,9 @@
 // Sentinel field node on a Particle Xenon (Device OS 1.5.2, the last Xenon release).
 //
 // Every 5 s: build a KIND_TELEMETRY SentinelMsg and advertise it as BLE manufacturer
-// data. MODE click: advertise a KIND_BUTTON message (priority 2) for BUTTON_ADV_MS,
-// then fall back to the current telemetry advert. RGB LED flashes blue on every send.
+// data. MODE click (or the byte 'b' on USB serial, for bench tests): advertise a
+// KIND_BUTTON message (priority 2) for BUTTON_ADV_MS, then fall back to the current
+// telemetry advert. RGB LED flashes blue on every send.
 //
 // No cloud, no mesh, no WiFi: SYSTEM_MODE(MANUAL) and BLE only. In production the
 // same 24-byte struct rides on LoRa (spec §3.3); only the radio is swapped.
@@ -91,6 +92,7 @@ void on_button(system_event_t event, int clicks) {
 }
 
 void setup() {
+  Serial.begin(115200);
   System.on(button_click, on_button);
   RGB.control(true);
   RGB.color(0, 0, 0);
@@ -101,6 +103,10 @@ void setup() {
 
 void loop() {
   unsigned long now = millis();
+
+  while (Serial.available()) {
+    if (Serial.read() == 'b') button_pending = true;   // bench trigger, same path as MODE
+  }
 
   if (button_pending) {
     button_pending = false;

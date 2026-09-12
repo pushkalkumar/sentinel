@@ -1,4 +1,41 @@
-// OWNER: fe-drill
-export function ByMuster() {
-  return null
+import type { DrillClass, NodeId } from '@/lib/types'
+import { Panel } from '@/components/ui/Panel'
+import { useSiteStore } from '@/store/site'
+
+export interface ByMusterProps {
+  classes: DrillClass[]
+}
+
+interface MusterRow { nodeId: NodeId; label: string; classes: number; submitted: number }
+
+function groupByMuster(classes: DrillClass[], labelFor: (id: NodeId) => string): MusterRow[] {
+  const rows = new Map<NodeId, MusterRow>()
+  for (const c of classes) {
+    const id = c.rollcall?.node_id ?? c.muster_node_id
+    const row = rows.get(id) ?? { nodeId: id, label: c.rollcall?.node_label ?? labelFor(id), classes: 0, submitted: 0 }
+    rows.set(id, { ...row, classes: row.classes + 1, submitted: row.submitted + (c.rollcall ? 1 : 0) })
+  }
+  return [...rows.values()].sort((a, b) => b.classes - a.classes || a.label.localeCompare(b.label))
+}
+
+/** DESIGN §8.3: classes per muster point, with how many have reported in. */
+export function ByMuster({ classes }: ByMusterProps) {
+  const nodes = useSiteStore((s) => s.nodes)
+  const rows = groupByMuster(classes, (id) => nodes[id]?.label ?? id)
+  return (
+    <Panel title="By muster point" padded={false}>
+      {rows.length === 0 ? (
+        <p className="px-5 py-4 text-sm text-ink-3">No classes assigned.</p>
+      ) : (
+        <ul className="divide-y divide-line">
+          {rows.map((r) => (
+            <li key={r.nodeId} className="h-8 px-5 flex items-center gap-3 text-sm">
+              <span className="text-ink flex-1 truncate" title={r.nodeId}>{r.label}</span>
+              <span className="font-mono text-xs text-ink-2 tabular-nums">{r.submitted} / {r.classes} in</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
+  )
 }

@@ -23,7 +23,8 @@ import json
 import logging
 import sys
 import time
-from datetime import datetime, timezone
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 
 import httpx
 import serial
@@ -37,12 +38,21 @@ FIELD_NODE = "xenon-a"
 GATEWAY_NODE = "xenon-b"
 SITE_GATEWAY = "hub"
 HOP_PACE_S = 0.4              # same pacing as the simulator so the animation reads the same
-HTTP_TIMEOUT_S = 3.0
+HTTP_TIMEOUT_S = 10.0           # ingest runs the alert engine synchronously; slow under a busy sim
 SERIAL_RETRY_S = 2.0
 PROBE_S = 7.0                 # node_b prints at least every 5 s; a silent Particle port is node_a
-SIM_STATE_MAX_AGE_S = 2.0
+SIM_STATE_MAX_AGE_S = 2.0      # re-poll /api/sim/state at most this often
+SIM_STATE_STALE_S = 120.0      # extrapolate the last sim clock this long before falling back to wall time
 # LiPo curve is not linear but for a demo readout this is honest enough: 3.3 V empty, 4.2 V full.
 BATT_EMPTY_MV, BATT_FULL_MV = 3300, 4200
+
+
+@dataclass(frozen=True)
+class SimClock:
+    ts: datetime        # sim_ts as reported
+    speed: float        # sim seconds per wall second
+    playing: bool
+    seen_at: float      # time.monotonic() when reported
 
 
 def wall_now_iso() -> str:
@@ -89,8 +99,8 @@ class Backend:
         self.base_url = base_url.rstrip("/")
         self.headers = {"X-Sim-Key": sim_key}
         self.client = httpx.Client(base_url=self.base_url, timeout=HTTP_TIMEOUT_S)
-        self._sim_ts: str | None = None
-        self._sim_ts_at = 0.0
+        self._sim: SimClock | None = None
+        self._sim_polled_at = -SIM_STATE_MAX_AGE_S
 
     def _reset(self) -> None:
         try:
@@ -115,19 +125,32 @@ class Backend:
             log.warning("POST %s -> non-JSON body", path)
             return None
 
-    def reading_ts(self) -> tuple[str, str]:
-        """(ts, clock_name). Sim clock when the simulator is connected, wall clock otherwise."""
-        now = time.monotonic()
-        if now - self._sim_ts_at < SIM_STATE_MAX_AGE_S and self._sim_ts:
-            return self._sim_ts, "sim"
+    def _refresh_sim(self) -> None:
         try:
             data = self.client.get("/api/sim/state").json().get("data") or {}
         except (httpx.HTTPError, ValueError) as exc:
             log.warning("GET /api/sim/state failed: %s", exc)
-            data = {}
-        if data.get("connected") and data.get("sim_ts"):
-            self._sim_ts, self._sim_ts_at = data["sim_ts"], now
-            return self._sim_ts, "sim"
+            return
+        self._sim_polled_at = time.monotonic()
+        if not (data.get("connected") and data.get("sim_ts")):
+            self._sim = None
+            return
+        self._sim = SimClock(ts=datetime.strptime(data["sim_ts"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc),
+                             speed=float(data.get("speed") or 1), playing=bool(data.get("playing")),
+                             seen_at=self._sim_polled_at)
+
+    def reading_ts(self) -> tuple[str, str]:
+        """(ts, clock_name). Sim clock while the simulator is connected, extrapolated through short backend
+        outages (uvicorn --reload windows); wall clock only when the simulator is really gone."""
+        now = time.monotonic()
+        if now - self._sim_polled_at >= SIM_STATE_MAX_AGE_S:
+            self._refresh_sim()
+            now = time.monotonic()
+        sim = self._sim
+        if sim and now - sim.seen_at < SIM_STATE_STALE_S:
+            elapsed = (now - sim.seen_at) * sim.speed if sim.playing else 0.0
+            ts = sim.ts + timedelta(seconds=elapsed)
+            return ts.isoformat(timespec="milliseconds").replace("+00:00", "Z"), "sim"
         return wall_now_iso(), "wall"
 
 

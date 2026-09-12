@@ -1,81 +1,64 @@
 # Demo script
 
-Two versions: 90 seconds at the table, 3 minutes on stage. Both use the same stack, the same identities and the same order of beats, so the stage version is the table version with two beats added and more said out loud.
+Four minutes on stage. One laptop, one projector, two Xenons on the table. The stage version is the `/demo` war room playing itself; you talk over it, press one physical button, and finish on the exploded node.
 
-## Before any judge arrives
+## Before you go up (do this five minutes early, not one)
 
-1. `make clean && make seed`, then `make dev`. Wait for the `[fe] Local:` line.
-2. Laptop hotspot on. Note the laptop's IP on that hotspot (`ipconfig getifaddr en0` or the WiFi menu). Write it on a card: `http://<laptop-ip>:5173/m`.
-3. Browser window A, left half: `/login` as `admin@sentinel.demo` / `sentinel`, land on `/admin`. Sim controls visible, Time Machine strip at the bottom, sim at 07:30, all dots green, card "Outdoor practice: OK".
-4. Browser window B, right half: `/login` as `responder@sentinel.demo` / `sentinel`, land on `/responder`. Turn the sound toggle on.
-5. Second phone (ours) joined to the hotspot with `/m/staff` open and `T-3B-7Q2` entered, waiting for a drill.
-6. Confirm `make smoke` passes. Confirm the phone loads `/m` over the hotspot.
-7. Between judges: sim control `jump calm`, resolve any open incidents in B, end any drill.
+1. Open https://sentinel-seattle.vercel.app in the browser you will present from. The backend sleeps on Render after 15 idle minutes and takes about 50 seconds to wake; the landing page's live counters tell you when it is back. Do this before you are called, never on stage.
+2. Log in at `/login` as `admin@sentinel.demo` / `sentinel`. Open `/demo`. Press F for fullscreen. Set speed to 2x. Do not press Play yet; the page sits on chapter 1 with the map calm.
+3. Press R once so the director resets to calm and clears any rows a previous run left behind.
+4. Plug both Xenons into the laptop. Xenon A blinks blue every 5 s, Xenon B blinks green when it hears A. In a terminal: `make bridge`. Wait for the line that says it is posting readings. Open `/hardware` in a second tab and confirm the live panel shows Xenon A with a fresh reading.
+5. Slides open in a third tab or a second window, three slides only.
+6. Back to the `/demo` tab. That is the one on the projector when your name is called.
 
-## 90 seconds at the table
+Local fallback if the venue network is bad: `make clean && make seed && make dev`, then the same steps at http://localhost:5173. The bridge posts to `:8000` by default.
 
-Say the first line while the judge is still sitting down.
+## The four minutes
 
-| t | Route and click | Say |
+| t | On screen | Say |
 |---|---|---|
-| 0:00 | A: `/admin`, calm. Point at the card. | "Every emergency app assumes the internet exists. Sentinel doesn't. This is a school on a normal morning: eight nodes, all green, practice is on." |
-| 0:10 | A: sim controls, `jump smoke`. Dots go orange then red together; card flips to "Cancel outdoor practice", PM2.5 about 71 at Athletic Field. | "Smoke afternoon. Every node climbs together. That's the sky, not the building, so the card cancels practice and nothing else happens." |
-| 0:25 | A: click the gym dot to select it, then `trigger fire` at selected node. Gym alone turns alarm red with a double ring; banner solid red; hop dash gym to science to hub. | "One node spiking while its neighbours are flat is a fire in that aisle. Every node climbing together is the sky. That's the whole algorithm, and it fits on a slide." |
-| 0:35 | A: click the gym dot again. Sky vs Building drawer opens: `LOCAL_FIRE`, three passing checks with live numbers, gym bar far right of the median line. | "Rules, not a model. Here is the exact test and the numbers it saw." Close the drawer. |
-| 0:45 | Hand the judge the card with the URL. Judge's phone: `/m`, tap `I need help`, pick `Gymnasium`, tap `Trapped`, count 2, `Send report`. Code appears, e.g. `SN-7K3F`. | "You can't fake standing next to the box. Only a phone on the node's own WiFi can open a verified report, and only a responder can close it." |
-| 1:00 | B: `/responder` pings; queue row shows the code, Trapped, `Verified 70`. Click it. `/responder/incident/SN-XXXX`: trust meter 70, timeline. Click `Acknowledge`, then type a note and `Resolve`. | "Proximity plus the sensor agreeing with them. Acknowledged, resolved with a note, and every action is in the audit log with an IP." |
-| 1:15 | Judge's phone: `/m/status` flips to Resolved on its own. | "Their receipt updates live. Now turn off the WiFi. Do it again." Do the offline beat only if there is a second judge with a phone; otherwise say it and point to `/hardware` for the follow-up. |
-| 1:25 | A: hover the Time Machine track, drag the handle back to 13:30, then press LIVE. | "Every decision is stored with the numbers that caused it, so a principal can replay the afternoon." |
+| 0:00 | Slide 1: the box on a wall, price, one line. | "Disaster hardware fails because it sits unused. This box earns its wall every month: it decides whether practice goes outside in smoke season and it runs the fire drill Washington requires. Then, on the bad day, it is already there." |
+| 0:20 | Slide 2: the algorithm, one sentence. | "The whole algorithm fits on this slide. One node spiking while its neighbours are flat is a fire in that aisle. Every node climbing together is the sky." |
+| 0:40 | Slide 3: what is real today. Campus from OpenStreetMap, two boards on the table, rules decide, model advises. | "Everything you are about to see runs on the public site. The campus is Roosevelt High, from OpenStreetMap. Two real boards are on this table. The alerts are decided by rules you can read; a small model sits beside them and says when it disagrees." |
+| 1:00 | Switch to `/demo`. Press Play. Chapter 1, calm. | "07:30. Eight nodes, all green, practice is on. Every emergency app assumes the internet exists. Sentinel doesn't." |
+| 1:10 | Chapter 2, smoke. Dots go orange together, card flips to "Cancel outdoor practice". | "Smoke afternoon. Every node climbs together. That's the sky, not the building, so the card cancels practice and nothing else happens." |
+| 1:25 | Chapter 3, fire. Gym alone goes alarm red, hop dash gym to science to hub, `LOCAL_FIRE` in the decision panel. | "One node spiking while its neighbours are flat is a fire in that aisle. Every node climbing together is the sky. That's the whole algorithm." Pause until the hop reaches the hub. |
+| 1:45 | Chapter 4, report. Incident card appears: Trapped, 2, "Gym storage room, door jammed", Verified. Beside the phone mock, the triage card shows the reporter's words in quotes with type, count and urgency, and a basis line saying whether Gemini or the keyword rules read it. | "Only a phone standing next to the box can open a verified report. This one is standing next to the gym node, and the gym's own sensors agree with it. The model read the text and agrees; it did not decide anything. Only a responder can close it." |
+| 2:05 | Chapter 5, responder. Timeline fills: acknowledged, en route with a note, resolved "Crew 3 walked both out". The situation brief under the header rewrites itself from the stored rows. | "Acknowledged, en route, resolved with a note. Every action is in the audit log with an IP. The reporter's phone flipped to Resolved on its own." Press space to pause here. Chapters 6 and 7 exist if a judge asks about drills; you do not run them on stage. |
+| 2:30 | Pick up Xenon A. Press MODE once. Toast on screen; a hop travels `xenon-a -> xenon-b -> hub` on the live map. | "Turn off the WiFi. Do it again." Hold the board up. "This is not the simulator. Same 24-byte message our nodes will send over LoRa, over Bluetooth for today, relayed by the second board, on the map." |
+| 2:50 | Switch to `/hardware`. Drag explode to 1. Point at the live panel with A's last reading and B's relay. | "Thirty-one dollars a node at a thousand units. Schematic, BOM, power budget and firmware are in the repo. The ESP32 node is designed, not fabricated; these two are the radio layer standing in for it." |
+| 3:10 | Stay on `/hardware`, explode back to 0. | "Rules decide. Humans resolve. The model advises and is honest about being trained on a simulated day. Sentinel drafts the emergency alert; your agency sends it. Thank you." |
+| 3:25 | Done. Leave the war room up for questions. | Questions. Keep `/demo` paused on chapter 5; the map still shows the fire, the incident and the audit trail, which is what most questions point at. |
 
-Optional closer if the judge is a buyer: A: `/admin/drill`, `Start fire drill`; our phone switches to roll call; submit 28 present with two missing; tile 3B goes amber `28 / 30`. "A sentinel that only wakes up for the disaster is asleep when it matters. Ours takes attendance every month, so it's awake."
+Thirty-five seconds of slack. Spend it on the pause after the hop reaches the hub, not on talking faster.
 
-## 3 minutes on stage
+## If a judge wants more
 
-Same beats, with the offline beat and the drill beat always included and the pitch said in full at the top.
+- Drills: press right arrow twice. Chapter 6 musters six classes; 3B comes in `28 / 30` with two named missing. "A sentinel that only wakes up for the disaster is asleep when it matters."
+- All clear: chapter 7. Overrides decay and the engine closes the fire alert itself. "Nothing here needed the internet."
+- The model: `/admin`, click the gym dot. The explain drawer shows the rule that fired with live numbers and, under it, the Second Opinion panel with the model's class probabilities, whether it agrees with the open rule branch, and the drift note. `GET /api/ml/model-card` on the backend URL shows the training metadata and the confusion matrix.
+- Gemini: the triage card in chapter 4 and the situation brief on `/demo` are the two live surfaces. Both carry a `basis` line; with the key set it names the model, without it it says `fallback: keyword rules`. `POST /api/ai/triage` with a sentence in Spanish or Hindi returns the detected language and an English summary quoting the original; the phone report page does not call it yet.
 
-| t | Route and click | Say |
-|---|---|---|
-| 0:00 | A: `/`, landing, hop dash crossing the hero card. | The 30-second pitch from `docs/NOVELTY.md` §4, cut to the audience: drop the warehouse sentence for a school crowd, drop the drill sentence for investors. |
-| 0:30 | A: `/admin`, calm. `jump smoke`. | "Every node climbing together is the sky. The card cancels practice. Registered parents in the zone get a text; here is the outbox." Click through to `/admin/alerts`, point at the SMS outbox and its SIM tag, come back to `/admin`. |
-| 0:55 | A: select the gym dot, `trigger fire`. | "One node spiking while its neighbours are flat is a fire in that aisle. Every node climbing together is the sky. That's the whole algorithm, and it fits on a slide." |
-| 1:05 | A: click gym, Sky vs Building drawer. | "Dryad puts the intelligence in each sensor. We put it between the sensors, because in a schoolyard the sky itself is the false alarm. Three checks, live numbers, no model." |
-| 1:20 | Judge one's phone on the hotspot: `/m`, `I need help`, `Gymnasium`, `Trapped`, 2, `Send report`. Code on screen. B pings, queue shows `Verified 70`. | "You can't fake standing next to the box. Only a phone on the node's own WiFi can open a verified report, and only a responder can close it." |
-| 1:40 | Turn off the laptop's uplink WiFi (keep the hotspot). Judge two's phone: same report from `Gymnasium`. Code appears; B shows a second row, `Verified 90` (crowd corroboration). | "Turn off the WiFi. Do it again." Say nothing else until the second code is on the screen. Then: "Nothing here needed the internet." |
-| 2:05 | B: open the first incident, `Acknowledge`, note, `Resolve`. Judge one's phone flips to Resolved. Click `Draft WEA` on the incident. Modal: `FRW`, 90 and 360 counters, polygon with 4 vertices. | "Sentinel drafts the alert. Your agency sends it. We're not pretending to be FEMA; we're making sure the fire department's message is already written when they log in." Close the modal. |
-| 2:30 | A: `/admin/drill`, `Start fire drill`. Our phone switches to roll call; submit 28 present, `S-3B-07` and `S-3B-19` missing. Tile 3B amber `28 / 30`, missing list shows both with Athletic Field. | "A sentinel that only wakes up for the disaster is asleep when it matters. Ours takes attendance every month, so it's awake." |
-| 2:50 | A: `/hardware`, drag explode to 1. | "Thirty-one dollars a node at a thousand units. Designed, not fabricated; schematic, BOM and firmware are in the repo. Thank you." |
+## Failure playbook
 
-## The offline beat, and what to do if it fails
-
-The hotspot and the uplink are different radios on the laptop. Turn off only the uplink (the WiFi network the laptop joined), never the hotspot. The phone's request goes hotspot to Vite to backend on the same machine; nothing leaves the laptop.
-
-If the second phone cannot reach the page after the uplink is off:
-
-1. Do not debug on stage. Say "the demo network is the laptop; let me show you the same thing from the first phone" and repeat the report from judge one's phone.
-2. If the backend or simulator has also gone quiet, drag the Time Machine handle back to the moment the fire fired. The map, dots and card read stored state, so the picture holds while you talk.
-3. Turn the uplink back on after the demo, not during it.
+1. **Render is asleep.** Symptom: the landing page counters stay blank, `/demo` says loading, or the login spins. Cause: nobody hit the API for 15 minutes. Fix: open the site five minutes before you are called. On stage, if it happens anyway, present slides 1 to 3 slowly and press Play when the header shows LIVE; the wake takes about 50 seconds. Never refresh repeatedly; each hit resets nothing and the container still needs its boot time.
+2. **Gemini is down or rate-limited.** Nothing on stage depends on it. The triage and brief endpoints fall back to keyword rules within 8 seconds and label the result `fallback: keyword rules` with a reason. If a judge asks, point at the label: "The product does the same thing without the model; it just says so."
+3. **Bridge is not running.** Symptom: MODE press does nothing on the map, `/hardware` live panel says none yet. Fix in a spare terminal: `make bridge` (or `make bridge PORT=/dev/tty.usbmodem1401`). It auto-detects the gateway port and reconnects every 2 s. If the board is blinking magenta, it is in safe mode; skip the button beat and say "the hop you saw in chapter 3 is the same path".
+4. **Bridge says duplicate ts (sim paused?).** The director is paused, so the sim clock is not moving and readings collide on `(node_id, ts)`. Press space to resume, or `jump calm` from `/admin`. The button hop still posts.
+5. **A chapter reports a wait timed out.** The director shows what it saw and moves on; the map holds the last state. Press left then right arrow to re-run the chapter; chapters are idempotent.
+6. **WebSocket stuck** (LIVE pill stays on RECONNECTING, dots frozen): reload the tab. The page rehydrates from one overview call. You stay logged in.
+7. **Card did not flip after the smoke chapter:** the 10-minute rolling average lags. Wait three seconds; if still calm, left then right arrow.
+8. **Fire did not open in chapter 3:** the gym had less than five sim minutes of history. Re-run the chapter; it waits for history before lighting.
+9. **Total loss:** play the 60-second backup video from the desktop and narrate it with the table above.
 
 ## Which judge gets which line
 
 | Judge | Lead with | Line |
 |---|---|---|
-| Aayush Shah (Amazon AGI), Rishi Cheruku (Amazon) | The neighbour-median fire test and the flooding mesh. Open Sky vs Building early. | "That's the whole algorithm, and it fits on a slide." Then: "rules first, no LLM in the loop, here is why." |
-| Surbhi Jha (NVIDIA) | Edge server runs the same container as cloud; ingest is idempotent on `(node_id, ts)`; OTA over LoRa in chunks. | "Node alone, node plus a Pi, or cloud. Three tiers, same code." |
-| Jonathan Briggs (Eastside Prep CTIO) | He is the buyer. BOM and price per building, the drill grid replacing clipboards. Run the drill beat. | "A sentinel that only wakes up for the disaster is asleep when it matters. Ours takes attendance every month, so it's awake." |
-| Dr. Mo Zhou (Eastside Prep, data science) | The decision card, `/admin/air` with the smoke-day curves, and the Time Machine. The simulated day is the shape of a real dataset. | "Every decision is stored with the numbers that caused it." |
-| Floor judges from Seattle tech and VC | Warehouse loss prevention is the revenue story; schools are distribution. Trust score and responder-only close for the abuse question. | "You can't fake standing next to the box." |
+| Amazon (Aayush Shah, Rishi Cheruku) | The neighbour-median test and where the model sits relative to it. | "Rules decide, the model advises. Here is the disagreement log it would take to change that." |
+| NVIDIA (Surbhi Jha) | Same container on a Pi at the site or in the cloud; ingest idempotent on `(node_id, ts)`; the model is numpy, no GPU, under a millisecond. | "Node alone, node plus a Pi, or cloud. Three tiers, same code." |
+| Eastside Prep CTIO (Jonathan Briggs) | He is the buyer. Price per building, the drill grid replacing clipboards. Run chapter 6. | "A sentinel that only wakes up for the disaster is asleep when it matters." |
+| Eastside Prep data science (Dr. Mo Zhou) | The model card, the confusion matrix, why the labels come from the scenario and not the rules. | "It is not a copy of the rules, and it is not trained on real fires. Both are on the card." |
+| Floor judges from Seattle tech and VC | Warehouse loss prevention is the revenue story; schools are distribution. | "You can't fake standing next to the box." |
 | Anyone who raises Dryad or Meshtastic | Name them first. | "They put the intelligence in each sensor. We put it between the sensors, because in a schoolyard the sky itself is the false alarm." |
-| Anyone with public-sector experience | The WEA draft modal. | "Sentinel drafts the alert. Your agency sends it." |
-
-## Failure playbook
-
-1. Simulator down (dashboard says "simulator offline", `GET /api/sim/state` returns `connected: false`): in a spare terminal, `make sim`. It reconnects without a backend restart.
-2. WebSocket stuck (LIVE pill stays on RECONNECTING, dots frozen): reload the tab. The page re-hydrates from one `overview` call.
-3. Backend down: `make backend` in a spare terminal. Tokens are signed, so nobody logs in again; tabs reconnect on their own.
-4. Phone cannot load the page: check the phone is on the hotspot, not the venue WiFi, and that the URL uses the hotspot IP, not `localhost`. Re-read the IP from the WiFi menu; it changes when the hotspot restarts.
-5. Phone loads but the report returns an error: if the copy says blocked, the dev toggle is on; long-press the wordmark on `/m` to turn it off. If it says three open reports, resolve them in B.
-6. Fire does not fire after `trigger fire`: make sure a node was selected first; if not, select the gym dot and trigger again. If the sim clock is before 13:00 the gym still fires; the check is relative to neighbours.
-7. Card did not flip after `jump smoke`: wait three seconds; the 10-minute rolling average lags. If still calm, `jump smoke` again.
-8. Responder queue empty after a phone report: the report may have been queued by the flood guard (more than 20 per node in 10 minutes). Use `clear`, `jump calm`, and report again from a different node.
-9. Anything visual wrong during the fire: drag the Time Machine handle back a few minutes to a stored state and keep talking; press LIVE when the live view looks right again.
-10. Total loss: play the 60-second backup video from the desktop and narrate it with this script.
+| Anyone with public-sector experience | The WEA draft modal on an incident. | "Sentinel drafts the alert. Your agency sends it." |

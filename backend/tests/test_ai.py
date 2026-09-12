@@ -127,7 +127,7 @@ async def test_client_live_success_validates_and_caches():
     assert out["basis"].startswith("gemini-2.5-flash second opinion")
     assert out["type"] == "trapped" and out["rules"]["type"] == "fire" and out["cached"] is False
     assert out["human_decides"] == rules.HUMAN_DECIDES
-    assert str(seen[0].url) == f"{API_BASE}/gemini-2.5-flash:generateContent"
+    assert str(seen[0].url) == f"{API_BASE}/gemini-flash-lite-latest:generateContent"
     assert seen[0].headers["x-goog-api-key"] == "test" and "key=" not in str(seen[0].url)
     again = await c.triage(SPANISH)
     assert again["cached"] is True and c.calls_used == 1 and c.status()["cache_size"] == 1

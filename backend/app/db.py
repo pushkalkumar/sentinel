@@ -53,6 +53,7 @@ async def init_db() -> None:
     if settings.reset_db:
         await engine.dispose()
         _delete_db_file()
+        log.info("SENTINEL_RESET_DB=1: database reset (%s)", settings.db_url)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

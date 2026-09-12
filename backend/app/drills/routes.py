@@ -1,6 +1,7 @@
 """Drill and roll-call routes (CONTRACT §3.8)."""
 from __future__ import annotations
 
+import asyncio
 from typing import Literal
 
 from fastapi import APIRouter, Depends, Query, Response
@@ -17,6 +18,9 @@ from app.timefmt import now_iso
 from app.ws import hub
 
 router = APIRouter()
+
+# Two admins clicking "start drill" together must not both pass the open-drill check and insert.
+_create_lock = asyncio.Lock()
 
 AnyStaff = Depends(require_roles("admin", "teacher", "responder"))
 AdminOnly = Depends(require_roles("admin"))
@@ -64,11 +68,12 @@ async def _drill_or_404(session: AsyncSession, drill_id: int) -> Drill:
 @router.post("/drills", status_code=201)
 async def create_drill(body: DrillCreate, session: SessionDep, principal: Principal = AdminOnly) -> dict:
     await _gate_site(session, principal, body.site_id)
-    if await service.get_open_drill(session, body.site_id) is not None:
-        raise ApiError("CONFLICT", f"a drill is already open at site {body.site_id}")
-    drill = Drill(site_id=body.site_id, kind=body.kind, is_real=False, started_at=now_iso(), started_by=principal.uid)
-    session.add(drill)
-    await session.commit()
+    async with _create_lock:
+        if await service.get_open_drill(session, body.site_id) is not None:
+            raise ApiError("CONFLICT", f"a drill is already open at site {body.site_id}")
+        drill = Drill(site_id=body.site_id, kind=body.kind, is_real=False, started_at=now_iso(), started_by=principal.uid)
+        session.add(drill)
+        await session.commit()
     data = await service.drill_to_dict(session, drill)
     await hub.broadcast("drill_started", data)
     return ok(data)

@@ -18,6 +18,8 @@ from app.seed import seed_if_empty
 from app.state import state
 from app.timefmt import now_iso
 
+# uvicorn configures only its own loggers; without this the app's INFO lines (seed, reset, startup) never print.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 log = logging.getLogger("sentinel")
 
 ROUTER_MODULES = (
@@ -29,9 +31,13 @@ ROUTER_MODULES = (
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    if settings.reset_db:
+        log.warning("SENTINEL_RESET_DB=1: dropping the database and reseeding")
     await init_db()
     async with SessionLocal() as session:
-        await seed_if_empty(session)
+        seeded = await seed_if_empty(session)
+    log.info("sentinel %s ready: db=%s seeded=%s sim_url=%s routers=%d",
+             settings.version, settings.db_url, "fresh" if seeded else "existing", settings.sim_url, len(MOUNTED))
     yield
     await engine.dispose()
 

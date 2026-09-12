@@ -65,6 +65,8 @@ async def rewind_history(session, sim_ts: str) -> None:
     state.last_eval.clear()
     state.site_band.clear()          # decision.py restores it lazily from decision_log
     state.pending_all_clear.clear()
+    from app.alerts import ingest
+    ingest._last_status.clear()      # node_status dedup keys describe a future that no longer exists
     log.info("rewound history to %s (%d alerts dropped)", sim_ts, len(doomed))
 
 

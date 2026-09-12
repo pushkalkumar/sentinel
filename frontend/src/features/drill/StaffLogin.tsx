@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import type { StaffLoginResponse } from '@/lib/types'
 import { isApiError, staffLogin } from '@/lib/api'
 import { Input } from '@/components/ui/Input'
+import { FieldButton } from '@/features/phone/FieldButton'
+import { RING } from '@/features/phone/surface'
 
 export interface StaffLoginProps {
   onSuccess: (res: StaffLoginResponse) => void
@@ -36,10 +38,10 @@ export function StaffLogin({ onSuccess }: StaffLoginProps) {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5 pt-6" noValidate>
+    <form onSubmit={submit} className="flex flex-col gap-8 pt-8" noValidate>
       <div>
-        <h1 className="text-[28px] font-bold leading-tight text-f-ink">Staff sign in</h1>
-        <p className="text-[16px] text-f-ink-2 mt-1">Enter the code from your staff badge. Your class loads with it.</p>
+        <h1 className="text-[26px] font-semibold leading-tight text-f-ink">Staff sign in</h1>
+        <p className="text-[17px] leading-6 text-f-ink-2 mt-1 text-pretty">Enter the code from your staff badge. Your class loads with it.</p>
       </div>
       <Input
         fieldSize="phone"
@@ -53,15 +55,9 @@ export function StaffLogin({ onSuccess }: StaffLoginProps) {
         spellCheck={false}
         inputMode="text"
         error={error}
-        className="font-field-mono text-[20px] tracking-wider uppercase"
+        className={`border-transparent ${RING} rounded-lg font-field-mono text-[20px] tracking-wider uppercase`}
       />
-      <button
-        type="submit"
-        disabled={busy || code.trim().length === 0}
-        className="h-16 w-full rounded-sm bg-f-ink text-white text-[20px] font-semibold disabled:opacity-45"
-      >
-        {busy ? 'Checking...' : 'Continue'}
-      </button>
+      <FieldButton type="submit" variant="ink" loading={busy} disabled={code.trim().length === 0}>Continue</FieldButton>
     </form>
   )
 }

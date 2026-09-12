@@ -1,10 +1,11 @@
 import { useCallback, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { useLive } from '@/lib/live'
-import { SimTag } from '@/components/ui/SimTag'
+import { SIM_TAG_TEXT } from '@/components/ui/SimTag'
 import { useSessionStore } from '@/store/session'
 import { useSiteStore } from '@/store/site'
 import { usePhoneStore } from '@/features/phone/phoneStore'
+import { HONESTY } from '@/features/phone/surface'
 import { BandBanner } from '@/features/phone/BandBanner'
 import { NodePicker } from '@/features/phone/NodePicker'
 
@@ -40,12 +41,12 @@ export function PhoneShell() {
         <div className="sticky top-0 z-30">
           <BandBanner node={node} loading={loading} error={error} />
         </div>
-        <main className="flex-1 px-5 pb-8">
+        <main className="flex-1 px-6 pb-10">
           <Outlet />
         </main>
         {pathname === '/m' && (
-          <footer className="px-5 pb-6">
-            <SimTag kind="phone" ground="light" className="h-auto min-h-[22px] py-1 whitespace-normal [&_span]:whitespace-normal [&_span]:overflow-visible" />
+          <footer className="px-6 pb-8">
+            <p className={HONESTY}>{SIM_TAG_TEXT.phone}</p>
           </footer>
         )}
       </div>

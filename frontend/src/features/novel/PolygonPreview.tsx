@@ -20,7 +20,7 @@ export function PolygonPreview({ zone, nodes, affectedIds, vertexCount, viewBox 
 
   return (
     <div className="flex flex-col gap-2 min-w-0">
-      <svg viewBox={viewBox} role="img" aria-label={zone ? `${zone.name} polygon with ${affectedIds.length} affected nodes` : 'No zone polygon'} className="w-full rounded-sm hairline bg-canvas">
+      <svg viewBox={viewBox} role="img" aria-label={zone ? `${zone.name} polygon with ${affectedIds.length} affected nodes` : 'No zone polygon'} className="w-full rounded-lg bg-canvas">
         <defs>
           <pattern id="wea-grid" width="50" height="50" patternUnits="userSpaceOnUse">
             <path d="M50 0H0V50" fill="none" stroke="var(--color-line-faint)" strokeWidth={1} />
@@ -43,14 +43,11 @@ export function PolygonPreview({ zone, nodes, affectedIds, vertexCount, viewBox 
             </g>
           )
         })}
-        {!points && (
-          <text x="500" y="350" textAnchor="middle" fontSize={24} fill="var(--color-ink-3)">No zone polygon for this alert</text>
-        )}
       </svg>
-      <div className="flex items-center gap-3 font-mono text-xs text-ink-3">
-        <span className="text-ink-2">{zone?.name ?? 'Zone unknown'}</span>
-        <span className={overCap ? 'text-alarm' : undefined}>vertices: {vertexCount} / {WEA_VERTEX_CAP}</span>
-        <span className="ml-auto">{affectedIds.length} node{affectedIds.length === 1 ? '' : 's'} affected</span>
+      <div className="flex items-center gap-4 text-xs text-ink-3">
+        <span className="text-ink-2">{zone?.name ?? 'No zone polygon for this alert'}</span>
+        <span className={overCap ? 'text-alarm' : undefined}><span className="font-mono">{vertexCount}</span> of <span className="font-mono">{WEA_VERTEX_CAP}</span> vertices</span>
+        <span className="ml-auto"><span className="font-mono">{affectedIds.length}</span> node{affectedIds.length === 1 ? '' : 's'} affected</span>
       </div>
     </div>
   )

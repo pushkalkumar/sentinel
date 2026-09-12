@@ -5,15 +5,15 @@ import { errorText, getDrillReport } from '@/lib/api'
 import { elapsed, fmtWall, fmtWallZoned } from '@/lib/time'
 import { DRILL_KIND_LABEL } from '@/features/drill/kinds'
 
-const TH = 'text-left text-[12px] uppercase tracking-[0.08em] font-semibold text-f-ink-2 py-2 pr-4 border-b border-f-line-strong'
-const TD = 'py-2 pr-4 border-b border-f-line text-[14px] text-f-ink align-top'
+const TH = 'text-left text-[13px] font-medium text-f-ink-2 pb-2 pr-4 border-b border-f-line'
+const TD = 'py-2.5 pr-4 border-b border-f-line text-[14px] text-f-ink align-top'
 const MONO = 'font-field-mono tabular-nums'
 
 function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="min-w-0">
-      <div className="text-[12px] uppercase tracking-[0.08em] font-semibold text-f-ink-2">{label}</div>
-      <div className="text-[16px] text-f-ink mt-0.5">{children}</div>
+      <div className="text-[13px] text-f-ink-2">{label}</div>
+      <div className="text-[16px] text-f-ink mt-1">{children}</div>
     </div>
   )
 }
@@ -62,22 +62,22 @@ function ReportBody({ report }: { report: DrillReportT }) {
   const kind = DRILL_KIND_LABEL[drill.kind]
   return (
     <article>
-      <header className="flex items-start justify-between gap-6 border-b border-f-ink pb-5">
+      <header className="flex items-start justify-between gap-6 border-b border-f-ink pb-6">
         <div>
-          <div className="text-[12px] uppercase tracking-[0.08em] font-semibold text-f-ink-2">Sentinel · {kind} record</div>
-          <h1 className="text-[28px] font-bold leading-tight mt-1">{site.name}</h1>
+          <p className="text-[14px] text-f-ink-2">Sentinel {kind.toLowerCase()} record</p>
+          <h1 className="text-[28px] font-semibold leading-tight mt-1">{site.name}</h1>
           <p className="text-[14px] text-f-ink-2 mt-1">{site.address}</p>
         </div>
         <button
           type="button"
           onClick={() => window.print()}
-          className="print:hidden h-12 px-5 rounded-sm bg-f-ink text-white text-[16px] font-semibold shrink-0"
+          className="print:hidden h-11 px-5 rounded-lg bg-f-ink text-white text-[15px] font-semibold shrink-0 active:scale-[0.98]"
         >
           Print
         </button>
       </header>
 
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4 py-5 border-b border-f-line">
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-6 py-8">
         <Fact label="Drill">{kind}{drill.is_real ? ' (real event)' : ''}</Fact>
         <Fact label="Started">
           <span className={MONO} title={fmtWallZoned(drill.started_at)}>{fmtWall(drill.started_at, 'HH:mm:ss')}</span>
@@ -95,19 +95,18 @@ function ReportBody({ report }: { report: DrillReportT }) {
           <span className={MONO}>{compliance.time_to_full_rollcall_s === null ? 'not reached' : elapsed(compliance.time_to_full_rollcall_s)}</span>
         </Fact>
         <Fact label="Students">
-          <span className={MONO}>{drill.summary.present_total} present · {drill.summary.missing_total} missing · {drill.summary.roster_total} enrolled</span>
+          <span className={MONO}>{drill.summary.present_total}</span> present, <span className={MONO}>{drill.summary.missing_total}</span> missing, <span className={MONO}>{drill.summary.roster_total}</span> enrolled
         </Fact>
       </section>
 
-      <section className="py-5 border-b border-f-line">
-        <div className="text-[12px] uppercase tracking-[0.08em] font-semibold text-f-ink-2">Compliance</div>
-        <p className="text-[16px] mt-1">
+      <section className="pb-8">
+        <p className="text-[16px] text-pretty">
           Filed under <span className="font-semibold">{compliance.statute}</span>. Keep this record with the site&apos;s emergency plan.
         </p>
       </section>
 
-      <section className="py-5">
-        <h2 className="text-[18px] font-bold mb-2">Classes</h2>
+      <section className="pb-8">
+        <h2 className="text-[18px] font-semibold mb-3">Classes</h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
@@ -144,8 +143,8 @@ function ReportBody({ report }: { report: DrillReportT }) {
         </div>
       </section>
 
-      <section className="py-5">
-        <h2 className="text-[18px] font-bold mb-2">Missing students</h2>
+      <section className="pb-8">
+        <h2 className="text-[18px] font-semibold mb-3">Missing students</h2>
         {report.missing.length === 0 ? (
           <p className="text-[14px] text-f-ink-2">No students were reported missing.</p>
         ) : (
@@ -170,8 +169,8 @@ function ReportBody({ report }: { report: DrillReportT }) {
         )}
       </section>
 
-      <footer className="pt-4 border-t border-f-line text-[14px] text-f-ink-2">
-        Generated <span className={MONO} title={fmtWallZoned(report.generated_at)}>{fmtWall(report.generated_at, 'HH:mm:ss')}</span> · drill #{drill.id}
+      <footer className="pt-4 text-[13px] text-f-ink-2">
+        Generated <span className={MONO} title={fmtWallZoned(report.generated_at)}>{fmtWall(report.generated_at, 'HH:mm:ss')}</span>, drill <span className={MONO}>#{drill.id}</span>
       </footer>
     </article>
   )

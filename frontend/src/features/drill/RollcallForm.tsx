@@ -4,6 +4,8 @@ import type { ClassInfo, Drill, Node, NodeId, Rollcall } from '@/lib/types'
 import { errorText, submitRollcall } from '@/lib/api'
 import { elapsed, fmtWall, fmtWallZoned } from '@/lib/time'
 import { Stepper } from '@/components/ui/Stepper'
+import { FieldButton } from '@/features/phone/FieldButton'
+import { FIELD_INPUT, SLAB } from '@/features/phone/surface'
 import { RosterChips } from './RosterChips'
 import { drillElapsedS, useNowTick } from './clock'
 import { DRILL_KIND_LABEL } from './kinds'
@@ -83,88 +85,75 @@ export function RollcallForm({ drill, classInfo, nodes, onSubmitted }: RollcallF
   const defaultLabel = nodes.find((n) => n.id === classInfo.muster_node_id)?.label ?? classInfo.muster_node_id
 
   return (
-    <div className="flex flex-col gap-6 pt-4">
+    <div className="flex flex-col gap-8 pt-8">
       <div>
-        <div className="font-field-mono text-[14px] text-f-ink-2 uppercase tracking-wider tabular-nums">
-          {DRILL_KIND_LABEL[drill.kind]} · {elapsed(drillSecs)}
-        </div>
-        <h1 className="text-[28px] font-bold leading-tight text-f-ink mt-1">Class {classInfo.name}</h1>
-        <p className="text-[16px] text-f-ink-2 mt-1">{classInfo.roster_size} on the roster · usual muster point {defaultLabel}</p>
+        <p className="text-[15px] text-f-ink-2 tabular-nums">
+          {DRILL_KIND_LABEL[drill.kind]}, <span className="font-field-mono">{elapsed(drillSecs)}</span> elapsed
+        </p>
+        <h1 className="text-[26px] font-semibold leading-tight text-f-ink mt-1">Class {classInfo.name}</h1>
+        <p className="text-[17px] leading-6 text-f-ink-2 mt-1 text-pretty">{classInfo.roster_size} on the roster. Usual muster point {defaultLabel}.</p>
       </div>
 
       {!editing && submitted ? (
         <div className="flex flex-col gap-5">
-          <div className="rounded-md border border-f-line-strong bg-f-surface p-5">
-            <div className="text-[14px] text-f-ink-2 uppercase tracking-wider font-semibold">Roll call submitted</div>
-            <div className="text-[32px] font-bold font-field-mono tabular-nums mt-1 text-f-ink">
-              {submitted.present} / {classInfo.roster_size}
-            </div>
-            <p className="text-[16px] text-f-ink-2 mt-1">
+          <div className={`${SLAB} p-5`}>
+            <p className="text-[15px] text-f-ink-2">Roll call submitted</p>
+            <p className="text-[40px] font-semibold font-field-mono tabular-nums leading-none mt-2 text-f-ink">
+              {submitted.present} <span className="text-f-ink-2 font-normal">/ {classInfo.roster_size}</span>
+            </p>
+            <p className="text-[17px] leading-6 text-f-ink mt-3 text-pretty">
               {submitted.missing_refs.length === 0 ? 'Everyone accounted for.' : `${submitted.missing_refs.length} missing: ${submitted.missing_refs.join(', ')}`}
             </p>
-            <p className="text-[14px] text-f-ink-2 mt-3">
-              Sent <span className="font-field-mono" title={fmtWallZoned(submitted.submitted_at)}>{fmtWall(submitted.submitted_at, 'HH:mm:ss')}</span> from {submitted.node_label}. The office has it.
+            <p className="text-[14px] leading-5 text-f-ink-2 mt-3">
+              Sent <span className="font-field-mono tabular-nums" title={fmtWallZoned(submitted.submitted_at)}>{fmtWall(submitted.submitted_at, 'HH:mm:ss')}</span> from {submitted.node_label}. The office has it.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={startResubmit}
-            className="h-16 w-full rounded-sm border-[1.5px] border-f-line-strong bg-f-surface text-f-ink text-[20px] font-semibold active:bg-f-canvas"
-          >
-            Resubmit
-          </button>
+          <FieldButton onClick={startResubmit}>Resubmit</FieldButton>
         </div>
       ) : (
         <>
-          <section>
-            <div className="text-[16px] text-f-ink-2 mb-2" id="present-label">Present</div>
+          <section className="flex items-center justify-between gap-4">
+            <span className="text-[17px] text-f-ink" id="present-label">Present</span>
             <Stepper value={present} onChange={changePresent} min={0} max={classInfo.roster_size} label="Present" />
           </section>
 
           <section>
-            <div className="text-[16px] text-f-ink-2 mb-2">
-              Missing <span className="text-f-ink-2">(tap names)</span>
-              {missing.length > 0 && <span className="font-field-mono tabular-nums text-f-ink"> · {missing.length}</span>}
-            </div>
+            <p className="flex items-baseline justify-between gap-4 text-[17px] text-f-ink mb-3">
+              <span>Missing <span className="text-f-ink-2">(tap names)</span></span>
+              {missing.length > 0 && <span className="font-field-mono tabular-nums">{missing.length}</span>}
+            </p>
             <RosterChips roster={classInfo.roster} missing={missing} onToggle={toggleMissing} disabled={busy} />
           </section>
 
           <section>
             <label className="block">
-              <span className="block text-[16px] text-f-ink-2 mb-2">Muster point</span>
+              <span className="block text-[17px] text-f-ink mb-2">Muster point</span>
               <span className="relative block">
                 <select
                   value={nodeId}
                   onChange={(e) => setNodeId(e.target.value)}
                   disabled={busy}
-                  className="appearance-none h-16 w-full rounded-sm bg-f-surface border-[1.5px] border-f-line-strong text-f-ink text-[20px] px-4 pr-12 outline-none focus:border-f-signal"
+                  className={`appearance-none h-16 ${FIELD_INPUT} pr-12 text-[19px]`}
                 >
                   {nodeOptions.length === 0 && <option value={classInfo.muster_node_id}>{defaultLabel}</option>}
                   {nodeOptions.map((n) => (
                     <option key={n.id} value={n.id}>{n.label}</option>
                   ))}
                 </select>
-                <ChevronDown size={24} strokeWidth={1.5} aria-hidden className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-f-ink-2" />
+                <ChevronDown size={22} strokeWidth={1.5} aria-hidden className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-f-ink-2" />
               </span>
             </label>
-            <p className="text-[14px] text-f-ink-2 mt-2">{NODE_PICKER_NOTE}</p>
+            <p className="text-[14px] leading-5 text-f-ink-2 mt-2 text-pretty">{NODE_PICKER_NOTE}</p>
           </section>
 
           {mismatch && !error && (
-            <p className="text-[14px] text-f-ink-2">
+            <p className="text-[15px] leading-5 text-f-ink-2 text-pretty">
               {present} present + {missing.length} missing = {total}. The roster has {classInfo.roster_size}; the office will reject a count that does not add up.
             </p>
           )}
           {error && <p className="text-[16px] text-f-alarm" role="alert">{error}</p>}
 
-          <button
-            type="button"
-            onClick={submit}
-            disabled={busy}
-            className="h-16 w-full rounded-sm bg-f-signal text-white text-[20px] font-semibold disabled:opacity-45"
-          >
-            {busy ? 'Sending...' : 'Submit roll call'}
-          </button>
+          <FieldButton variant="ink" onClick={submit} loading={busy}>Submit roll call</FieldButton>
         </>
       )}
     </div>

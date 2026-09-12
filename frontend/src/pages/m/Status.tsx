@@ -7,6 +7,7 @@ import { fmtWall, fmtWallZoned } from '@/lib/time'
 import { useIncidentStore } from '@/store/incidents'
 import { StatusTimeline } from '@/features/phone/StatusTimeline'
 import { FieldButton } from '@/features/phone/FieldButton'
+import { SLAB } from '@/features/phone/surface'
 
 const POLL_MS = 10_000
 
@@ -54,10 +55,10 @@ export default function Status() {
 
   if (!hasCode) {
     return (
-      <div className="flex flex-col gap-4 pt-6 font-field">
-        <h1 className="text-[28px] font-bold leading-tight text-f-ink">No code given</h1>
-        <p className="text-[16px] text-f-ink-2">Go back and enter the code from your report.</p>
-        <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 text-[18px] font-semibold text-f-signal">
+      <div className="flex flex-col gap-4 pt-8 font-field">
+        <h1 className="text-[26px] font-semibold leading-tight text-f-ink">No code given</h1>
+        <p className="text-[17px] text-f-ink-2">Go back and enter the code from your report.</p>
+        <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 text-[17px] font-medium text-f-signal">
           <ArrowLeft size={20} strokeWidth={1.5} aria-hidden /> Back
         </Link>
       </div>
@@ -68,17 +69,20 @@ export default function Status() {
   const messages = incident?.timeline.filter((e) => e.action === 'message') ?? []
 
   return (
-    <div className="flex flex-col gap-6 pt-3 font-field">
+    <div className="flex flex-col gap-8 pt-2 font-field">
       <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 -ml-1 px-1 text-[16px] text-f-ink-2 self-start">
         <ArrowLeft size={20} strokeWidth={1.5} aria-hidden /> Back
       </Link>
 
-      <h1 className="font-field-mono text-[40px] font-bold leading-none text-f-ink tabular-nums">{code}</h1>
+      <div>
+        <p className="text-[15px] text-f-ink-2">Your report</p>
+        <h1 className="font-field-mono text-[40px] font-semibold leading-none tracking-[0.02em] text-f-ink tabular-nums mt-1">{code}</h1>
+      </div>
 
-      {loading && !incident && <p className="text-[16px] text-f-ink-2">Looking up your report...</p>}
+      {loading && !incident && <p className="text-[16px] text-f-ink-2">Looking up your report</p>}
 
       {error && !incident && (
-        <p role="alert" className="text-[16px] text-f-alarm">{error}</p>
+        <p role="alert" className="text-[17px] leading-6 text-f-ink text-pretty">{error}</p>
       )}
 
       {incident && status && (
@@ -89,16 +93,16 @@ export default function Status() {
             <p className="text-[16px] text-f-alarm">A responder flagged this report as false. Find a staff member if you still need help.</p>
           )}
           {status === 'resolved' && (
-            <p className="text-[18px] font-semibold text-f-ink">Resolved. If you still need help, send a new report.</p>
+            <p className="text-[18px] font-medium text-f-ink">Resolved. If you still need help, send a new report.</p>
           )}
 
           {messages.length > 0 && (
             <section className="flex flex-col gap-3" aria-label="Messages from responders">
               {messages.map((m, i) => (
-                <blockquote key={`${m.at}-${i}`} className="rounded-md bg-f-surface border border-f-line px-4 py-3">
-                  <p className="text-[18px] text-f-ink leading-snug">"{m.note}"</p>
-                  <footer className="mt-1 font-field-mono text-[14px] text-f-ink-2 tabular-nums">
-                    Responder · <time dateTime={m.at} title={fmtWallZoned(m.at)}>{fmtWall(m.at)}</time>
+                <blockquote key={`${m.at}-${i}`} className={`${SLAB} px-5 py-4`}>
+                  <p className="text-[18px] text-f-ink leading-snug text-pretty">{m.note}</p>
+                  <footer className="mt-2 text-[14px] text-f-ink-2">
+                    Responder, <time dateTime={m.at} title={fmtWallZoned(m.at)} className="font-field-mono tabular-nums">{fmtWall(m.at)}</time>
                   </footer>
                 </blockquote>
               ))}

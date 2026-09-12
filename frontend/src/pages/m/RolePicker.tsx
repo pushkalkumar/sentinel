@@ -4,6 +4,7 @@ import { useSessionStore } from '@/store/session'
 import { usePhoneStore } from '@/features/phone/phoneStore'
 import { FieldButton } from '@/features/phone/FieldButton'
 import { DevToggle } from '@/features/phone/DevToggle'
+import { RING, SLAB } from '@/features/phone/surface'
 
 /** CONTRACT §4.4 alphabet: no 0/O/1/I/L. */
 const CODE_CHARS = /[^ABCDEFGHJKMNPQRSTUVWXYZ23456789]/g
@@ -16,7 +17,8 @@ export default function RolePicker() {
   const openPicker = usePhoneStore((s) => s.openPicker)
   const [code, setCode] = useState('')
 
-  const siteLine = node ? `${node.site.name} · ${node.label}` : pickedNodeId ? `node ${pickedNodeId}` : 'No node picked'
+  const siteLine = node ? node.site.name : pickedNodeId ? `Node ${pickedNodeId}` : 'No node picked'
+  const placeLine = node ? node.label : null
 
   const submitCode = (e: FormEvent) => {
     e.preventDefault()
@@ -25,28 +27,31 @@ export default function RolePicker() {
   }
 
   return (
-    <div className="flex flex-col gap-6 pt-5 font-field">
+    <div className="flex flex-col gap-8 pt-8 font-field">
       <div>
         <DevToggle>
-          <span className="block text-[28px] font-bold leading-tight text-f-ink">Sentinel</span>
+          <span className="block text-[30px] font-semibold leading-none tracking-[-0.01em] text-f-ink">Sentinel</span>
         </DevToggle>
-        <p className="text-[16px] text-f-ink-2">{siteLine}</p>
-        <button type="button" onClick={openPicker} className="min-h-12 -ml-1 px-1 text-[16px] font-semibold text-f-signal underline-offset-4 underline">
+        <p className="text-[17px] text-f-ink-2 mt-2">
+          {siteLine}
+          {placeLine && <span className="text-f-ink"> {placeLine}</span>}
+        </p>
+        <button type="button" onClick={openPicker} className="min-h-12 -ml-1 px-1 text-[16px] font-medium text-f-signal">
           {pickedNodeId ? 'Change node' : 'Pick the node next to you'}
         </button>
       </div>
 
       <nav className="flex flex-col gap-3" aria-label="Who are you">
         <FieldButton height={72} variant="ink" onClick={() => navigate('/m/report')}>I need help</FieldButton>
-        <FieldButton height={72} onClick={() => navigate('/m/staff')}>I'm staff</FieldButton>
-        <FieldButton height={72} onClick={() => navigate('/m/responder')}>I'm a responder</FieldButton>
+        <FieldButton height={64} onClick={() => navigate('/m/staff')}>I'm staff</FieldButton>
+        <FieldButton height={64} onClick={() => navigate('/m/responder')}>I'm a responder</FieldButton>
       </nav>
 
-      <form onSubmit={submitCode} className="flex flex-col gap-2" noValidate>
-        <label htmlFor="have-code" className="text-[18px] text-f-ink">Have a code?</label>
+      <form onSubmit={submitCode} className="flex flex-col gap-3" noValidate>
+        <label htmlFor="have-code" className="text-[17px] text-f-ink">Have a code?</label>
         <div className="flex gap-2">
-          <div className="flex-1 min-w-0 flex items-center h-16 rounded-sm bg-f-surface border border-f-line-strong px-4 focus-within:border-f-signal">
-            <span aria-hidden className="font-field-mono text-[22px] text-f-ink-2 tabular-nums">SN-</span>
+          <div className={`flex-1 min-w-0 flex items-center h-16 px-4 ${SLAB} rounded-lg ${RING} focus-within:shadow-[0_0_0_2px_var(--color-f-signal)]`}>
+            <span aria-hidden className="font-field-mono text-[22px] text-f-ink-2/60 tabular-nums">SN-</span>
             <input
               id="have-code"
               value={code}
@@ -59,7 +64,7 @@ export default function RolePicker() {
               inputMode="text"
               maxLength={CODE_LEN}
               aria-describedby="code-hint"
-              className="flex-1 min-w-0 h-full bg-transparent outline-none font-field-mono text-[22px] tracking-[0.2em] text-f-ink placeholder:text-f-ink-2 placeholder:tracking-[0.2em] uppercase tabular-nums"
+              className="flex-1 min-w-0 h-full bg-transparent outline-none font-field-mono text-[22px] tracking-[0.18em] text-f-ink placeholder:text-f-ink-2/40 placeholder:tracking-[0.18em] uppercase tabular-nums"
             />
           </div>
           <FieldButton type="submit" block={false} className="w-24 shrink-0" disabled={code.length !== CODE_LEN}>Check</FieldButton>

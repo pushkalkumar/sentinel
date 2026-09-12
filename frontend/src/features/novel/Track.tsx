@@ -84,15 +84,15 @@ export function Track({ data, bounds }: TrackProps) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         onKeyDown={onKeyDown}
-        className="relative h-8 rounded-sm hairline bg-canvas cursor-ew-resize touch-none outline-none focus-visible:border-signal-line"
+        className="relative h-7 rounded-sm bg-canvas cursor-ew-resize touch-none outline-none focus-visible:shadow-[0_0_0_2px_var(--color-accent-line)]"
       >
-        <svg viewBox={`0 0 ${SPARK_W} ${SPARK_H}`} preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-6 w-full" aria-hidden>
+        <svg viewBox={`0 0 ${SPARK_W} ${SPARK_H}`} preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-5 w-full" aria-hidden>
           {spark.area && <path d={spark.area} fill="var(--color-signal-dim)" />}
-          {spark.line && <path d={spark.line} fill="none" stroke="var(--color-signal)" strokeOpacity={0.5} strokeWidth={1} vectorEffect="non-scaling-stroke" />}
+          {spark.line && <path d={spark.line} fill="none" stroke="var(--color-signal)" strokeOpacity={0.45} strokeWidth={1} vectorEffect="non-scaling-stroke" />}
         </svg>
         {hours.map((h) => {
           const x = msToFrac(bounds.startMs + (h - DAY_START_H) * 3_600_000, bounds) * 100
-          return <i key={h} aria-hidden className="absolute bottom-0 w-px h-2 bg-line-strong" style={{ left: `${x}%` }} />
+          return <i key={h} aria-hidden className="absolute bottom-0 w-px h-1.5 bg-line" style={{ left: `${x}%` }} />
         })}
         {liveFrac !== null && active && (
           <i aria-hidden title={`Live ${fmtSim(liveTs)}`} className="absolute inset-y-0 w-px bg-ink-4" style={{ left: `${liveFrac * 100}%` }} />
@@ -106,12 +106,12 @@ export function Track({ data, bounds }: TrackProps) {
             style={{ left: `${handleFrac * 100}%` }}
             aria-hidden
           >
-            <div className={clsx('absolute inset-y-0 left-1/2 w-px', active ? 'bg-ink' : 'bg-signal')} />
-            <div className={clsx('absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-4 rounded-xs border', active ? 'bg-ink border-ink' : 'bg-signal border-signal')} />
+            <div className={clsx('absolute inset-y-0 left-1/2 w-px', active ? 'bg-accent' : 'bg-signal')} />
+            <div className={clsx('absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-3.5 rounded-xs', active ? 'bg-accent' : 'bg-signal')} />
           </motion.div>
         )}
       </div>
-      <div className="relative h-4 font-mono text-2xs text-ink-3" aria-hidden>
+      <div className="relative h-4 mt-0.5 font-mono text-2xs text-ink-3" aria-hidden>
         {hours.filter((h) => h % 2 === 1 || h === DAY_START_H).map((h) => {
           const x = msToFrac(bounds.startMs + (h - DAY_START_H) * 3_600_000, bounds) * 100
           return (

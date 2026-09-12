@@ -33,12 +33,12 @@ function AlertPin({ a, bounds }: { a: TimelineAlert; bounds: DayBounds }) {
         transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
         onClick={() => scrubTo(a.started_at)}
         aria-label={`${meta?.label ?? a.kind} at ${fmtSim(a.started_at)}${a.node_label ? `, ${a.node_label}` : ''}`}
-        className="block w-3 h-4 flex items-end justify-center cursor-pointer"
+        className="block w-3 h-4 flex items-end justify-center cursor-pointer opacity-80 hover:opacity-100 focus-visible:opacity-100 transition-[opacity] duration-[120ms]"
       >
         <i
           aria-hidden
           className={clsx('block rounded-full', a.priority <= 2 ? 'size-2' : 'size-1.5')}
-          style={{ background: color, boxShadow: a.priority === 1 ? `0 0 0 2px ${color}44` : undefined }}
+          style={{ background: color }}
         />
       </motion.button>
       <div
@@ -54,15 +54,15 @@ function AlertPin({ a, bounds }: { a: TimelineAlert; bounds: DayBounds }) {
       >
         <div className="flex items-center gap-2 mb-1.5">
           <i aria-hidden className="size-1.5 rounded-full" style={{ background: PRIORITY_COLOR[a.priority] }} />
-          <span className="font-mono text-xs text-ink">{a.kind}</span>
+          <span className="text-xs font-medium text-ink">{meta?.label ?? a.kind}</span>
           <span className="ml-auto font-mono text-2xs text-ink-3">{fmtSim(a.started_at)}</span>
         </div>
-        <p className="font-mono text-xs text-ink-2 break-words">{a.reason || 'No reason recorded.'}</p>
+        <p className="text-xs text-ink-2 break-words">{a.reason || 'No reason recorded.'}</p>
         {a.node_id && (
           <button
             type="button"
             onClick={() => openExplain(a.node_id as string, a.started_at)}
-            className="mt-2 text-xs text-signal hover:underline"
+            className="mt-2 text-xs text-accent hover:underline"
           >
             Show math
           </button>
@@ -84,12 +84,12 @@ function IncidentPin({ i, bounds }: { i: TimelineIncident; bounds: DayBounds }) 
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
       onClick={() => scrubTo(i.sim_at as string)}
-      title={`${i.code} · ${i.type} · ${i.status} · trust ${i.trust_score}`}
+      title={`${i.code}, ${i.type}, ${i.status}, trust ${i.trust_score}`}
       aria-label={`Incident ${i.code} at ${fmtSim(i.sim_at)}`}
-      className="absolute top-0 -translate-x-1/2 w-3 h-3 flex items-center justify-center cursor-pointer"
+      className="absolute top-0 -translate-x-1/2 w-3 h-3 flex items-start justify-center cursor-pointer opacity-70 hover:opacity-100 focus-visible:opacity-100 transition-[opacity] duration-[120ms]"
       style={{ left }}
     >
-      <i aria-hidden className="block size-1.5 rotate-45 bg-ink-2" />
+      <i aria-hidden className="block w-0.5 h-2 rounded-full bg-ink-2" />
     </motion.button>
   )
 }

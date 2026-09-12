@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Copy, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import type { Alert, NodeId, WeaDraft } from '@/lib/types'
 import { errorText, getWeaDraft, listAlerts } from '@/lib/api'
 import { useUiStore } from '@/store/ui'
@@ -21,8 +21,6 @@ type WeaDraftFull = WeaDraft & {
   vertex_count?: number
   nodes_affected?: number
 }
-
-const HEADER_NOTE = 'Sentinel drafts. Your agency issues through IPAWS. Nothing is sent from here.'
 
 function ringLength(polygon: WeaDraft['polygon']): number {
   const coords = (polygon as { coordinates?: unknown }).coordinates
@@ -55,20 +53,20 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-function Chip({ label, value }: { label: string; value: string }) {
+function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 h-[22px] px-2 rounded-sm hairline font-mono text-xs whitespace-nowrap">
-      <span className="text-ink-3">{label}</span>
-      <span className="text-ink">{value}</span>
-    </span>
+    <div className="min-w-0">
+      <dt className="text-xs text-ink-3">{label}</dt>
+      <dd className="font-mono text-sm text-ink truncate mt-0.5" title={value}>{value}</dd>
+    </div>
   )
 }
 
 function Field({ id, label, limit, value, onChange, rows }: { id: string; label: string; limit: number; value: string; onChange: (v: string) => void; rows: number }) {
   return (
     <label htmlFor={id} className="block min-w-0">
-      <span className="flex items-baseline justify-between mb-1.5">
-        <span className="label-signage">{label}</span>
+      <span className="flex items-baseline justify-between mb-2">
+        <span className="text-sm text-ink-2">{label}</span>
         <CharCounter count={value.length} limit={limit} />
       </span>
       <textarea
@@ -77,7 +75,7 @@ function Field({ id, label, limit, value, onChange, rows }: { id: string; label:
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={value.length > limit || undefined}
-        className="w-full rounded-sm bg-raised hairline text-ink px-3 py-2 text-base outline-none focus:border-signal-line resize-y"
+        className="w-full rounded-md bg-raised text-ink px-3.5 py-2.5 text-base leading-6 outline-none focus:shadow-[0_0_0_2px_var(--color-accent-line)] resize-y transition-[box-shadow] duration-[120ms]"
       />
     </label>
   )
@@ -152,36 +150,33 @@ function ModalBody({ alertId }: { alertId: number }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-6 p-6 overflow-y-auto min-h-0">
-        <div className="flex flex-col gap-4 min-w-0">
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-10 px-8 pt-2 pb-8 overflow-y-auto min-h-0">
+        <div className="flex flex-col gap-6 min-w-0">
           {!eligible && draft.eligibility_note && (
-            <p className="rounded-sm bg-warn-dim text-warn text-sm px-3 py-2">{draft.eligibility_note}</p>
+            <p className="rounded-md bg-warn-dim text-warn text-sm px-3.5 py-2.5">{draft.eligibility_note}</p>
           )}
-          <div className="flex flex-col gap-1">
-            <span className="label-signage">Headline</span>
-            <p className="text-base text-ink">{draft.headline}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Chip label="event" value={draft.event_code} />
-            <Chip label="severity" value={draft.severity} />
-            <Chip label="urgency" value={draft.urgency} />
-            <Chip label="certainty" value={draft.certainty} />
-          </div>
-          <Field id="wea-90" label="90 character text" limit={LIMIT_90} value={text90} onChange={setText90} rows={3} />
-          <Field id="wea-360" label="360 character text" limit={LIMIT_360} value={text360} onChange={setText360} rows={6} />
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-xs text-ink-3">
-            <dt>sender</dt><dd className="text-ink-2">{draft.sender}</dd>
-            <dt>area</dt><dd className="text-ink-2">{draft.area_description}</dd>
+          <h3 className="display-h2 text-xl text-ink text-balance">{draft.headline}</h3>
+          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3">
+            <Fact label="Event" value={draft.event_code} />
+            <Fact label="Severity" value={draft.severity} />
+            <Fact label="Urgency" value={draft.urgency} />
+            <Fact label="Certainty" value={draft.certainty} />
+          </dl>
+          <Field id="wea-90" label="Short text, 90 characters" limit={LIMIT_90} value={text90} onChange={setText90} rows={2} />
+          <Field id="wea-360" label="Long text, 360 characters" limit={LIMIT_360} value={text360} onChange={setText360} rows={7} />
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
+            <dt className="text-ink-3">Sender</dt><dd className="text-ink-2 truncate" title={draft.sender}>{draft.sender}</dd>
+            <dt className="text-ink-3">Area</dt><dd className="text-ink-2">{draft.area_description}</dd>
           </dl>
         </div>
         <PolygonPreview zone={zone} nodes={nodes} affectedIds={affectedIds} vertexCount={vertexCount} viewBox={viewBox} />
       </div>
-      <footer className="shrink-0 flex flex-col gap-3 px-6 py-4 border-t border-line md:flex-row md:items-center">
-        <p className="text-xs text-ink-3 md:flex-1 md:min-w-0">{draft.disclaimer}</p>
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-        <Button variant="secondary" icon={Copy} onClick={() => void copy('the CAP XML', draft.cap_xml)} disabled={!draft.cap_xml}>Copy CAP XML</Button>
-        <Button variant="secondary" icon={Copy} onClick={() => void copy('the 90 character text', text90)}>Copy 90</Button>
-        <Button variant="primary" icon={Copy} onClick={() => void copy('the 360 character text', text360)}>Copy 360</Button>
+      <footer className="shrink-0 flex flex-col gap-4 px-8 py-5 bg-raised md:flex-row md:items-center">
+        <p className="text-xs text-ink-3 md:flex-1 md:min-w-0 text-pretty">{draft.disclaimer}</p>
+        <div className="flex flex-wrap items-center gap-1 shrink-0">
+          <Button variant="ghost" onClick={() => void copy('the CAP XML', draft.cap_xml)} disabled={!draft.cap_xml}>Copy CAP XML</Button>
+          <Button variant="ghost" onClick={() => void copy('the 90 character text', text90)}>Copy short text</Button>
+          <Button variant="primary" className="ml-2" onClick={() => void copy('the 360 character text', text360)}>Copy long text</Button>
         </div>
       </footer>
     </>
@@ -220,13 +215,12 @@ export function WeaDraftModal() {
             initial={reduced ? false : { y: 8, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.32, ease: [0.2, 0, 0, 1] }}
-            className="bg-overlay rounded-md w-full max-w-[960px] max-h-[calc(100dvh-32px)] flex flex-col overflow-hidden"
+            className="bg-surface rounded-xl w-full max-w-[960px] max-h-[calc(100dvh-32px)] flex flex-col overflow-hidden"
             style={{ boxShadow: 'var(--shadow-overlay)' }}
           >
-            <header className="h-12 shrink-0 flex items-center gap-4 px-6 border-b border-line">
-              <h2 id="wea-title" className="label-signage">Draft WEA</h2>
-              <span className="text-sm text-ink-2 truncate">{HEADER_NOTE}</span>
-              <button type="button" onClick={closeWea} aria-label="Close" className="ml-auto text-ink-3 hover:text-ink shrink-0">
+            <header className="h-16 shrink-0 flex items-center gap-4 px-8">
+              <h2 id="wea-title" className="display-h2 text-lg text-ink">Draft a wireless emergency alert</h2>
+              <button type="button" onClick={closeWea} aria-label="Close" className="ml-auto -mr-2 size-8 inline-flex items-center justify-center rounded-md text-ink-3 hover:text-ink hover:bg-[rgba(255,255,255,0.04)] shrink-0 transition-[color,background-color] duration-[120ms]">
                 <X size={16} strokeWidth={1.5} />
               </button>
             </header>

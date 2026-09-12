@@ -93,7 +93,7 @@ export default function Staff() {
   }
 
   if (restoring) {
-    return <p className="pt-6 text-[16px] text-f-ink-2">Checking your sign in...</p>
+    return <p className="pt-8 text-[16px] text-f-ink-2">Checking your sign in</p>
   }
 
   if (!isTeacher || !classInfo) {
@@ -104,36 +104,47 @@ export default function Staff() {
     return <RollcallForm key={active.id} drill={active} classInfo={classInfo} nodes={nodes} onSubmitted={setActive} />
   }
 
+  const musterLabel = nodes.find((n) => n.id === classInfo.muster_node_id)?.label ?? classInfo.muster_node_id
+
   return (
-    <div className="flex flex-col gap-6 pt-6">
+    <div className="flex flex-col gap-8 pt-8">
       <div>
-        <div className="text-[14px] text-f-ink-2 uppercase tracking-wider font-semibold">Class {classInfo.name}</div>
         {endedView ? (
           <>
-            <h1 className="text-[28px] font-bold leading-tight text-f-ink mt-1">
+            <h1 className="text-[26px] font-semibold leading-tight text-f-ink text-balance">
               Drill ended at <span className="font-field-mono tabular-nums" title={fmtWallZoned(endedView.ended_at)}>{fmtWall(endedView.ended_at)}</span>. Thank you.
             </h1>
-            <p className="text-[16px] text-f-ink-2 mt-2">This page switches back to roll call when the office starts another drill.</p>
+            <p className="text-[17px] leading-6 text-f-ink-2 mt-2 text-pretty">This page switches back to roll call when the office starts another drill.</p>
           </>
         ) : (
           <>
-            <h1 className="text-[28px] font-bold leading-tight text-f-ink mt-1">No drill running.</h1>
-            <p className="text-[16px] text-f-ink-2 mt-2">This page switches to roll call when the office starts one.</p>
+            <h1 className="text-[26px] font-semibold leading-tight text-f-ink">No drill running.</h1>
+            <p className="text-[17px] leading-6 text-f-ink-2 mt-2 text-pretty">This page switches to roll call when the office starts one.</p>
           </>
         )}
       </div>
-      <div className="rounded-md border border-f-line bg-f-surface p-5">
-        <div className="text-[14px] text-f-ink-2">Signed in for</div>
-        <div className="text-[20px] font-semibold text-f-ink mt-0.5">Class {classInfo.name} · {classInfo.roster_size} students</div>
-        <div className="text-[14px] text-f-ink-2 mt-1">
-          Muster point {nodes.find((n) => n.id === classInfo.muster_node_id)?.label ?? classInfo.muster_node_id}
+
+      <dl className="flex flex-col gap-3 text-[17px]">
+        <div className="flex items-baseline justify-between gap-4">
+          <dt className="text-f-ink-2">Signed in for</dt>
+          <dd className="text-f-ink font-medium">Class {classInfo.name}</dd>
         </div>
-      </div>
+        <div className="flex items-baseline justify-between gap-4">
+          <dt className="text-f-ink-2">On the roster</dt>
+          <dd className="text-f-ink font-medium tabular-nums">{classInfo.roster_size}</dd>
+        </div>
+        <div className="flex items-baseline justify-between gap-4">
+          <dt className="text-f-ink-2">Muster point</dt>
+          <dd className="text-f-ink font-medium text-right">{musterLabel}</dd>
+        </div>
+      </dl>
+
       {pollError && <p className="text-[14px] text-f-alarm">{pollError}</p>}
+
       <button
         type="button"
         onClick={() => { logout(); setActive(null); setEndedView(null) }}
-        className="h-12 self-start px-4 rounded-sm text-[16px] font-semibold text-f-ink-2 underline-offset-4 hover:underline"
+        className="min-h-12 self-start -ml-1 px-1 text-[16px] font-medium text-f-signal"
       >
         Use a different code
       </button>

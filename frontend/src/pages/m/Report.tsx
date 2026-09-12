@@ -7,6 +7,7 @@ import { Stepper } from '@/components/ui/Stepper'
 import { TypeTiles } from '@/features/phone/TypeTiles'
 import { CodeScreen } from '@/features/phone/CodeScreen'
 import { FieldButton } from '@/features/phone/FieldButton'
+import { FIELD_INPUT } from '@/features/phone/surface'
 
 const TEXT_MAX = 280
 const GEO_TIMEOUT_MS = 8000
@@ -71,45 +72,45 @@ export default function Report() {
   const geoChecked = geo.state === 'on' || geo.state === 'asking'
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-6 pt-3 font-field" noValidate>
+    <form onSubmit={submit} className="flex flex-col gap-8 pt-2 font-field" noValidate>
       <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 -ml-1 px-1 text-[16px] text-f-ink-2 self-start">
         <ArrowLeft size={20} strokeWidth={1.5} aria-hidden /> Back
       </Link>
 
-      <section className="flex flex-col gap-3">
-        <h1 className="text-[24px] font-bold leading-tight text-f-ink">What is happening?</h1>
+      <section className="flex flex-col gap-4">
+        <h1 className="text-[26px] font-semibold leading-tight text-f-ink">What is happening?</h1>
         <TypeTiles value={type} onChange={(t) => { setType(t); if (error) setError(null) }} />
       </section>
 
       <section className="flex items-center justify-between gap-4">
-        <span className="text-[18px] text-f-ink">How many people?</span>
+        <span className="text-[17px] text-f-ink">How many people?</span>
         <Stepper value={count} onChange={setCount} min={1} max={500} label="How many people" />
       </section>
 
       <label className="block">
-        <span className="block text-[18px] text-f-ink mb-1.5">Anything else?</span>
+        <span className="block text-[17px] text-f-ink mb-2">Anything else?</span>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, TEXT_MAX))}
           rows={2}
           maxLength={TEXT_MAX}
           placeholder="Room, floor, what you see"
-          className="w-full rounded-sm bg-f-surface border border-f-line-strong text-f-ink placeholder:text-f-ink-2 px-4 py-3 outline-none font-field text-[18px] focus:border-f-signal resize-y"
+          className={`${FIELD_INPUT} py-3.5 resize-y`}
         />
-        <span className="block mt-1 text-[14px] text-f-ink-2 tabular-nums text-right">{text.length} / {TEXT_MAX}</span>
+        <span className="block mt-1.5 text-[14px] text-f-ink-2 tabular-nums text-right">{text.length} / {TEXT_MAX}</span>
       </label>
 
-      <label className="flex items-center gap-3 min-h-12 cursor-pointer">
+      <label className="flex items-center gap-4 min-h-12 cursor-pointer">
         <input
           type="checkbox"
           checked={geoChecked}
           onChange={(e) => toggleGeo(e.target.checked)}
-          className="size-7 shrink-0 accent-[var(--color-f-signal)]"
+          className="size-7 shrink-0 accent-[var(--color-f-ink)]"
         />
-        <span className="text-[18px] text-f-ink">
+        <span className="text-[17px] text-f-ink">
           Share my location
-          <span className="block text-[14px] text-f-ink-2">
-            {geo.state === 'asking' && 'Asking your phone...'}
+          <span className="block text-[14px] leading-5 text-f-ink-2">
+            {geo.state === 'asking' && 'Asking your phone'}
             {geo.state === 'on' && 'Location attached.'}
             {geo.state === 'failed' && 'Location not available. The report still works without it.'}
             {geo.state === 'off' && 'Optional. Helps responders find you.'}
@@ -119,7 +120,7 @@ export default function Report() {
 
       {error && <p role="alert" className="text-[16px] text-f-alarm">{error}</p>}
 
-      <FieldButton type="submit" variant="signal" loading={busy} disabled={!type}>Send report</FieldButton>
+      <FieldButton type="submit" variant="ink" loading={busy} disabled={!type}>Send report</FieldButton>
     </form>
   )
 }

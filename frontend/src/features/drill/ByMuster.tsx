@@ -25,13 +25,16 @@ export function ByMuster({ classes }: ByMusterProps) {
   return (
     <Panel title="By muster point" padded={false}>
       {rows.length === 0 ? (
-        <p className="px-5 py-4 text-sm text-ink-3">No classes assigned.</p>
+        <p className="px-panel pt-2 pb-5 text-sm text-ink-3">No classes assigned.</p>
       ) : (
-        <ul className="divide-y divide-line">
+        <ul className="px-panel pb-3">
           {rows.map((r) => (
-            <li key={r.nodeId} className="h-8 px-5 flex items-center gap-3 text-sm">
+            <li key={r.nodeId} className="h-9 flex items-center gap-3 text-sm border-b border-line last:border-b-0">
               <span className="text-ink flex-1 truncate" title={r.nodeId}>{r.label}</span>
-              <span className="font-mono text-xs text-ink-2 tabular-nums">{r.submitted} / {r.classes} in</span>
+              <span className="font-mono text-xs tabular-nums">
+                <span className={r.submitted === r.classes ? 'text-ink' : 'text-ink-2'}>{r.submitted}</span>
+                <span className="text-ink-4"> / {r.classes}</span>
+              </span>
             </li>
           ))}
         </ul>

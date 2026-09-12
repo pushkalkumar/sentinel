@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react'
-import { Download, ExternalLink } from 'lucide-react'
 import type { Drill as DrillT, DrillKind } from '@/lib/types'
 import { createDrill, endDrill, errorText, drillCsvUrl, getActiveDrill } from '@/lib/api'
-import { elapsed, fmtWall, fmtWallZoned } from '@/lib/time'
+import { elapsed } from '@/lib/time'
 import { useDrillStore } from '@/store/drills'
 import { useSessionStore } from '@/store/session'
 import { useUiStore } from '@/store/ui'
@@ -21,27 +20,23 @@ function LiveHeader({ drill, onEnd, ending, onDismiss }: { drill: DrillT; onEnd:
   const secs = drillElapsedS(drill, now)
   const s = drill.summary
   return (
-    <div className="flex items-end justify-between gap-6 flex-wrap py-6">
+    <div className="flex items-end justify-between gap-8 flex-wrap pt-10 pb-8">
       <div className="min-w-0">
-        <div className="label-signage mb-2">
-          {DRILL_KIND_LABEL[drill.kind]} · started <span className="font-mono normal-case tracking-normal" title={fmtWallZoned(drill.started_at)}>{fmtWall(drill.started_at, 'HH:mm:ss')}</span>
-          {!running && (
-            <>
-              {' '}· ended <span className="font-mono normal-case tracking-normal" title={fmtWallZoned(drill.ended_at)}>{fmtWall(drill.ended_at, 'HH:mm:ss')}</span>
-            </>
-          )}
-        </div>
-        <h1 className="display-h1 text-xl text-ink">
-          {s.submitted} of {s.classes} classes in · {s.missing_total} missing
+        <h1 className="display-h1 text-2xl text-ink tabular-nums">
+          {s.submitted} of {s.classes} classes in
         </h1>
+        <p className="text-base text-ink-3 mt-2">
+          {DRILL_KIND_LABEL[drill.kind]}{running ? ' running' : ' ended'}
+          {s.missing_total > 0 && <span className="text-warn">, {s.missing_total} missing</span>}
+        </p>
       </div>
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-8">
         <div className="text-right">
-          <div className="font-mono text-2xl text-ink tabular-nums leading-none">{elapsed(secs)}</div>
-          <div className="label-signage mt-1">{running ? 'elapsed' : 'final'}</div>
+          <div className="stat-number text-3xl text-ink leading-none">{elapsed(secs)}</div>
+          <div className="text-sm text-ink-3 mt-1.5">{running ? 'elapsed' : 'final'}</div>
         </div>
         {running ? (
-          <Button variant="danger" onClick={onEnd} loading={ending}>End drill</Button>
+          <Button variant="primary" onClick={onEnd} loading={ending}>Close drill</Button>
         ) : (
           <Button variant="ghost" onClick={onDismiss}>Start another</Button>
         )}
@@ -120,7 +115,7 @@ export default function Drill() {
 
   if (loading && !drill) {
     return (
-      <div className="py-6">
+      <div className="py-10">
         <Skeleton className="w-64" />
       </div>
     )
@@ -129,11 +124,10 @@ export default function Drill() {
   if (!drill) {
     return (
       <>
-        <div className="py-6">
-          <div className="label-signage mb-2">Drill</div>
-          <h1 className="display-h1 text-xl text-ink">Roll call</h1>
+        <div className="pt-10 pb-8">
+          <h1 className="display-h1 text-2xl text-ink">Roll call</h1>
         </div>
-        <section className="bg-surface hairline rounded-md">
+        <section className="bg-surface rounded-lg">
           <StartDrill onStart={start} error={error} />
         </section>
       </>
@@ -165,8 +159,8 @@ export default function Drill() {
   return (
     <>
       <LiveHeader drill={drill} onEnd={end} ending={ending} onDismiss={() => { setEndedView(null); lastActiveId.current = null }} />
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] items-start">
-        <section className="bg-surface hairline rounded-md p-5 min-h-[360px]">
+      <div className="grid gap-stack grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] items-start">
+        <section className="min-h-[320px]" aria-label="Roll call grid">
           {drill.classes.length === 0 ? (
             <p className="text-sm text-ink-3">No classes at this site yet.</p>
           ) : (
@@ -176,22 +170,17 @@ export default function Drill() {
         <aside className="flex flex-col gap-4">
           <MissingList missing={drill.missing} />
           <ByMuster classes={drill.classes} />
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="secondary"
-              icon={ExternalLink}
-              onClick={() => window.open(reportHref, '_blank', 'noopener')}
-            >
+          <div className="flex items-center gap-1 pt-2">
+            <Button variant="ghost" onClick={() => window.open(reportHref, '_blank', 'noopener')}>
               Export report
             </Button>
             <a
               href={csvHref}
               download={csvName}
               onClick={downloadCsv}
-              className="inline-flex items-center justify-center gap-2 h-9 px-3.5 rounded-sm text-base font-medium text-ink-2 hover:text-ink hover:bg-[rgba(255,255,255,0.04)]"
+              className="inline-flex items-center justify-center h-10 px-4 rounded-md text-base font-medium text-ink-2 hover:text-ink hover:bg-[rgba(255,255,255,0.04)]"
             >
-              <Download size={20} strokeWidth={1.5} aria-hidden />
-              Download CSV
+              CSV
             </a>
           </div>
         </aside>

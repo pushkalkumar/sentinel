@@ -26,38 +26,38 @@ export interface BandMeta {
 export const BAND_META: Record<BandKey, BandMeta> = {
   good: {
     label: 'Good', shortLabel: 'Good', epaName: 'Good',
-    color: '#5AD46E', dimClass: 'bg-band-good-dim', solidClass: 'bg-band-good', textClass: 'text-band-good',
+    color: '#6DB87A', dimClass: 'bg-band-good-dim', solidClass: 'bg-band-good', textClass: 'text-band-good',
     solidPill: false, inkOnSolid: '#0A0908', max: 9.0,
     headline: 'Outdoor practice: OK', guidance: 'All outdoor activity as scheduled',
   },
   moderate: {
     label: 'Moderate', shortLabel: 'Moderate', epaName: 'Moderate',
-    color: '#F2D94E', dimClass: 'bg-band-moderate-dim', solidClass: 'bg-band-moderate', textClass: 'text-band-moderate',
+    color: '#D9C45A', dimClass: 'bg-band-moderate-dim', solidClass: 'bg-band-moderate', textClass: 'text-band-moderate',
     solidPill: false, inkOnSolid: '#0A0908', max: 35.4,
     headline: 'Outdoor practice: OK, watch sensitive students', guidance: 'Outdoor activity OK; watch students with asthma',
   },
   usg: {
     label: 'Sensitive groups', shortLabel: 'Sensitive', epaName: 'Unhealthy for sensitive groups',
-    color: '#FF9A3C', dimClass: 'bg-band-usg-dim', solidClass: 'bg-band-usg', textClass: 'text-band-usg',
+    color: '#E29A52', dimClass: 'bg-band-usg-dim', solidClass: 'bg-band-usg', textClass: 'text-band-usg',
     solidPill: false, inkOnSolid: '#0A0908', max: 55.4,
     headline: 'Sensitive groups indoors', guidance: 'Sensitive students indoors; shorten outdoor PE',
   },
   unhealthy: {
     label: 'Unhealthy', shortLabel: 'Unhealthy', epaName: 'Unhealthy',
-    color: '#FF4A3D', dimClass: 'bg-band-unhealthy-dim', solidClass: 'bg-band-unhealthy', textClass: 'text-band-unhealthy',
-    solidPill: true, inkOnSolid: '#F2EEE8', max: 125.4,
+    color: '#E0574B', dimClass: 'bg-band-unhealthy-dim', solidClass: 'bg-band-unhealthy', textClass: 'text-band-unhealthy',
+    solidPill: true, inkOnSolid: '#EDE8E0', max: 125.4,
     headline: 'Cancel outdoor practice', guidance: 'Cancel outdoor practice and recess; PE indoors',
   },
   very_unhealthy: {
     label: 'Very unhealthy', shortLabel: 'V. unhealthy', epaName: 'Very unhealthy',
-    color: '#B98BF0', dimClass: 'bg-band-veryunhealthy-dim', solidClass: 'bg-band-veryunhealthy', textClass: 'text-band-veryunhealthy',
+    color: '#A88BD1', dimClass: 'bg-band-veryunhealthy-dim', solidClass: 'bg-band-veryunhealthy', textClass: 'text-band-veryunhealthy',
     solidPill: true, inkOnSolid: '#0A0908', max: 225.4,
     headline: 'All outdoor activity cancelled', guidance: 'All outdoor activity cancelled; keep windows closed',
   },
   hazardous: {
     label: 'Hazardous', shortLabel: 'Hazardous', epaName: 'Hazardous',
-    color: '#D94A62', dimClass: 'bg-band-hazardous-dim', solidClass: 'bg-band-hazardous', textClass: 'text-ink',
-    solidPill: true, inkOnSolid: '#F2EEE8', max: null,
+    color: '#B8475A', dimClass: 'bg-band-hazardous-dim', solidClass: 'bg-band-hazardous', textClass: 'text-ink',
+    solidPill: true, inkOnSolid: '#EDE8E0', max: null,
     headline: 'Shelter indoors', guidance: 'Shelter indoors; consider early dismissal',
   },
 }
@@ -83,36 +83,36 @@ export function worseBand(a: BandKey | null, b: BandKey | null): BandKey | null 
 export interface AlertMeta { label: string; color: string; dimColor: string; priority: 1 | 2 | 3 | 4 }
 
 export const ALERT_META: Record<AlertKind, AlertMeta> = {
-  LOCAL_FIRE: { label: 'Fire at node', color: '#FF4A3D', dimColor: 'rgba(255,74,61,0.14)', priority: 1 },
-  HAZARDOUS_SMOKE: { label: 'Hazardous smoke', color: '#D94A62', dimColor: 'rgba(217,74,98,0.16)', priority: 2 },
-  LOCAL_SMOKE_SUSPECT: { label: 'Local smoke suspected', color: '#FFB224', dimColor: 'rgba(255,178,36,0.14)', priority: 3 },
-  ACTIVITY_ADVISORY: { label: 'Activity advisory', color: '#46D2E4', dimColor: 'rgba(70,210,228,0.12)', priority: 4 },
+  LOCAL_FIRE: { label: 'Fire at node', color: '#E0574B', dimColor: 'rgba(224,87,75,0.14)', priority: 1 },
+  HAZARDOUS_SMOKE: { label: 'Hazardous smoke', color: '#B8475A', dimColor: 'rgba(217,74,98,0.16)', priority: 2 },
+  LOCAL_SMOKE_SUSPECT: { label: 'Local smoke suspected', color: '#D9A441', dimColor: 'rgba(255,178,36,0.14)', priority: 3 },
+  ACTIVITY_ADVISORY: { label: 'Activity advisory', color: '#7F9FA0', dimColor: 'rgba(127,159,160,0.12)', priority: 4 },
 }
 
 export interface PillMeta { label: string; color: string; dimColor: string; hollow: boolean }
 
 export const TRUST_META: Record<TrustLabel, PillMeta> = {
-  verified: { label: 'Verified', color: '#5AD46E', dimColor: 'rgba(90,212,110,0.14)', hollow: false },
-  likely: { label: 'Likely', color: '#FFB224', dimColor: 'rgba(255,178,36,0.14)', hollow: false },
-  unverified: { label: 'Unverified', color: '#6F6A62', dimColor: 'rgba(255,255,255,0.045)', hollow: true },
+  verified: { label: 'Verified', color: '#6DB87A', dimColor: 'rgba(109,184,122,0.14)', hollow: false },
+  likely: { label: 'Likely', color: '#D9A441', dimColor: 'rgba(255,178,36,0.14)', hollow: false },
+  unverified: { label: 'Unverified', color: '#6B665F', dimColor: 'rgba(255,255,255,0.045)', hollow: true },
 }
 
 export const STATUS_META: Record<IncidentStatus, PillMeta> = {
-  received: { label: 'Received', color: '#A9A39A', dimColor: 'rgba(255,255,255,0.045)', hollow: true },
-  acknowledged: { label: 'Acknowledged', color: '#46D2E4', dimColor: 'rgba(70,210,228,0.12)', hollow: false },
-  en_route: { label: 'En route', color: '#FFB224', dimColor: 'rgba(255,178,36,0.14)', hollow: false },
-  resolved: { label: 'Resolved', color: '#5AD46E', dimColor: 'rgba(90,212,110,0.14)', hollow: false },
-  false: { label: 'Flagged false', color: '#FF4A3D', dimColor: 'rgba(255,74,61,0.14)', hollow: false },
-  queued: { label: 'Queued', color: '#6F6A62', dimColor: 'rgba(255,255,255,0.045)', hollow: true },
+  received: { label: 'Received', color: '#A29C93', dimColor: 'rgba(255,255,255,0.045)', hollow: true },
+  acknowledged: { label: 'Acknowledged', color: '#7F9FA0', dimColor: 'rgba(127,159,160,0.12)', hollow: false },
+  en_route: { label: 'En route', color: '#D9A441', dimColor: 'rgba(255,178,36,0.14)', hollow: false },
+  resolved: { label: 'Resolved', color: '#6DB87A', dimColor: 'rgba(109,184,122,0.14)', hollow: false },
+  false: { label: 'Flagged false', color: '#E0574B', dimColor: 'rgba(224,87,75,0.14)', hollow: false },
+  queued: { label: 'Queued', color: '#6B665F', dimColor: 'rgba(255,255,255,0.045)', hollow: true },
 }
 
 export const NODE_STATUS_META: Record<NodeStatus, PillMeta & { pulse: boolean }> = {
-  ok: { label: 'Online', color: '#5AD46E', dimColor: 'transparent', hollow: false, pulse: false },
-  watch: { label: 'Watch', color: '#FFB224', dimColor: 'transparent', hollow: false, pulse: false },
-  alert: { label: 'Alerting', color: '#FF4A3D', dimColor: 'transparent', hollow: false, pulse: true },
+  ok: { label: 'Online', color: '#6DB87A', dimColor: 'transparent', hollow: false, pulse: false },
+  watch: { label: 'Watch', color: '#D9A441', dimColor: 'transparent', hollow: false, pulse: false },
+  alert: { label: 'Alerting', color: '#E0574B', dimColor: 'transparent', hollow: false, pulse: true },
   offline: { label: 'Offline', color: '#46423D', dimColor: 'transparent', hollow: true, pulse: false },
 }
 
 export const PRIORITY_COLOR: Record<1 | 2 | 3 | 4 | 5, string> = {
-  1: '#FF4A3D', 2: '#D94A62', 3: '#FFB224', 4: '#46D2E4', 5: '#6F6A62',
+  1: '#E0574B', 2: '#B8475A', 3: '#D9A441', 4: '#7F9FA0', 5: '#6B665F',
 }

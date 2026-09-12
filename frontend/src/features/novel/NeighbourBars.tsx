@@ -34,20 +34,20 @@ export function NeighbourBars({ explain, width = 320 }: NeighbourBarsProps) {
         if (v <= 0 || v > max) return null
         return (
           <g key={k}>
-            <line x1={x(v)} x2={x(v)} y1={TOP_PAD - 2} y2={height - 2} stroke={k === 1 ? 'var(--color-ink-3)' : 'var(--color-warn)'} strokeDasharray="3 3" strokeWidth={1} />
+            <line x1={x(v)} x2={x(v)} y1={TOP_PAD - 2} y2={height - 2} stroke={k === 1 ? 'var(--color-ink-4)' : 'var(--color-warn)'} strokeOpacity={k === 1 ? 1 : 0.7} strokeDasharray="3 3" strokeWidth={1} />
           </g>
         )
       })}
       {rows.map((r, i) => {
         const y = TOP_PAD + i * ROW_H
         const w = Math.max(1, x(r.pm25) - plotX)
-        const fill = r.self ? 'var(--color-signal)' : 'var(--color-ink-2)'
+        const fill = r.self ? 'var(--color-signal)' : 'var(--color-ink-3)'
         return (
           <g key={r.id}>
-            <text x={LABEL_W - 8} y={y + 12} textAnchor="end" fontSize={10} fill={r.self ? 'var(--color-ink)' : 'var(--color-ink-2)'} fontWeight={r.self ? 600 : 400}>
+            <text x={LABEL_W - 8} y={y + 12} textAnchor="end" fontSize={10} fill={r.self ? 'var(--color-ink)' : 'var(--color-ink-3)'} fontWeight={r.self ? 500 : 400}>
               {r.id}
             </text>
-            <rect x={plotX} y={y + 3} width={w} height={ROW_H - 8} rx={2} fill={fill} opacity={r.self ? 1 : 0.55} />
+            <rect x={plotX} y={y + 3} width={w} height={ROW_H - 8} rx={2} fill={fill} opacity={r.self ? 1 : 0.5} />
             <text x={x(r.pm25) + 6} y={y + 12} fontSize={10} fill={r.self ? 'var(--color-ink)' : 'var(--color-ink-3)'}>
               {r.pm25.toFixed(0)}
             </text>
@@ -55,9 +55,9 @@ export function NeighbourBars({ explain, width = 320 }: NeighbourBarsProps) {
         )
       })}
     </svg>
-      <div className="flex gap-4 font-mono text-2xs text-ink-3 pl-[92px]">
-        <span>median {median.toFixed(0)}</span>
-        <span className="text-warn">2× median {(median * 2).toFixed(0)}</span>
+      <div className="flex gap-4 text-2xs text-ink-3 pl-[92px]">
+        <span>median <span className="font-mono">{median.toFixed(0)}</span></span>
+        <span className="text-warn/80">fire line <span className="font-mono">{(median * 2).toFixed(0)}</span></span>
       </div>
     </div>
   )

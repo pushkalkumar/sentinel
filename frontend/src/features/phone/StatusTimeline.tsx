@@ -23,25 +23,25 @@ export function StatusTimeline({ status, timeline }: StatusTimelineProps) {
   const current = RANK[status]
   const flagged = status === 'false'
   return (
-    <ol className="relative pl-8 font-field" aria-label="Report progress">
-      <i aria-hidden className="absolute left-[9px] top-3 bottom-3 w-px bg-f-line" />
+    <ol className="relative pl-9 font-field" aria-label="Report progress">
+      <i aria-hidden className="absolute left-[7px] top-4 bottom-4 w-px bg-f-line" />
       {STEPS.map((step, i) => {
         const done = !flagged && i < current
         const active = !flagged && i === current
         const at = timeline.find((e) => step.actions.includes(e.action))?.at ?? null
         const label = i === 0 && status === 'queued' ? 'Queued for staff confirmation' : step.label
         return (
-          <li key={step.key} className="relative flex items-baseline justify-between gap-3 min-h-12">
+          <li key={step.key} className="relative flex items-baseline justify-between gap-3 min-h-14">
             <i
               aria-hidden
               className={clsx(
-                'absolute -left-8 top-1.5 size-[18px] rounded-full border-2',
-                active && 'bg-f-signal border-f-signal pulse-live',
-                done && 'bg-f-ink border-f-ink',
-                !active && !done && 'bg-f-surface border-f-line-strong',
+                'absolute -left-9 top-[7px] size-4 rounded-full',
+                active && 'bg-f-signal pulse-live',
+                done && 'bg-f-ink',
+                !active && !done && 'bg-f-canvas shadow-[inset_0_0_0_1.5px_var(--color-f-line-strong)]',
               )}
             />
-            <span className={clsx('text-[18px]', active ? 'font-bold text-f-signal' : done ? 'font-semibold text-f-ink' : 'text-f-ink-2')}>
+            <span className={clsx('text-[18px]', active ? 'font-semibold text-f-signal' : done ? 'font-medium text-f-ink' : 'text-f-ink-2')}>
               {label}
               {active && <span className="sr-only"> (current)</span>}
             </span>

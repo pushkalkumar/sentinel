@@ -7,8 +7,12 @@ import { useSessionStore } from '@/store/session'
 import { isOpenIncident, useIncidentStore } from '@/store/incidents'
 import { FieldIncidentCard } from '@/features/phone/FieldIncidentCard'
 import { FieldButton } from '@/features/phone/FieldButton'
+import { RING } from '@/features/phone/surface'
 
 const POLL_MS = 15_000
+
+/** Shared Input keeps its 24 percent border; on the phone we swap it for the soft edge. */
+const INPUT_QUIET = `border-transparent ${RING} rounded-lg`
 
 export default function Responder() {
   const token = useSessionStore((s) => s.token)
@@ -32,7 +36,7 @@ export default function Responder() {
     return () => { cancelled = true }
   }, [token, role, setAuth, logout])
 
-  if (restoring) return <p className="pt-6 text-[16px] text-f-ink-2 font-field">Checking your sign in...</p>
+  if (restoring) return <p className="pt-8 text-[16px] text-f-ink-2 font-field">Checking your sign in</p>
 
   const signedIn = token && (role === 'responder' || role === 'admin')
   if (!signedIn) return <FieldLogin />
@@ -67,13 +71,13 @@ function FieldLogin() {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5 pt-3 font-field" noValidate>
+    <form onSubmit={submit} className="flex flex-col gap-6 pt-2 font-field" noValidate>
       <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 -ml-1 px-1 text-[16px] text-f-ink-2 self-start">
         <ArrowLeft size={20} strokeWidth={1.5} aria-hidden /> Back
       </Link>
       <div>
-        <h1 className="text-[28px] font-bold leading-tight text-f-ink">Responder sign in</h1>
-        <p className="text-[16px] text-f-ink-2 mt-1">Only a responder can close an incident.</p>
+        <h1 className="text-[26px] font-semibold leading-tight text-f-ink">Responder sign in</h1>
+        <p className="text-[17px] text-f-ink-2 mt-1">Only a responder can close an incident.</p>
       </div>
       <Input
         fieldSize="phone"
@@ -85,6 +89,7 @@ function FieldLogin() {
         autoCapitalize="none"
         inputMode="email"
         placeholder="responder@sentinel.demo"
+        className={INPUT_QUIET}
       />
       <Input
         fieldSize="phone"
@@ -94,6 +99,7 @@ function FieldLogin() {
         onChange={(e) => { setPassword(e.target.value); if (error) setError(null) }}
         autoComplete="current-password"
         error={error}
+        className={INPUT_QUIET}
       />
       <FieldButton type="submit" variant="ink" loading={busy} disabled={!email.trim() || !password}>Sign in</FieldButton>
     </form>
@@ -131,37 +137,40 @@ function FieldQueue({ name, onSignOut }: { name: string; onSignOut: () => void }
   const open = order.map((c) => byCode[c]).filter((i) => i && isOpenIncident(i))
 
   return (
-    <div className="flex flex-col gap-5 pt-3 font-field">
-      <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 -ml-1 px-1 text-[16px] text-f-ink-2 self-start">
-        <ArrowLeft size={20} strokeWidth={1.5} aria-hidden /> Back
-      </Link>
-
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-[28px] font-bold leading-tight text-f-ink tabular-nums">{open.length} open</h1>
-          <p className="text-[16px] text-f-ink-2 mt-1">{name}</p>
-        </div>
-        <button type="button" onClick={onSignOut} className="min-h-12 px-2 text-[16px] font-semibold text-f-ink-2 underline underline-offset-4">
+    <div className="flex flex-col gap-8 pt-2 font-field">
+      <div className="flex items-center justify-between">
+        <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 -ml-1 px-1 text-[16px] text-f-ink-2">
+          <ArrowLeft size={20} strokeWidth={1.5} aria-hidden /> Back
+        </Link>
+        <button type="button" onClick={onSignOut} className="min-h-12 -mr-1 px-1 text-[16px] text-f-ink-2">
           Sign out
         </button>
       </div>
 
-      <FieldButton variant="ghost" height={56} onClick={() => void load(true)} loading={refreshing}>Pull to refresh</FieldButton>
+      <div className="flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-[30px] font-semibold leading-none text-f-ink tabular-nums">{open.length} open</h1>
+          <p className="text-[16px] leading-5 text-f-ink-2 mt-2 text-pretty">{name}</p>
+        </div>
+        <FieldButton variant="ghost" height={48} block={false} className="shrink-0 -mr-2 px-3 text-f-signal" onClick={() => void load(true)} loading={refreshing}>
+          Refresh
+        </FieldButton>
+      </div>
 
-      {loading && open.length === 0 && <p className="text-[16px] text-f-ink-2">Loading open incidents...</p>}
+      {loading && open.length === 0 && <p className="text-[16px] text-f-ink-2">Loading open incidents</p>}
 
       {error && (
         <p role="alert" className="text-[16px] text-f-alarm">{error}</p>
       )}
 
       {!loading && !error && open.length === 0 && (
-        <div className="rounded-md border border-f-line bg-f-surface p-5">
-          <p className="text-[18px] font-semibold text-f-ink">No open incidents.</p>
+        <div>
+          <p className="text-[18px] font-medium text-f-ink">No open incidents.</p>
           <p className="text-[16px] text-f-ink-2 mt-1">New reports appear here as they come in.</p>
         </div>
       )}
 
-      <ul className="flex flex-col gap-3" aria-label="Open incidents">
+      <ul className="flex flex-col gap-4" aria-label="Open incidents">
         {open.map((inc) => (
           <li key={inc.code}>
             <FieldIncidentCard incident={inc} />

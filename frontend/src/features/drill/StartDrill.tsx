@@ -24,23 +24,23 @@ export function StartDrill({ onStart, error }: StartDrillProps) {
   }
 
   return (
-    <div className="min-h-[360px] flex flex-col items-center justify-center text-center gap-5 px-6">
-      <p className="text-base text-ink-2 max-w-md">
+    <div className="min-h-[320px] flex flex-col items-center justify-center text-center gap-6 px-6">
+      <p className="text-md text-ink-2 max-w-sm text-pretty">
         No drill running. Start one and every teacher&apos;s phone switches to roll call.
       </p>
-      <div className="flex items-center gap-2 flex-wrap justify-center">
-        <label className="relative inline-flex items-center h-9 rounded-sm text-ink-2 hover:text-ink">
+      <div className="flex items-center gap-3 flex-wrap justify-center">
+        <label className="relative inline-flex items-center h-10 rounded-md text-ink-2 hover:text-ink">
           <span className="sr-only">Drill kind</span>
           <select
             value={kind}
             onChange={(e) => setKind(e.target.value as DrillKind)}
-            className="appearance-none h-9 pl-3 pr-8 bg-transparent text-sm font-medium text-inherit outline-none cursor-pointer rounded-sm hover:bg-[rgba(255,255,255,0.04)]"
+            className="appearance-none h-10 pl-3 pr-9 bg-transparent text-base font-medium text-inherit outline-none cursor-pointer rounded-md hover:bg-[rgba(255,255,255,0.04)]"
           >
             {DRILL_KINDS.map((k) => (
               <option key={k} value={k} className="bg-surface text-ink">{DRILL_KIND_LABEL[k]}</option>
             ))}
           </select>
-          <ChevronDown size={16} strokeWidth={1.5} aria-hidden className="absolute right-2 pointer-events-none" />
+          <ChevronDown size={16} strokeWidth={1.5} aria-hidden className="absolute right-3 pointer-events-none" />
         </label>
         <Button variant="primary" onClick={start} loading={busy}>
           Start {DRILL_KIND_LABEL[kind].toLowerCase()}

@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { Check } from 'lucide-react'
+import { RING } from '@/features/phone/surface'
 
 export interface RosterChipsProps {
   roster: string[]
@@ -26,9 +27,9 @@ export function RosterChips({ roster, missing, onToggle, disabled = false }: Ros
               aria-pressed={isMissing}
               onClick={() => onToggle(ref)}
               className={clsx(
-                'h-12 min-w-12 px-3 rounded-full border-[1.5px] inline-flex items-center gap-1.5 text-[16px] font-field-mono tabular-nums',
-                'disabled:opacity-45',
-                isMissing ? 'bg-f-ink text-white border-f-ink' : 'bg-f-surface text-f-ink border-f-line-strong active:bg-f-canvas',
+                'h-12 min-w-12 px-3.5 rounded-full inline-flex items-center gap-1.5 text-[16px] font-field-mono tabular-nums',
+                'transition-[background-color,color,scale] duration-[120ms] ease-[var(--ease-exit)] active:scale-[0.96] disabled:opacity-40',
+                isMissing ? 'bg-f-ink text-white' : `bg-f-surface text-f-ink ${RING} active:bg-f-canvas`,
               )}
             >
               {isMissing && <Check size={16} strokeWidth={2} aria-hidden />}

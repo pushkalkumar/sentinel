@@ -32,25 +32,24 @@ export interface RuleSourceProps {
   branch: Branch
 }
 
-/** Collapsed "Show rule" block; the fired branch is highlighted in signal-dim. */
+/** Collapsed "Show the rule" disclosure; the fired branch is tinted with accent-dim. */
 export function RuleSource({ branch }: RuleSourceProps) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="hairline rounded-sm">
+    <div>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="w-full h-8 px-3 flex items-center gap-2 text-xs text-ink-2 hover:text-ink"
+        className="-ml-2 h-8 px-2 rounded-sm inline-flex items-center gap-1.5 text-sm text-ink-2 hover:text-ink hover:bg-[rgba(255,255,255,0.04)] transition-[color,background-color] duration-[120ms]"
       >
         {open ? <ChevronDown size={16} strokeWidth={1.5} aria-hidden /> : <ChevronRight size={16} strokeWidth={1.5} aria-hidden />}
-        {open ? 'Hide rule' : 'Show rule'}
-        <span className="ml-auto font-mono text-2xs text-ink-3">spec §6.2</span>
+        {open ? 'Hide the rule' : 'Show the rule'}
       </button>
       {open && (
-        <pre className="border-t border-line px-3 py-2 font-mono text-2xs leading-4 text-ink-3 overflow-x-auto">
+        <pre className="mt-2 rounded-md bg-raised px-3 py-2.5 font-mono text-2xs leading-4 text-ink-3 overflow-x-auto">
           {RULE.map((l, i) => (
-            <span key={i} className={clsx('block -mx-1 px-1 rounded-xs', l.branch === branch && 'bg-signal-dim text-ink')}>
+            <span key={i} className={clsx('block -mx-1 px-1 rounded-xs', l.branch === branch && 'bg-accent-dim text-ink')}>
               {l.text || ' '}
             </span>
           ))}

@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import type { IncidentType } from '@/lib/types'
+import { RING } from './surface'
 
 export interface TypeTilesProps {
   value: IncidentType | null
@@ -16,7 +17,7 @@ const TILES: { type: IncidentType; label: string }[] = [
   { type: 'other', label: 'Other' },
 ]
 
-/** 2x3 grid of 96px outline tiles; the selected one is ink filled. */
+/** 2x3 grid of white tiles; the selected one is ink filled. No borders, tone does the work. */
 export function TypeTiles({ value, onChange }: TypeTilesProps) {
   return (
     <div role="radiogroup" aria-label="What is happening" className="grid grid-cols-2 gap-3">
@@ -30,10 +31,9 @@ export function TypeTiles({ value, onChange }: TypeTilesProps) {
             aria-checked={selected}
             onClick={() => onChange(t.type)}
             className={clsx(
-              'h-24 rounded-md px-3 text-[20px] font-semibold font-field leading-tight text-center',
-              selected
-                ? 'bg-f-ink text-white border-[1.5px] border-f-ink'
-                : 'bg-f-surface text-f-ink border-[1.5px] border-f-line-strong active:bg-f-canvas',
+              'h-[88px] rounded-lg px-3 text-[19px] font-semibold font-field leading-tight text-center',
+              'transition-[background-color,color,scale] duration-[120ms] ease-[var(--ease-exit)] active:scale-[0.98]',
+              selected ? 'bg-f-ink text-white' : `bg-f-surface text-f-ink ${RING} active:bg-f-canvas`,
             )}
           >
             {t.label}

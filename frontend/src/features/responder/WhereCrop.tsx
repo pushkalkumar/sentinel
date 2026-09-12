@@ -12,7 +12,6 @@ export interface WhereCropProps {
 
 const VIEW_W = 1000
 const VIEW_H = 700
-const ZOOM = 2.2
 const METRES_PER_DEG_LAT = 111_320
 const RING_M = 100
 
@@ -48,7 +47,7 @@ function fitProjection(nodes: Node[]): Fit | null {
   }
 }
 
-/** DESIGN §8.6 WHERE: compact map crop centred on the incident's node, GPS dot and 100 m ring if shared. */
+/** DESIGN §8.6 WHERE: the whole campus at panel width with the incident's node ringed, plus the GPS dot and its 100 m ring if shared. */
 export function WhereCrop({ incident, className }: WhereCropProps) {
   const nodes = useDisplayNodes()
   const links = useSiteStore((s) => s.links)
@@ -71,37 +70,25 @@ export function WhereCrop({ incident, className }: WhereCropProps) {
     return <div className={clsx('h-48 flex items-center justify-center text-sm text-ink-3', className)}>Map not available for this site.</div>
   }
 
-  // Centre on the node (or the GPS fix for internet-only reports); fall back to the whole map.
-  const cx = node?.map_x ?? gps?.x ?? VIEW_W / 2
-  const cy = node?.map_y ?? gps?.y ?? VIEW_H / 2
-  const zoom = node || gps ? ZOOM : 1
-  const originX = (Math.min(Math.max(cx, 0), VIEW_W) / VIEW_W) * 100
-  const originY = (Math.min(Math.max(cy, 0), VIEW_H) / VIEW_H) * 100
-
   return (
     <div className={clsx('relative overflow-hidden rounded-md bg-canvas', className)} style={{ aspectRatio: '10 / 7' }}>
-      <div
-        className="absolute inset-0"
-        style={{ transform: `scale(${zoom})`, transformOrigin: `${originX}% ${originY}%` }}
-      >
-        <CampusMap
-          nodes={nodes}
-          links={links}
-          zones={zones}
-          mode="mesh"
-          selectedId={nodeId}
-          highlightCode={incident.code}
-          ground={site?.kind === 'floorplan' ? 'floorplan' : 'campus'}
-          compact
-          className="absolute inset-0 w-full h-full [&_text]:[font-size:6px]"
-        />
-        {gps && (
-          <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden>
-            <circle cx={gps.x} cy={gps.y} r={gps.r} fill="rgba(127,159,160,0.08)" stroke="var(--color-signal)" strokeWidth={1} strokeDasharray="3 3" />
-            <circle cx={gps.x} cy={gps.y} r={4} fill="var(--color-signal)" stroke="var(--color-canvas)" strokeWidth={1.5} />
-          </svg>
-        )}
-      </div>
+      <CampusMap
+        nodes={nodes}
+        links={links}
+        zones={zones}
+        mode="mesh"
+        selectedId={nodeId}
+        highlightCode={incident.code}
+        ground={site?.kind === 'floorplan' ? 'floorplan' : 'campus'}
+        compact
+        className="absolute inset-0 w-full h-full [&_text]:[font-size:24px]"
+      />
+      {gps && (
+        <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden>
+          <circle cx={gps.x} cy={gps.y} r={gps.r} fill="rgba(127,159,160,0.08)" stroke="var(--color-signal)" strokeWidth={1.5} strokeOpacity={0.55} />
+          <circle cx={gps.x} cy={gps.y} r={5} fill="var(--color-signal)" stroke="var(--color-canvas)" strokeWidth={1.5} />
+        </svg>
+      )}
       <div className="absolute left-3 bottom-2 text-xs text-ink-3 flex items-center gap-3">
         <span>{node ? node.label : 'No node'}</span>
         {gps ? <span className="text-signal">GPS shared, 100 m ring</span> : <span>No GPS shared</span>}

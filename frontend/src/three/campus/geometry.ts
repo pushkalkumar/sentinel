@@ -40,21 +40,25 @@ export function flatPolygons(rings: readonly Ring[]): THREE.BufferGeometry | nul
   return merged
 }
 
-/** Polyline → flat ribbon with mitred joins (capped so acute corners do not spike). */
-function ribbon(path: Ring, width: number, positions: number[], indices: number[]): void {
+/** Polyline → flat ribbon with mitred joins (capped so acute corners do not spike). `closed` wraps the last vertex back to the first. */
+function ribbon(path: Ring, width: number, positions: number[], indices: number[], closed = false): void {
   const half = width / 2
   const n = path.length
+  const segs = closed ? n : n - 1
+  if (segs < 1) return
   const dirs: [number, number][] = []
-  for (let i = 0; i < n - 1; i += 1) {
-    const dx = path[i + 1][0] - path[i][0]
-    const dz = path[i + 1][1] - path[i][1]
+  for (let i = 0; i < segs; i += 1) {
+    const a = path[i]
+    const b = path[(i + 1) % n]
+    const dx = b[0] - a[0]
+    const dz = b[1] - a[1]
     const len = Math.hypot(dx, dz) || 1
     dirs.push([dx / len, dz / len])
   }
   const base = positions.length / 3
   for (let i = 0; i < n; i += 1) {
-    const d0 = dirs[Math.max(0, i - 1)]
-    const d1 = dirs[Math.min(n - 2, i)]
+    const d0 = closed ? dirs[(i - 1 + segs) % segs] : dirs[Math.max(0, i - 1)]
+    const d1 = closed ? dirs[i % segs] : dirs[Math.min(segs - 1, i)]
     let tx = d0[0] + d1[0]
     let tz = d0[1] + d1[1]
     const tl = Math.hypot(tx, tz)
@@ -66,17 +70,15 @@ function ribbon(path: Ring, width: number, positions: number[], indices: number[
     const m = half / cosHalf
     positions.push(path[i][0] + nx * m, 0, path[i][1] + nz * m, path[i][0] - nx * m, 0, path[i][1] - nz * m)
   }
-  for (let i = 0; i < n - 1; i += 1) {
+  for (let i = 0; i < segs; i += 1) {
     const a = base + i * 2
-    indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3)
+    const c = base + ((i + 1) % n) * 2
+    indices.push(a, c, a + 1, a + 1, c, c + 1)
   }
 }
 
-export function roadRibbons(roads: readonly Road[]): THREE.BufferGeometry | null {
-  if (roads.length === 0) return null
-  const positions: number[] = []
-  const indices: number[] = []
-  for (const r of roads) ribbon(r.path, r.width, positions, indices)
+function ribbonGeometry(positions: number[], indices: number[]): THREE.BufferGeometry | null {
+  if (indices.length === 0) return null
   const g = new THREE.BufferGeometry()
   g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   g.setIndex(indices)
@@ -86,5 +88,24 @@ export function roadRibbons(roads: readonly Road[]): THREE.BufferGeometry | null
   return g
 }
 
-/** Closed ring as a point list for drei Line (repeats the first point). */
-export const closedLoop = (r: Ring, y: number): [number, number, number][] => [...r, r[0]].map(([x, z]) => [x, y, z])
+export function roadRibbons(roads: readonly Road[]): THREE.BufferGeometry | null {
+  if (roads.length === 0) return null
+  const positions: number[] = []
+  const indices: number[] = []
+  for (const r of roads) ribbon(r.path, r.width, positions, indices)
+  return ribbonGeometry(positions, indices)
+}
+
+/**
+ * Closed outlines as flat mitred ribbons. A rasterised strip stays continuous at any angle,
+ * where a hairline screen-space line breaks into dots along a grazing edge (DESIGN_V2: solid strokes only).
+ */
+export function outlineRibbons(rings: readonly Ring[], width: number): THREE.BufferGeometry | null {
+  const positions: number[] = []
+  const indices: number[] = []
+  for (const r of rings) {
+    if (r.length < 3) continue
+    ribbon(r, width, positions, indices, true)
+  }
+  return ribbonGeometry(positions, indices)
+}

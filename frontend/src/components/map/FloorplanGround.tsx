@@ -1,5 +1,7 @@
 // Static floor plan for site 2 (Harbor Island DC-4). Two racks at y≈180 and y≈430, dock office bottom-left.
+// Solid strokes only (DESIGN_V2 §4): the hop dash is the one moving mark on any map.
 const STROKE = 'var(--color-line)'
+const FAINT = 'var(--color-line-faint)'
 
 function rackTicks(y: number, from: number, to: number, step: number): string {
   const d: string[] = []
@@ -14,21 +16,21 @@ export function FloorplanGround() {
       <rect x={30} y={30} width={940} height={640} />
       {/* sprinkler riser room, north-west corner */}
       <rect x={40} y={40} width={70} height={60} />
-      {/* Aisle A rack */}
+      {/* Aisle A rack, with its bay dividers */}
       <rect x={200} y={150} width={640} height={60} />
-      <path d={rackTicks(180, 240, 800, 40)} strokeDasharray="1 3" />
+      <path d={rackTicks(180, 240, 800, 40)} stroke={FAINT} />
       {/* Aisle B rack */}
       <rect x={260} y={400} width={520} height={60} />
-      <path d={rackTicks(430, 300, 740, 40)} strokeDasharray="1 3" />
+      <path d={rackTicks(430, 300, 740, 40)} stroke={FAINT} />
       {/* dock office */}
       <rect x={60} y={560} width={140} height={100} />
       <rect x={60} y={560} width={140} height={24} />
       {/* dock doors along the south wall */}
       <path d="M260 670 V650 H340 V670 M380 670 V650 H460 V670 M500 670 V650 H580 V670 M620 670 V650 H700 V670 M740 670 V650 H820 V670" />
       {/* truck gate, east */}
-      <path d="M970 520 H950 V600 H970" strokeDasharray="4 8" />
+      <path d="M970 520 H950 V600 H970" stroke={FAINT} />
       {/* aisle centre lines */}
-      <path d="M200 300 H840 M200 550 H840" strokeDasharray="2 10" />
+      <path d="M200 300 H840 M200 550 H840" stroke={FAINT} />
     </g>
   )
 }

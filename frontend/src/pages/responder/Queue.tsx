@@ -6,7 +6,7 @@ import { useIncidentStore, isOpenIncident } from '@/store/incidents'
 import { useSiteStore } from '@/store/site'
 import { useMeshStore } from '@/store/mesh'
 import { useDisplayNodes } from '@/store/select'
-import { CampusMap } from '@/components/map/CampusMap'
+import { CampusView } from '@/components/map/CampusView'
 import { SplitPane } from '@/features/responder/SplitPane'
 import { QueueList } from '@/features/responder/QueueList'
 import { SensorStrip } from '@/features/responder/SensorStrip'
@@ -80,7 +80,7 @@ export default function Queue() {
         ) : nodes.length === 0 ? (
           <p className="text-sm text-ink-3">No nodes at this site yet.</p>
         ) : (
-          <CampusMap
+          <CampusView
             nodes={nodes}
             links={links}
             zones={zones}
@@ -89,7 +89,8 @@ export default function Queue() {
             highlightCode={current?.code}
             hops={hops}
             ground={site?.kind === 'floorplan' ? 'floorplan' : 'campus'}
-            className="max-h-full"
+            labels="always"
+            className="w-full h-full rounded-md overflow-hidden"
           />
         )}
       </div>

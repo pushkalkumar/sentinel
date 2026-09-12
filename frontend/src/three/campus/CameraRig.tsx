@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
@@ -9,7 +9,9 @@ const AZIMUTH_RANGE = THREE.MathUtils.degToRad(15)
 const POLAR_RANGE = THREE.MathUtils.degToRad(7)
 /** 2° sweep over 20 s, then back (a 40 s sine). */
 const DRIFT_AMPLITUDE = THREE.MathUtils.degToRad(1)
-const DRIFT_PERIOD_S = 40
+const DRIFT_PERIOD_MS = 40_000
+/** A 1°/20 s sweep needs nothing like 60 fps; the frames saved belong to the rest of the page. */
+const DRIFT_STEP_MS = 1000 / 24
 
 interface Props { distance: number; drift: boolean }
 
@@ -19,8 +21,6 @@ export function CameraRig({ distance, drift }: Props) {
   const camera = useThree((s) => s.camera)
   const invalidate = useThree((s) => s.invalidate)
   const idle = useRef(true)
-  const t0 = useRef<number | null>(null)
-  const sph = useRef(new THREE.Spherical())
 
   useEffect(() => {
     camera.position.copy(restPosition(distance))
@@ -37,20 +37,25 @@ export function CameraRig({ distance, drift }: Props) {
     return () => c.removeEventListener('start', stop)
   }, [])
 
-  useEffect(() => { if (drift) invalidate() }, [drift, invalidate])
-
-  useFrame((state) => {
-    if (!drift || !idle.current) return
-    const now = state.clock.elapsedTime
-    if (t0.current === null) t0.current = now
-    const theta = REST_THETA + DRIFT_AMPLITUDE * Math.sin(((now - t0.current) / DRIFT_PERIOD_S) * Math.PI * 2)
-    const s = sph.current
-    s.setFromVector3(camera.position.clone().sub(TARGET))
-    s.theta = theta
-    camera.position.copy(TARGET).add(new THREE.Vector3().setFromSpherical(s))
-    camera.lookAt(TARGET)
-    state.invalidate()
-  })
+  // Timer-driven rather than per-frame: a demand loop then renders 24 drift frames a second, not 60.
+  useEffect(() => {
+    if (!drift) return
+    const t0 = performance.now()
+    const sph = new THREE.Spherical()
+    const offset = new THREE.Vector3()
+    let timer = 0
+    const step = () => {
+      if (!idle.current) return
+      sph.setFromVector3(offset.copy(camera.position).sub(TARGET))
+      sph.theta = REST_THETA + DRIFT_AMPLITUDE * Math.sin(((performance.now() - t0) / DRIFT_PERIOD_MS) * Math.PI * 2)
+      camera.position.copy(TARGET).add(offset.setFromSpherical(sph))
+      camera.lookAt(TARGET)
+      invalidate()
+      timer = window.setTimeout(step, DRIFT_STEP_MS)
+    }
+    timer = window.setTimeout(step, DRIFT_STEP_MS)
+    return () => window.clearTimeout(timer)
+  }, [drift, camera, invalidate])
 
   return (
     <OrbitControls

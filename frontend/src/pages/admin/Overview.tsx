@@ -5,7 +5,7 @@ import { useMeshStore } from '@/store/mesh'
 import { useDisplayNodes } from '@/store/select'
 import { useIncidentStore, isOpenIncident } from '@/store/incidents'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { CampusMap } from '@/components/map/CampusMap'
+import { CampusView } from '@/components/map/CampusView'
 import { DecisionCard } from '@/features/admin/DecisionCard'
 import { NodeList } from '@/features/admin/NodeList'
 import { OpenIncidents } from '@/features/admin/OpenIncidents'
@@ -38,11 +38,11 @@ export default function Overview() {
     <div className="pb-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-x-14 gap-y-8 items-start">
       <div className="flex flex-col gap-4 min-w-0">
         <DecisionCard />
-        <section className="bg-surface rounded-lg overflow-visible" aria-label={ground === 'campus' ? 'Campus map' : 'Floor plan'}>
+        <section className="bg-surface rounded-lg overflow-hidden p-2" aria-label={ground === 'campus' ? 'Campus map' : 'Floor plan'}>
           {!loaded && !error && <div className="p-panel"><Skeleton className="w-64" /></div>}
           {error && nodes.length === 0 && <p className="p-panel text-sm text-alarm">{error}</p>}
           {nodes.length > 0 && (
-            <CampusMap
+            <CampusView
               nodes={nodes}
               links={links}
               mode={mapMode}
@@ -50,8 +50,8 @@ export default function Overview() {
               onSelect={(id) => { selectNode(id); openExplain(id) }}
               hops={hops}
               ground={ground}
-              labels="hover"
-              className="w-full max-h-[32rem] p-2"
+              labels="always"
+              className="w-full aspect-[10/7] max-h-[27rem] rounded-md overflow-hidden"
             />
           )}
         </section>

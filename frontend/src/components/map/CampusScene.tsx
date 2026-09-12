@@ -23,7 +23,15 @@ const FLASH_MS = 160
 /** Fog starts just past the campus and reaches the ground colour at the data edge. */
 const FOG_NEAR_OFFSET = 6
 const FOG_DEPTH = 78
+const DEFAULT_ASPECT = 1.6
 const EMPTY_HOPS: NonNullable<CampusMapProps['hops']> = []
+
+export interface CampusSceneProps extends CampusMapProps {
+  /** Slow idle orbit until the first drag. Off by default: the console maps stay still. */
+  drift?: boolean
+  /** False parks the render loop (scene scrolled out of view). */
+  active?: boolean
+}
 
 /** Redraw the demand-mode canvas whenever the props that shape the scene change. */
 function Invalidate({ deps }: { deps: unknown[] }) {
@@ -33,17 +41,40 @@ function Invalidate({ deps }: { deps: unknown[] }) {
   return null
 }
 
+/** The container drives the canvas size; a demand loop needs an explicit redraw after each resize. */
+function useContainerAspect(ref: React.RefObject<HTMLDivElement | null>): number {
+  const [aspect, setAspect] = useState(DEFAULT_ASPECT)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const read = () => {
+      const { width, height } = el.getBoundingClientRect()
+      if (width > 0 && height > 0) setAspect(width / height)
+    }
+    read()
+    const ro = new ResizeObserver(read)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [ref])
+  return aspect
+}
+
 /**
  * Lit architectural model of the real campus (docs/MAP_DATA.md), same props as the SVG CampusMap.
  * Returns null for floor plans and where WebGL is missing so the caller can fall back to CampusMap.
  */
-export function CampusScene(props: CampusMapProps) {
-  const { nodes, links, mode, selectedId = null, onSelect, hops, highlightCode, ground, compact = false, labels = 'always', className } = props
+export function CampusScene(props: CampusSceneProps) {
+  const {
+    nodes, links, mode, selectedId = null, onSelect, hops, highlightCode, ground,
+    compact = false, labels = 'always', drift = false, active = true, className,
+  } = props
   const [webgl] = useState(supportsWebGL)
   const reducedMotion = useReducedMotion()
   const [hoverId, setHoverId] = useState<NodeId | null>(null)
   const [flashes, setFlashes] = useState<Record<NodeId, number>>({})
   const timers = useRef<number[]>([])
+  const box = useRef<HTMLDivElement>(null)
+  const aspect = useContainerAspect(box)
   const hopList = hops ?? EMPTY_HOPS
 
   useEffect(() => () => { for (const t of timers.current) window.clearTimeout(t) }, [])
@@ -68,12 +99,13 @@ export function CampusScene(props: CampusMapProps) {
 
   if (ground !== 'campus' || !webgl) return null
 
-  const distance = distanceFor(compact)
+  const distance = distanceFor(compact, aspect)
   const fogNear = distance + FOG_NEAR_OFFSET
   const fogFar = fogNear + FOG_DEPTH
 
   return (
     <div
+      ref={box}
       className={clsx('overflow-hidden', className ?? 'relative w-full aspect-[10/7]')}
       role="img"
       aria-label={`Campus model, ${mode} mode`}
@@ -81,32 +113,33 @@ export function CampusScene(props: CampusMapProps) {
       data-compact={compact || undefined}
     >
       <div className="relative w-full h-full">
-      <Canvas
-        dpr={[1, 1.5]}
-        frameloop="demand"
-        shadows={{ type: THREE.PCFShadowMap }}
-        camera={{ fov: FOV, near: 2, far: 420, position: restPosition(distance).toArray() }}
-        gl={{
-          antialias: false, alpha: false, powerPreference: 'high-performance',
-          toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.15, outputColorSpace: THREE.SRGBColorSpace,
-        }}
-        onPointerMissed={() => setHoverId(null)}
-        style={{ touchAction: 'pan-y' }}
-      >
-        <Invalidate deps={[nodes, links, mode, selectedId, hopList, highlightCode, compact, labels, hoverId, flashes]} />
-        <Rig fogNear={fogNear} fogFar={fogFar} />
-        <Terrain />
-        <Buildings />
-        <Links links={links} anchors={anchors} mode={mode} hops={hopList} reducedMotion={reducedMotion} onLanded={onLanded} />
-        <Nodes
-          nodes={nodes} anchors={anchors} mode={mode}
-          selectedId={selectedId} hoverId={hoverId} highlightNode={highlightNode} flashes={flashes}
-          labels={labels} compact={compact} reducedMotion={reducedMotion}
-          onHover={setHoverId} onSelect={onSelect}
-        />
-        <CameraRig distance={distance} drift={!reducedMotion} />
-      </Canvas>
-      <p className="pointer-events-none absolute bottom-2 right-3 font-sans text-[10px] text-ink-4 select-none">{ATTRIBUTION}</p>
+        <Canvas
+          dpr={[1, 1.5]}
+          frameloop="demand"
+          resize={{ debounce: 0 }}
+          shadows={{ type: THREE.PCFShadowMap }}
+          camera={{ fov: FOV, near: 2, far: 420, position: restPosition(distance).toArray() }}
+          gl={{
+            antialias: false, alpha: false, powerPreference: 'high-performance',
+            toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.15, outputColorSpace: THREE.SRGBColorSpace,
+          }}
+          onPointerMissed={() => setHoverId(null)}
+          style={{ touchAction: 'pan-y' }}
+        >
+          <Invalidate deps={[nodes, links, mode, selectedId, hopList, highlightCode, compact, labels, hoverId, flashes, distance, aspect]} />
+          <Rig fogNear={fogNear} fogFar={fogFar} />
+          <Terrain />
+          <Buildings />
+          <Links links={links} anchors={anchors} mode={mode} hops={hopList} reducedMotion={reducedMotion} onLanded={onLanded} />
+          <Nodes
+            nodes={nodes} anchors={anchors} mode={mode}
+            selectedId={selectedId} hoverId={hoverId} highlightNode={highlightNode} flashes={flashes}
+            labels={labels} compact={compact} reducedMotion={reducedMotion}
+            onHover={setHoverId} onSelect={onSelect}
+          />
+          <CameraRig distance={distance} drift={drift && active && !reducedMotion} />
+        </Canvas>
+        <p className="pointer-events-none absolute bottom-2 right-3 font-sans text-[10px] text-ink-4 select-none">{ATTRIBUTION}</p>
       </div>
     </div>
   )

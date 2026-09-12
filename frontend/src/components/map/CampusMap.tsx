@@ -34,10 +34,7 @@ export function CampusMap({
   const onLanded = useCallback((id: NodeId) => {
     setFlashes((f) => ({ ...f, [id]: Date.now() }))
     timers.current.push(window.setTimeout(() => {
-      setFlashes((f) => {
-        const { [id]: _gone, ...rest } = f
-        return rest
-      })
+      setFlashes((f) => Object.fromEntries(Object.entries(f).filter(([k]) => k !== id)))
     }, FLASH_MS))
   }, [])
 

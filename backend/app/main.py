@@ -26,7 +26,9 @@ ROUTER_MODULES = (
     "app.core.auth", "app.core.nodes", "app.core.sites", "app.core.incidents", "app.core.mesh", "app.core.sim",
     "app.alerts.ingest", "app.alerts.routes",
     "app.drills.routes", "app.drills.timeline",
+    "app.ai.routes",
     "app.demo",
+    "app.ml.routes",
 )
 
 

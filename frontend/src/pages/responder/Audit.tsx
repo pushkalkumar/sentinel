@@ -29,13 +29,12 @@ export default function Audit() {
   return (
     <>
       <PageHeader
-        eyebrow="Responder"
         title="Audit log"
         right={<Button variant="ghost" icon={RefreshCw} onClick={load} loading={loading && entries.length > 0}>Refresh</Button>}
       />
       <Panel
         title="Every action, with actor and IP"
-        meta={fetchedAt ? `newest first · ${entries.length} events` : undefined}
+        meta={fetchedAt ? `${entries.length} events, newest first` : undefined}
         padded={false}
       >
         <AuditTable entries={entries} loading={loading} error={error} />

@@ -4,12 +4,10 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useDisplayCard } from '@/store/select'
 import { useSiteStore } from '@/store/site'
 import { BAND_META, bandIndex } from '@/lib/bands'
-import { fmtSim } from '@/lib/time'
-import { Pill } from '@/components/ui/Pill'
-import { LiveDot } from '@/components/ui/LiveDot'
 import { Skeleton } from '@/components/ui/Skeleton'
 
 const COUNT_MS = 600
+const EASE_ENTER: [number, number, number, number] = [0.2, 0, 0, 1]
 
 /** Counts from the previous value to `target` over 600 ms with --ease-enter; instant under reduced motion. */
 function useCountUp(target: number, reduced: boolean): number {
@@ -33,7 +31,11 @@ function useCountUp(target: number, reduced: boolean): number {
   return value
 }
 
-/** DESIGN §6.7. Headline strings come from BAND_META, never paraphrased. */
+/**
+ * The single hero of /admin (DESIGN_V2 §4): the band word, one reading, one sentence.
+ * Sits on the canvas with no card chrome; the band dot is the only colour.
+ * Guidance strings come from BAND_META, never paraphrased.
+ */
 export function DecisionCard() {
   const card = useDisplayCard()
   const site = useSiteStore((s) => s.site)
@@ -45,16 +47,14 @@ export function DecisionCard() {
   const shown = useCountUp(card?.pm25 ?? 0, reduced)
 
   const indoor = site?.kind === 'floorplan'
-  const eyebrow = indoor ? 'INDOOR AIR' : 'OUTDOOR ACTIVITY'
 
   if (!card) {
     return (
-      <section className="bg-surface hairline rounded-lg p-8" aria-busy={!loaded && !error}>
-        <div className="label-signage mb-4">{eyebrow}</div>
+      <section className="pt-10 pb-6 min-h-[11rem]" aria-busy={!loaded && !error}>
         {error
           ? <p className="text-sm text-alarm">{error}</p>
           : loaded
-            ? <p className="text-sm text-ink-3">No readings yet. The card fills in on the first reading from the site.</p>
+            ? <p className="text-sm text-ink-3">No readings yet. The decision fills in on the first reading from the site.</p>
             : <Skeleton className="w-64" />}
       </section>
     )
@@ -62,68 +62,43 @@ export function DecisionCard() {
 
   const meta = BAND_META[card.band]
   const hazardous = bandIndex(card.band) >= bandIndex('hazardous')
-  const last = card.log[0]
   const node = nodes[card.node_id]
   const zone = node ? zones.find((z) => z.id === node.zone_id) : undefined
-  const headline = indoor && card.band === 'good' ? 'Indoor air: OK' : card.headline || meta.headline
-  const guidance = card.guidance || meta.guidance
+  const word = indoor && card.band === 'good' ? 'Indoor air OK' : meta.label
+  const sentence = card.guidance || meta.guidance
 
   return (
-    <section className="bg-surface hairline rounded-lg p-8" aria-live="polite">
-      <div className="flex items-center gap-4 flex-wrap">
-        <span className="label-signage">{eyebrow} · {card.node_label.toUpperCase()}</span>
-        <span className="ml-auto font-mono text-xs text-ink-3">since {fmtSim(card.changed_at, 'HH:mm')}</span>
-        <LiveDot />
-      </div>
-      <div className="mt-6 flex items-start gap-8 flex-wrap">
-        <div className="flex-1 min-w-[16rem]">
-          <div className="relative min-h-[2.6rem] overflow-hidden">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.h2
-                key={headline}
-                className="display-h1 text-[40px] text-ink"
-                initial={reduced ? false : { y: 12, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={reduced ? undefined : { y: -12, opacity: 0 }}
-                transition={{ duration: 0.24, ease: [0.2, 0, 0, 1] }}
-              >
-                {headline}
-              </motion.h2>
-            </AnimatePresence>
-          </div>
-          <p className="mt-3 text-lg text-ink-2">{guidance}</p>
+    <section className="pt-10 pb-6 flex items-end justify-between gap-10 flex-wrap" aria-live="polite">
+      <div className="min-w-0 flex-1 basis-[22rem]">
+        <div className="relative overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.h1
+              key={word}
+              className="display-hero text-[clamp(2.75rem,5vw,4.25rem)] text-ink flex items-center gap-4"
+              initial={reduced ? false : { y: 14, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={reduced ? undefined : { y: -14, opacity: 0 }}
+              transition={{ duration: 0.26, ease: EASE_ENTER }}
+            >
+              <i aria-hidden className="size-3 rounded-full shrink-0 translate-y-[0.04em]" style={{ background: meta.color }} />
+              <span className="truncate">{word}</span>
+            </motion.h1>
+          </AnimatePresence>
         </div>
-        <div className="text-right shrink-0">
-          <div className="font-mono text-[56px] leading-none tabular-nums" style={{ color: meta.color }}>
-            {Math.round(shown)}
-          </div>
-          <div className="mt-2 font-mono text-2xs text-ink-3">PM2.5 µg/m³ {card.window_minutes}-min</div>
-          <div className="mt-3 flex justify-end">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={card.band}
-                initial={reduced ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={reduced ? undefined : { opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Pill kind="band" value={card.band} />
-              </motion.span>
-            </AnimatePresence>
-          </div>
+        <p className="mt-4 text-lg text-ink-2 max-w-[44ch]">{sentence}.</p>
+        {hazardous && (
+          <p className="mt-2 text-sm text-ink-3">
+            SMS sent to {zone?.recipient_count ?? 0} registered phones in {zone?.name ?? card.node_label}.{' '}
+            <Link to="/admin/alerts" className="text-ink-2 underline underline-offset-2 decoration-line-strong hover:text-ink">See the outbox</Link>
+          </p>
+        )}
+      </div>
+      <div className="shrink-0 text-right">
+        <div className="stat-number text-[clamp(3.5rem,6vw,5.5rem)] leading-none text-ink">{Math.round(shown)}</div>
+        <div className="mt-2 text-sm text-ink-3">
+          PM2.5 <span className="font-mono text-xs">µg/m³</span>, {card.window_minutes}-min at {card.node_label}
         </div>
       </div>
-      <div className="mt-6 pt-4 border-t border-line font-mono text-xs text-ink-3">
-        {last
-          ? `Rule: band ${last.band_from && bandIndex(last.band_from) < bandIndex(last.band_to) ? 'worsened' : 'changed'} ${last.band_from ? BAND_META[last.band_from].label : 'none'} → ${BAND_META[last.band_to].label} at ${fmtSim(last.at, 'HH:mm:ss')} (${last.node_id})`
-          : `Rule: site band is ${meta.label} from the ${card.window_minutes}-min rolling PM2.5 at ${card.node_label}`}
-      </div>
-      {hazardous && (
-        <div className="mt-2 text-sm text-ink-2">
-          SMS sent to {zone?.recipient_count ?? 0} registered phones in zone {zone?.name ?? card.node_label}.{' '}
-          <Link to="/admin/alerts" className="underline decoration-line-strong hover:decoration-signal">See the outbox</Link>
-        </div>
-      )}
     </section>
   )
 }

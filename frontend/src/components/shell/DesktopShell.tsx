@@ -14,6 +14,8 @@ import { clockNow } from '@/lib/time'
 import { LiveDot } from '@/components/ui/LiveDot'
 import { Toasts } from '@/components/ui/Toasts'
 import { Banner } from '@/components/ui/Banner'
+import { SimTag } from '@/components/ui/SimTag'
+import { SoundToggle } from '@/features/responder/SoundToggle'
 import { Grain } from './Grain'
 import { ExplainDrawer } from '@/features/novel/ExplainDrawer'
 
@@ -38,9 +40,14 @@ function Clock() {
     const id = setInterval(() => setNow(clockNow()), 1000)
     return () => clearInterval(id)
   }, [])
-  return <span className="font-mono text-xs text-ink-2 tabular-nums">{now}</span>
+  return <span className="font-mono text-xs text-ink-3 tabular-nums">{now}</span>
 }
 
+/**
+ * Console frame. The window is a fixed-height column so a page can fill the
+ * viewport exactly (the responder queue) while long pages scroll inside `main`.
+ * One honesty line for the whole console sits in the footer (DESIGN_V2 §2.4).
+ */
 export function DesktopShell() {
   const user = useSessionStore((s) => s.user)
   const role = useSessionStore((s) => s.role)
@@ -72,12 +79,12 @@ export function DesktopShell() {
   const tabs = role === 'responder' ? RESPONDER_TABS : ADMIN_TABS
 
   return (
-    <div className="min-h-dvh bg-canvas text-ink">
+    <div className="h-dvh flex flex-col bg-canvas text-ink">
       <Grain />
-      <header className="h-14 sticky top-0 z-30 bg-canvas/95 backdrop-blur border-b border-line flex items-center gap-6 px-6">
+      <header className="h-14 shrink-0 z-30 flex items-center gap-8 px-6">
         <div className="flex items-baseline gap-3 min-w-0">
           <span className="display-h1 text-[17px] font-semibold tracking-tight">Sentinel</span>
-          {(siteName ?? user?.tenant.name) && <span className="text-sm text-ink-2 truncate">{siteName ?? user?.tenant.name}</span>}
+          {(siteName ?? user?.tenant.name) && <span className="text-sm text-ink-3 truncate">{siteName ?? user?.tenant.name}</span>}
         </div>
         <nav className="flex items-center gap-1 h-full" aria-label="Sections">
           {tabs.map((t) => (
@@ -86,8 +93,10 @@ export function DesktopShell() {
               to={t.to}
               end={t.end}
               className={({ isActive }) => clsx(
-                'relative h-full inline-flex items-center px-3 text-sm font-medium transition-[color] duration-[120ms]',
-                isActive ? 'text-ink after:absolute after:left-3 after:right-3 after:bottom-0 after:h-0.5 after:bg-signal' : 'text-ink-2 hover:text-ink',
+                'relative h-full inline-flex items-center px-3 text-sm transition-[color] duration-[120ms]',
+                isActive
+                  ? 'text-ink after:absolute after:left-3 after:right-3 after:bottom-[15px] after:h-px after:bg-accent'
+                  : 'text-ink-3 hover:text-ink-2',
               )}
             >
               {t.label}
@@ -95,15 +104,16 @@ export function DesktopShell() {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-5">
+          {role === 'responder' && <SoundToggle />}
           <LiveDot />
           <Clock />
           {user && (
-            <div className="flex items-center gap-2 pl-4 border-l border-line">
+            <div className="flex items-center gap-3">
               <span className="text-sm text-ink-2 truncate max-w-48">{user.name}</span>
               <button
                 type="button"
                 onClick={() => { logout(); navigate('/login') }}
-                className="text-ink-3 hover:text-ink"
+                className="size-8 -mr-2 inline-flex items-center justify-center rounded-md text-ink-3 hover:text-ink hover:bg-[rgba(255,255,255,0.04)] transition-[color,background-color] duration-[120ms]"
                 aria-label="Log out"
                 title="Log out"
               >
@@ -114,8 +124,13 @@ export function DesktopShell() {
         </div>
       </header>
       <Banner />
-      <main className="max-w-[1600px] mx-auto px-6 pb-12 relative z-[2]">
-        <Outlet />
+      <main className="flex-1 min-h-0 overflow-y-auto relative z-[2] flex flex-col">
+        <div className="w-full max-w-console mx-auto px-6 grow shrink-0 flex flex-col">
+          <Outlet />
+        </div>
+        <footer className="shrink-0 w-full max-w-console mx-auto px-6 h-10 flex items-center">
+          <SimTag kind="nodes" />
+        </footer>
       </main>
       <Toasts />
       <ExplainDrawer />

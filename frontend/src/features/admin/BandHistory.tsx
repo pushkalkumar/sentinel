@@ -19,7 +19,7 @@ export function BandHistory({ data }: { data: AirResponse }) {
           }
           return (
             <li key={s.node_id} className="flex items-center gap-3">
-              <span className="font-mono text-xs text-ink-2 w-20 truncate">{s.node_id}</span>
+              <span className="text-xs text-ink-2 w-28 truncate">{s.label}</span>
               <div className="flex-1 h-3 flex gap-px bg-line rounded-xs overflow-hidden" role="img" aria-label={`${s.label} band history`}>
                 {n === 0
                   ? <span className="flex-1 bg-raised" />

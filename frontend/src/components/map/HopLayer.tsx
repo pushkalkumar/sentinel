@@ -92,8 +92,8 @@ export function HopLayer({ hops, byId, onLanded }: HopLayerProps) {
               : { duration: total / 1000, ease: EASE_HOP }}
             onAnimationComplete={() => finish(h)}
           >
-            <line x1={-ux * DASH_LEN} y1={-uy * DASH_LEN} x2={0} y2={0} stroke="var(--color-signal)" strokeWidth={2} strokeLinecap="round" opacity={0.5} />
-            <line x1={-ux * (DASH_LEN / 2)} y1={-uy * (DASH_LEN / 2)} x2={0} y2={0} stroke="var(--color-signal)" strokeWidth={2} strokeLinecap="round" />
+            <line x1={-ux * DASH_LEN} y1={-uy * DASH_LEN} x2={0} y2={0} stroke="var(--color-signal)" strokeWidth={1.5} strokeLinecap="round" opacity={0.4} />
+            <line x1={-ux * (DASH_LEN / 2)} y1={-uy * (DASH_LEN / 2)} x2={0} y2={0} stroke="var(--color-signal)" strokeWidth={1.5} strokeLinecap="round" />
           </motion.g>
         )
       })}

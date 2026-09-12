@@ -79,7 +79,7 @@ export function WhereCrop({ incident, className }: WhereCropProps) {
   const originY = (Math.min(Math.max(cy, 0), VIEW_H) / VIEW_H) * 100
 
   return (
-    <div className={clsx('relative overflow-hidden rounded-sm bg-canvas hairline', className)} style={{ aspectRatio: '10 / 7' }}>
+    <div className={clsx('relative overflow-hidden rounded-md bg-canvas', className)} style={{ aspectRatio: '10 / 7' }}>
       <div
         className="absolute inset-0"
         style={{ transform: `scale(${zoom})`, transformOrigin: `${originX}% ${originY}%` }}
@@ -93,18 +93,18 @@ export function WhereCrop({ incident, className }: WhereCropProps) {
           highlightCode={incident.code}
           ground={site?.kind === 'floorplan' ? 'floorplan' : 'campus'}
           compact
-          className="absolute inset-0 w-full h-full"
+          className="absolute inset-0 w-full h-full [&_text]:[font-size:6px]"
         />
         {gps && (
           <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden>
-            <circle cx={gps.x} cy={gps.y} r={gps.r} fill="rgba(70,210,228,0.08)" stroke="var(--color-signal)" strokeWidth={1} strokeDasharray="3 3" />
+            <circle cx={gps.x} cy={gps.y} r={gps.r} fill="rgba(127,159,160,0.08)" stroke="var(--color-signal)" strokeWidth={1} strokeDasharray="3 3" />
             <circle cx={gps.x} cy={gps.y} r={4} fill="var(--color-signal)" stroke="var(--color-canvas)" strokeWidth={1.5} />
           </svg>
         )}
       </div>
-      <div className="absolute left-3 bottom-2 font-mono text-2xs text-ink-3 flex items-center gap-3">
-        <span>{node ? `node ${node.id}` : 'no node'}</span>
-        {gps ? <span className="text-signal">GPS shared · 100 m ring</span> : <span>no GPS shared</span>}
+      <div className="absolute left-3 bottom-2 text-xs text-ink-3 flex items-center gap-3">
+        <span>{node ? node.label : 'No node'}</span>
+        {gps ? <span className="text-signal">GPS shared, 100 m ring</span> : <span>No GPS shared</span>}
       </div>
     </div>
   )

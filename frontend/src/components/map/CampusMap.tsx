@@ -4,7 +4,7 @@ import type { IncidentCode, MeshLogEntry, Node, NodeId, Zone } from '@/lib/types
 import { CampusGround } from './CampusGround'
 import { FloorplanGround } from './FloorplanGround'
 import { HopLayer } from './HopLayer'
-import { NodeDot } from './NodeDot'
+import { NodeDot, type LabelMode } from './NodeDot'
 
 // Frozen interface (BUILD_PLAN §1.3). Add optional props only via INTEGRATION_NOTES.
 export interface CampusMapProps {
@@ -14,6 +14,7 @@ export interface CampusMapProps {
   highlightCode?: IncidentCode;     // pulse the node of this incident
   ground: 'campus' | 'floorplan';   // which footprint layer
   compact?: boolean;                // landing hero card / incident detail crop
+  labels?: LabelMode;               // 'hover' keeps labels off until hover, focus or selection (INTEGRATION_NOTES: optional, added for DESIGN_V2)
   className?: string;
 }
 
@@ -22,7 +23,7 @@ const NO_HOPS: MeshLogEntry[] = []
 
 /** DESIGN §6.5 / §6.6: static footprints, dashed hairline links, band-coloured dots, signal hop dashes. */
 export function CampusMap({
-  nodes, links, zones, mode, selectedId = null, onSelect, hops = NO_HOPS, highlightCode, ground, compact = false, className,
+  nodes, links, zones, mode, selectedId = null, onSelect, hops = NO_HOPS, highlightCode, ground, compact = false, labels = 'always', className,
 }: CampusMapProps) {
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
   const [flashes, setFlashes] = useState<Record<NodeId, number>>({})
@@ -60,13 +61,13 @@ export function CampusMap({
     >
       {ground === 'campus' ? <CampusGround /> : <FloorplanGround />}
       {zones && zones.length > 0 && (
-        <g fill="none" stroke="var(--color-line-faint)" strokeWidth={1} strokeDasharray="6 6" aria-hidden>
+        <g fill="none" stroke="var(--color-line-faint)" strokeWidth={0.75} strokeDasharray="6 6" aria-hidden>
           {zones.map((z) => (
             <polygon key={z.id} points={z.map_poly.map(([x, y]) => `${x},${y}`).join(' ')} />
           ))}
         </g>
       )}
-      <g stroke="var(--color-line)" strokeDasharray="2 4" strokeWidth={1} fill="none" aria-hidden>
+      <g stroke="var(--color-signal)" strokeOpacity={mode === 'mesh' ? 0.32 : 0.16} strokeDasharray="2 5" strokeWidth={0.75} fill="none" aria-hidden>
         {links.map(([a, b]) => {
           const na = byId.get(a)
           const nb = byId.get(b)
@@ -84,6 +85,7 @@ export function CampusMap({
           highlighted={highlightNode === n.id}
           flash={n.id in flashes}
           compact={compact}
+          labels={labels}
           onSelect={onSelect}
         />
       ))}

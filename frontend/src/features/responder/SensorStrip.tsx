@@ -3,10 +3,11 @@ import type { Alert, Node, Reading } from '@/lib/types'
 import { useSiteStore } from '@/store/site'
 import { useDisplayAlerts } from '@/store/select'
 import { fmtSim } from '@/lib/time'
+import { ALERT_META } from '@/lib/bands'
 
 export interface SensorStripProps {
   node: Node | null
-  /** "SENSORS AT GYM" (queue), "NODE GYM NOW", or no label when the panel header already says it. */
+  /** Kept in the API for callers; the line no longer prints a signage label. */
   heading?: 'sensors' | 'now' | 'none'
   className?: string
 }
@@ -21,14 +22,9 @@ function rise(list: Reading[], pick: (r: Reading) => number): number | null {
   return pick(latest) - pick(base)
 }
 
-function Delta({ value, digits = 0 }: { value: number | null; digits?: number }) {
-  if (value === null || Math.abs(value) < (digits ? 0.05 : 0.5)) return null
-  const up = value > 0
-  return (
-    <span className={clsx('ml-1.5', up ? 'text-warn' : 'text-ink-3')}>
-      {up ? '↑' : '↓'}{Math.abs(value).toFixed(digits)}
-    </span>
-  )
+function deltaTitle(value: number | null, unit: string, digits = 0): string | undefined {
+  if (value === null || Math.abs(value) < (digits ? 0.05 : 0.5)) return undefined
+  return `${value > 0 ? 'up' : 'down'} ${Math.abs(value).toFixed(digits)}${unit} in the last ten minutes`
 }
 
 function topAlert(alerts: Alert[], nodeId: string): Alert | null {
@@ -36,19 +32,27 @@ function topAlert(alerts: Alert[], nodeId: string): Alert | null {
   return mine[0] ?? null
 }
 
-/** DESIGN §8.5 mono strip under the map: PM2.5 with rise, temp with rise, MQ-2, open alert since. */
-export function SensorStrip({ node, heading = 'sensors', className }: SensorStripProps) {
+function Reading({ label, value, title, rising }: { label: string; value: string; title?: string; rising?: boolean }) {
+  return (
+    <span className="inline-flex items-baseline gap-1.5" title={title}>
+      <span className="text-ink-3">{label}</span>
+      <span className={clsx('font-mono tabular-nums', rising ? 'text-warn' : 'text-ink')}>{value}</span>
+    </span>
+  )
+}
+
+/**
+ * One quiet line of readings under the map (DESIGN_V2 §4): node name, five values,
+ * no arrows. Ten-minute deltas show on hover. An open alert closes the line in its colour.
+ */
+export function SensorStrip({ node, className }: SensorStripProps) {
   const readings = useSiteStore((s) => (node ? s.readings[node.id] : undefined))
   const alerts = useDisplayAlerts()
-  const label = heading === 'none' ? null : node
-    ? heading === 'sensors' ? `Sensors at ${node.id}` : `Node ${node.id} now`
-    : 'Sensors'
 
   if (!node) {
     return (
-      <div className={clsx('h-12 px-5 flex items-center gap-6 font-mono text-xs text-ink-3 border-t border-line', className)}>
-        {label && <span className="label-signage">{label}</span>}
-        <span>Select an incident to see its node.</span>
+      <div className={clsx('h-10 flex items-center text-sm text-ink-4', className)}>
+        Select an incident to see readings from its node.
       </div>
     )
   }
@@ -56,33 +60,27 @@ export function SensorStrip({ node, heading = 'sensors', className }: SensorStri
   const latest = node.latest
   const list = readings ?? []
   const alert = topAlert(alerts, node.id)
+  const pmRise = rise(list, (r) => r.pm25)
+  const tempRise = rise(list, (r) => r.temp_c)
+  const gasRise = rise(list, (r) => r.mq2_raw)
   return (
-    <div className={clsx('min-h-12 px-5 py-2 flex items-center gap-x-6 gap-y-1 flex-wrap font-mono text-xs border-t border-line', className)}>
-      {label && <span className="label-signage shrink-0">{label}</span>}
+    <div className={clsx('min-h-10 py-2 flex items-center gap-x-6 gap-y-1 flex-wrap text-sm', className)}>
+      <span className="text-ink-2">{node.label}</span>
       {!latest ? (
-        <span className="text-ink-3">No readings yet from this node.</span>
+        <span className="text-ink-4">No readings yet from this node.</span>
       ) : (
         <>
-          <span className="text-ink-2">
-            PM2.5 <span className="text-ink">{Math.round(latest.pm25)}</span>
-            <Delta value={rise(list, (r) => r.pm25)} />
-          </span>
-          <span className="text-ink-2">
-            temp <span className="text-ink">{latest.temp_c.toFixed(1)}</span>
-            <Delta value={rise(list, (r) => r.temp_c)} digits={1} />
-          </span>
-          <span className="text-ink-2">
-            MQ-2 <span className="text-ink">{Math.round(latest.mq2_raw)}</span>
-            <Delta value={rise(list, (r) => r.mq2_raw)} />
-          </span>
-          <span className="text-ink-3">
-            batt {latest.battery_pct}% · rssi {latest.rssi}
-          </span>
+          <Reading label="PM2.5" value={String(Math.round(latest.pm25))} title={deltaTitle(pmRise, '')} rising={(pmRise ?? 0) >= 10} />
+          <Reading label="Temp" value={`${latest.temp_c.toFixed(1)}°`} title={deltaTitle(tempRise, '°', 1)} rising={(tempRise ?? 0) >= 2} />
+          <Reading label="Gas" value={String(Math.round(latest.mq2_raw))} title={deltaTitle(gasRise, '')} rising={(gasRise ?? 0) >= 50} />
+          <Reading label="Battery" value={`${latest.battery_pct}%`} />
+          <Reading label="Signal" value={`${latest.rssi}`} title="RSSI, dBm" />
         </>
       )}
       {alert && (
-        <span className="ml-auto shrink-0" style={{ color: alert.priority <= 2 ? 'var(--color-alarm)' : 'var(--color-warn)' }}>
-          {alert.kind} since {fmtSim(alert.started_at, 'HH:mm:ss')}
+        <span className="ml-auto shrink-0 text-sm" style={{ color: alert.priority <= 2 ? 'var(--color-alarm)' : 'var(--color-warn)' }}>
+          {ALERT_META[alert.kind].label} since{' '}
+          <span className="font-mono tabular-nums">{fmtSim(alert.started_at, 'HH:mm:ss')}</span>
         </span>
       )}
     </div>

@@ -109,7 +109,7 @@ export default function IncidentDetail() {
 
   const canAct = role === 'responder'
   const closed = inc.status === 'resolved' || inc.status === 'false'
-  const where = inc.via === 'internet' ? 'internet only' : `via node ${inc.node_id ?? '?'}`
+  const where = inc.via === 'internet' ? 'Internet only' : `Via node ${inc.node_id ?? '?'}`
   const site = inc.site_id !== null && inc.site_id === siteId ? siteName : null
   const count = inc.type === 'safe' ? null : `${inc.count} ${inc.count === 1 ? 'person' : 'people'}`
 
@@ -118,28 +118,23 @@ export default function IncidentDetail() {
       {back}
       <div className="grid gap-4 lg:grid-cols-[58fr_42fr] items-start">
         <div className="flex flex-col gap-4 min-w-0">
-          <section className="bg-surface hairline rounded-md p-5 flex flex-col gap-4">
+          <section className="bg-surface rounded-lg p-panel flex flex-col gap-4">
             <h1 className="sr-only">{inc.code}</h1>
             <CodeCells code={inc.code} size="desktop" />
             <div className="flex items-center gap-3 flex-wrap">
               <span className="display-h2 text-lg text-ink">
                 {INCIDENT_TYPE_LABEL[inc.type]}
-                {count && <span className="text-ink-2"> · {count}</span>}
+                {count && <span className="text-ink-2">, {count}</span>}
               </span>
               <Pill kind="trust" value={inc.trust_label} />
               <span className="font-mono text-md text-ink tabular-nums">{inc.trust_score}</span>
               <Pill kind="incident" value={inc.status} className="ml-auto" />
             </div>
             {inc.text && <blockquote className="text-sm text-ink border-l-2 border-line-strong pl-3">“{inc.text}”</blockquote>}
-            <p className="font-mono text-xs text-ink-2 flex items-center gap-2 flex-wrap">
-              <span>{where}</span>
-              {inc.node_label && <span>· {inc.node_label}</span>}
-              {site && <span>· {site}</span>}
-              <span>·</span>
-              <time dateTime={inc.created_at} title={fmtWallZoned(inc.created_at)}>{fmtWall(inc.created_at, 'HH:mm:ss')}</time>
-              {inc.mesh && (
-                <span className="text-ink-3">· {inc.mesh.hops} {inc.mesh.hops === 1 ? 'hop' : 'hops'} {inc.mesh.delivered ? 'delivered' : 'in flight'}</span>
-              )}
+            <p className="text-sm text-ink-3">
+              {[where, inc.node_label, site].filter(Boolean).join(', ')} at{' '}
+              <time className="font-mono text-xs text-ink-2" dateTime={inc.created_at} title={fmtWallZoned(inc.created_at)}>{fmtWall(inc.created_at, 'HH:mm:ss')}</time>
+              {inc.mesh && `, ${inc.mesh.hops} ${inc.mesh.hops === 1 ? 'hop' : 'hops'} ${inc.mesh.delivered ? 'delivered' : 'in flight'}`}
             </p>
           </section>
 
@@ -172,11 +167,11 @@ export default function IncidentDetail() {
           <Panel title="Trust">
             <TrustMeter score={inc.trust_score} label={inc.trust_label} breakdown={inc.trust_breakdown} />
           </Panel>
-          <Panel title="Where" meta={inc.node_label ?? (inc.via === 'internet' ? 'no node' : undefined)}>
+          <Panel title="Where">
             <WhereCrop incident={inc} />
           </Panel>
-          <Panel title={node ? `Node ${node.id} now` : 'Node now'} padded={false}>
-            <SensorStrip node={node} heading="none" className="border-t-0" />
+          <Panel title="Node now">
+            <SensorStrip node={node} className="py-0 min-h-0" />
           </Panel>
         </div>
       </div>

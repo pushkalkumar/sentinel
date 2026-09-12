@@ -2,7 +2,6 @@ import { useSmsStore } from '@/store/sms'
 import { useDisplayAlerts } from '@/store/select'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Panel } from '@/components/ui/Panel'
-import { SimTag } from '@/components/ui/SimTag'
 import { Pill } from '@/components/ui/Pill'
 import { fmtSim } from '@/lib/time'
 import { Thresholds } from '@/features/admin/Thresholds'
@@ -14,9 +13,9 @@ export default function Alerts() {
   const open = useDisplayAlerts()
   return (
     <>
-      <PageHeader eyebrow="Alerts" title="Thresholds, recipients and the outbox" />
+      <PageHeader title="Thresholds, recipients and the outbox" />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-        <Panel title="Open alerts" meta={`${open.length}`}>
+        <Panel title="Open alerts" meta={open.length > 0 ? `${open.length}` : undefined}>
           {open.length === 0
             ? <p className="text-sm text-ink-3">No open alerts. The engine opens one when a node crosses a rule.</p>
             : (
@@ -32,13 +31,13 @@ export default function Alerts() {
               </ul>
             )}
         </Panel>
-        <Panel title="Thresholds" meta="apply on the next reading">
+        <Panel title="Thresholds">
           <Thresholds />
         </Panel>
         <Panel title="Zones and recipients" className="lg:col-span-2">
           <Recipients />
         </Panel>
-        <Panel title="SMS outbox" meta={`${count} messages`} right={<SimTag kind="sms" />} padded={false} className="lg:col-span-2">
+        <Panel title="SMS outbox" meta={`${count} messages, provider disabled in demo`} padded={false} className="lg:col-span-2">
           <SmsOutbox />
         </Panel>
       </div>

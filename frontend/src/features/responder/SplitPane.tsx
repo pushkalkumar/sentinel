@@ -82,7 +82,7 @@ export function SplitPane({ left, right, initial = 0.4, minLeft = 360, minRight 
         title="Drag to resize"
       >
         <span className="absolute inset-y-0 -left-1.5 -right-1.5" />
-        <span className={clsx('absolute inset-y-0 left-0 w-px transition-[background-color] duration-[120ms]', dragging ? 'bg-signal' : 'group-hover:bg-line-strong')} />
+        <span className={clsx('absolute inset-y-0 left-0 w-px transition-[background-color] duration-[120ms]', dragging ? 'bg-accent' : 'group-hover:bg-line-strong')} />
       </div>
       <div className="min-w-0 flex-1 flex flex-col">{right}</div>
     </div>

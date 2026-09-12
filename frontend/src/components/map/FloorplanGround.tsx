@@ -1,5 +1,5 @@
 // Static floor plan for site 2 (Harbor Island DC-4). Two racks at y≈180 and y≈430, dock office bottom-left.
-const STROKE = 'var(--color-line-faint)'
+const STROKE = 'var(--color-line)'
 
 function rackTicks(y: number, from: number, to: number, step: number): string {
   const d: string[] = []
@@ -9,7 +9,7 @@ function rackTicks(y: number, from: number, to: number, step: number): string {
 
 export function FloorplanGround() {
   return (
-    <g stroke={STROKE} strokeWidth={1} fill="none" aria-hidden data-ground="floorplan">
+    <g stroke={STROKE} strokeWidth={0.75} fill="none" aria-hidden data-ground="floorplan">
       {/* outer wall */}
       <rect x={30} y={30} width={940} height={640} />
       {/* sprinkler riser room, north-west corner */}

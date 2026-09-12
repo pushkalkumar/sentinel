@@ -74,55 +74,49 @@ export default function Login() {
   return (
     <div className="min-h-dvh bg-canvas text-ink relative flex flex-col">
       <Grain />
-      <header className="relative z-[2] h-14 flex items-center px-6 border-b border-line">
-        <Link to="/" className="display-h1 text-[17px] font-semibold tracking-tight text-ink">Sentinel</Link>
-        <span className="ml-3 text-sm text-ink-2">Console sign-in</span>
-      </header>
-
-      <main className="relative z-[2] flex-1 flex items-start justify-center px-4 py-16">
-        <form onSubmit={submit} noValidate className="w-full max-w-[400px] bg-surface hairline rounded-md">
-          <div className="h-10 flex items-center px-5 border-b border-line">
-            <h1 className="label-signage">Sign in</h1>
+      <main className="relative z-[2] flex-1 flex items-center justify-center px-4 py-16">
+        <form onSubmit={submit} noValidate className="w-full max-w-[340px] flex flex-col gap-6">
+          <div className="flex flex-col gap-1">
+            <Link to="/" className="display-h1 text-[17px] font-semibold tracking-tight text-ink self-start">Sentinel</Link>
+            <h1 className="display-h2 text-xl text-ink mt-6">Sign in to the console</h1>
           </div>
-          <div className="p-5 flex flex-col gap-5">
-            <Segmented<Tab>
-              label="Account type"
-              value={tab}
-              onChange={switchTab}
-              options={[{ value: 'admin', label: 'Admin' }, { value: 'responder', label: 'Responder' }]}
-              className="self-start"
-            />
-            {denied && !error && (
-              <p className="text-sm text-warn" role="status">
-                That page needs a {next?.startsWith('/responder') ? 'responder' : 'different'} account. Sign in with one that has access.
-              </p>
-            )}
-            <Input
-              label="Email"
-              type="email"
-              name="email"
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoFocus
-            />
-            <Input
-              label="Password"
-              type="password"
-              name="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={error}
-              hint={tab === 'admin' ? 'Demo: admin@sentinel.demo, password sentinel' : 'Demo: responder@sentinel.demo, password sentinel'}
-            />
-            <Button type="submit" variant="primary" loading={busy} className="w-full">
-              {tab === 'admin' ? 'Open admin console' : 'Open responder console'}
-            </Button>
-            <p className="text-sm text-ink-2 text-center">
-              Staff? <Link to="/m/staff" className="text-ink underline underline-offset-2 decoration-line-strong hover:decoration-ink">Use the phone page</Link>
+          <Segmented<Tab>
+            label="Account type"
+            value={tab}
+            onChange={switchTab}
+            options={[{ value: 'admin', label: 'Admin' }, { value: 'responder', label: 'Responder' }]}
+            className="self-start"
+          />
+          {denied && !error && (
+            <p className="text-sm text-warn" role="status">
+              That page needs a {next?.startsWith('/responder') ? 'responder' : 'different'} account. Sign in with one that has access.
             </p>
-          </div>
+          )}
+          <Input
+            label="Email"
+            type="email"
+            name="email"
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoFocus
+          />
+          <Input
+            label="Password"
+            type="password"
+            name="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={error}
+            hint="Demo password: sentinel"
+          />
+          <Button type="submit" variant="primary" loading={busy} className="w-full mt-2">
+            {tab === 'admin' ? 'Open admin console' : 'Open responder console'}
+          </Button>
+          <p className="text-sm text-ink-3 text-center">
+            Staff? <Link to="/m/staff" className="text-ink-2 underline underline-offset-2 decoration-line-strong hover:text-ink">Use the phone page</Link>
+          </p>
         </form>
       </main>
     </div>

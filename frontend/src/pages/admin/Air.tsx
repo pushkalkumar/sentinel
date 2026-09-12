@@ -7,7 +7,6 @@ import type { AirResponse } from '@/lib/types'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Panel } from '@/components/ui/Panel'
 import { Segmented } from '@/components/ui/Segmented'
-import { SimTag } from '@/components/ui/SimTag'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { AirChart } from '@/features/admin/AirChart'
 import { BandHistory } from '@/features/admin/BandHistory'
@@ -48,17 +47,11 @@ export default function Air() {
   return (
     <>
       <PageHeader
-        eyebrow="Air · today"
         title="PM2.5 by node"
-        right={(
-          <>
-            <Segmented label="Range" options={rangeOptions} value={range} onChange={setRange} />
-            <SimTag kind="nodes" />
-          </>
-        )}
+        right={<Segmented label="Range" options={rangeOptions} value={range} onChange={setRange} />}
       />
       <div className="flex flex-col gap-4">
-        <Panel title="PM2.5" meta={data ? `µg/m³ · ${data.step}-min steps · ${data.series.length} nodes` : 'µg/m³'}>
+        <Panel title="PM2.5" meta={data ? `µg/m³, ${data.step}-min steps` : 'µg/m³'}>
           {loading && !data && <Skeleton className="w-64" />}
           {error && !data && <p className="text-sm text-alarm">{error}</p>}
           {data && <AirChart data={data} selected={selected} onSelect={selectNode} />}
@@ -69,7 +62,7 @@ export default function Air() {
             {error && !data && <p className="text-sm text-alarm">{error}</p>}
             {data && <BandHistory data={data} />}
           </Panel>
-          <Panel title="Decision log" meta="newest first" padded={false}>
+          <Panel title="Decision log" padded={false}>
             <DecisionLog entries={data?.band_history ?? []} loading={loading && !data} error={!data ? error : null} />
           </Panel>
         </div>

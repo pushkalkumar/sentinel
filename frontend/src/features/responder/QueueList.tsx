@@ -77,7 +77,7 @@ export function QueueList({ incidents, selected, onSelect, onOpen, siteName, loa
       aria-activedescendant={selected ?? undefined}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="outline-none focus-visible:outline-2 focus-visible:outline-signal focus-visible:-outline-offset-2"
+      className="outline-none focus-visible:outline-2 focus-visible:outline-accent focus-visible:-outline-offset-2"
     >
       <AnimatePresence initial={false}>
         {incidents.map((inc) => (

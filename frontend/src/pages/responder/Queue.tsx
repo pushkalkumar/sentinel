@@ -7,15 +7,14 @@ import { useSiteStore } from '@/store/site'
 import { useMeshStore } from '@/store/mesh'
 import { useDisplayNodes } from '@/store/select'
 import { CampusMap } from '@/components/map/CampusMap'
-import { SimTag } from '@/components/ui/SimTag'
 import { SplitPane } from '@/features/responder/SplitPane'
 import { QueueList } from '@/features/responder/QueueList'
 import { SensorStrip } from '@/features/responder/SensorStrip'
-import { SoundToggle } from '@/features/responder/SoundToggle'
 
-/** The bar is 56px and the shell's main has 48px bottom padding; the pane fills the rest. */
-const PANE_HEIGHT = 'calc(100dvh - 56px - 48px)'
-
+/**
+ * /responder: queue left, map right, one line of readings under the map (DESIGN_V2 §4).
+ * The page fills the shell's remaining height; the shell footer carries the honesty line.
+ */
 export default function Queue() {
   const navigate = useNavigate()
   const incidents = useIncidentStore(useShallow((s) => s.order.map((c) => s.byCode[c]).filter(isOpenIncident)))
@@ -45,10 +44,9 @@ export default function Queue() {
 
   const left = (
     <div className="flex flex-col min-h-0 h-full">
-      <div className="h-12 shrink-0 flex items-center gap-3 px-4 border-b border-line">
+      <div className="h-12 shrink-0 flex items-center gap-2 px-5">
         <h1 className="label-signage">Incidents</h1>
-        <span className="font-mono text-xs text-ink-2 tabular-nums">{incidents.length} open</span>
-        <span className="ml-auto font-mono text-2xs text-ink-3">sort: priority, then trust</span>
+        <span className="text-xs text-ink-3">{incidents.length === 0 ? 'none open' : `${incidents.length} open`}</span>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">
         <QueueList
@@ -65,16 +63,16 @@ export default function Queue() {
   )
 
   const right = (
-    <div className="flex flex-col min-h-0 h-full">
-      <div className="h-12 shrink-0 flex items-center gap-3 px-4 border-b border-line">
+    <div className="flex flex-col min-h-0 h-full pl-6">
+      <div className="h-12 shrink-0 flex items-center gap-2">
         <h2 className="label-signage">{site?.name ?? 'Map'}</h2>
-        {current && <span className="font-mono text-xs text-ink-2">{current.code} at {current.node_label ?? 'internet'}</span>}
-        <div className="ml-auto flex items-center gap-2">
-          <SoundToggle />
-          <SimTag kind="nodes" />
-        </div>
+        {current && (
+          <span className="text-xs text-ink-3">
+            <span className="font-mono text-ink-2">{current.code}</span> at {current.node_label ?? 'internet'}
+          </span>
+        )}
       </div>
-      <div className="flex-1 min-h-0 flex items-center justify-center p-4 bg-canvas/40">
+      <div className="flex-1 min-h-0 flex items-center justify-center bg-surface rounded-lg p-3">
         {siteError && nodes.length === 0 ? (
           <p className="text-sm text-alarm text-center max-w-sm">{siteError}</p>
         ) : !siteLoaded ? (
@@ -95,12 +93,12 @@ export default function Queue() {
           />
         )}
       </div>
-      <SensorStrip node={node} heading="sensors" className="shrink-0" />
+      <SensorStrip node={node} className="shrink-0 px-1" />
     </div>
   )
 
   return (
-    <div className="-mx-6 bg-surface border-x border-line" style={{ height: PANE_HEIGHT }}>
+    <div className="h-0 flex-1 min-h-0 -mx-6 px-1 pb-2">
       <SplitPane left={left} right={right} className="h-full" />
     </div>
   )

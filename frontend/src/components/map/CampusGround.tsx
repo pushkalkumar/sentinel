@@ -1,9 +1,9 @@
-// Static footprints for site 1 (CONTRACT §1.2 coordinates). 1px line-faint outlines, no fills, no labels.
-const STROKE = 'var(--color-line-faint)'
+// Static footprints for site 1 (CONTRACT §1.2 coordinates). 0.75px hairline outlines, no fills, no labels.
+const STROKE = 'var(--color-line)'
 
 export function CampusGround() {
   return (
-    <g stroke={STROKE} strokeWidth={1} fill="none" aria-hidden data-ground="campus">
+    <g stroke={STROKE} strokeWidth={0.75} fill="none" aria-hidden data-ground="campus">
       {/* walkways */}
       <path d="M500 160 L500 300 M360 200 L420 200 L420 300 M640 210 L560 210 L540 300 M480 360 L480 490 M280 400 L420 400 M690 400 L540 400 M240 600 L350 600 L350 560" strokeDasharray="1 3" />
       {/* Main Hall (gateway) */}

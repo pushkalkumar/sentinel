@@ -80,14 +80,23 @@ export default function Xenon() {
 
   const active = incident !== null && OPEN.includes(incident.status)
   const resolved = incident !== null && incident.status === 'resolved'
+  const working = active && incident.status !== 'received' && incident.status !== 'queued'   // a responder has it
+  const STEPS: { key: Incident['status']; label: string }[] = [
+    { key: 'received', label: 'Received' }, { key: 'acknowledged', label: 'Acknowledged' },
+    { key: 'en_route', label: 'En route' }, { key: 'resolved', label: 'Resolved' },
+  ]
+  const stepIndex = incident ? Math.max(0, STEPS.findIndex((st) => st.key === incident.status)) : -1
+  const notes = incident ? incident.events.filter((e) => e.note && e.actor_role !== 'civilian').slice(-3) : []
+  const trackUrl = incident ? `${location.origin}/m/status?code=${incident.code}` : null
+  const tone = working ? 'bg-[#8A5A1C] text-white' : active ? 'bg-[#B3372C] text-white' : 'bg-canvas text-ink'
 
   return (
     <main
-      className={clsx('min-h-dvh flex flex-col items-center justify-center text-center px-8 transition-colors duration-700', active ? 'bg-[#B3372C] text-white' : 'bg-canvas text-ink')}
+      className={clsx('min-h-dvh flex flex-col items-center justify-center text-center px-8 transition-colors duration-700', tone)}
     >
       <p className={clsx('label-signage', active ? 'text-white/70' : 'text-ink-3')}>Xenon A · real hardware over BLE</p>
       <h1 className="mt-6 font-display text-[clamp(48px,9vw,128px)] leading-[0.95] tracking-tight text-balance">
-        {active ? 'Incident reported' : resolved ? 'Resolved' : 'Standing by'}
+        {working ? (incident.status === 'en_route' ? 'Help is on the way' : 'Responder has it') : active ? 'Incident reported' : resolved ? 'Resolved' : 'Standing by'}
       </h1>
       <p className={clsx('mt-6 text-lg max-w-xl', active ? 'text-white/85' : 'text-ink-2')}>
         {active
@@ -98,6 +107,29 @@ export default function Xenon() {
       </p>
       {incident && (
         <p className={clsx('mt-8 font-mono text-4xl tabular-nums', active ? 'text-white' : 'text-ink')}>{incident.code}</p>
+      )}
+      {incident && (
+        <ol className="mt-8 flex items-center gap-3 text-sm" aria-label="Report status">
+          {STEPS.map((st, i) => (
+            <li key={st.key} className="flex items-center gap-3">
+              <span className={clsx('flex items-center gap-2', i <= stepIndex ? (active ? 'text-white' : 'text-ink') : (active ? 'text-white/40' : 'text-ink-4'))}>
+                <i aria-hidden className={clsx('inline-block size-2 rounded-full', i < stepIndex ? 'bg-current' : i === stepIndex ? 'bg-current animate-pulse' : 'border border-current')} />
+                {st.label}
+              </span>
+              {i < STEPS.length - 1 && <span aria-hidden className={clsx('h-px w-8', active ? 'bg-white/30' : 'bg-line')} />}
+            </li>
+          ))}
+        </ol>
+      )}
+      {notes.length > 0 && (
+        <ul className={clsx('mt-5 space-y-1 text-sm max-w-lg', active ? 'text-white/85' : 'text-ink-2')}>
+          {notes.map((e) => <li key={e.id}>{e.actor_name ?? e.actor_role}: {e.note}</li>)}
+        </ul>
+      )}
+      {trackUrl && (
+        <p className={clsx('mt-5 text-sm', active ? 'text-white/70' : 'text-ink-3')}>
+          Track from any phone, no login: <a href={trackUrl} className="underline underline-offset-4 font-mono">{trackUrl.replace(/^https?:\/\//, '')}</a>
+        </p>
       )}
       {lastPress && (
         <p className={clsx('mt-3 font-mono text-xs', active ? 'text-white/60' : 'text-ink-4')}>

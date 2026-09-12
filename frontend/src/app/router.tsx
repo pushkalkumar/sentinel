@@ -24,6 +24,7 @@ import Responder from '@/pages/m/Responder'
 
 // /hardware is lazy so three.js stays out of the main chunk.
 const Hardware = lazy(() => import('@/pages/Hardware'))
+const Demo = lazy(() => import('@/pages/Demo'))
 
 function HardwareRoute() {
   return (
@@ -37,6 +38,11 @@ export const router = createBrowserRouter([
   { path: '/', element: <Landing /> },
   { path: '/login', element: <Login /> },
   { path: '/hardware', element: <HardwareRoute /> },
+  { path: '/demo', element: (
+    <RequireRole roles={['admin', 'responder']}>
+      <Suspense fallback={<div className="min-h-dvh bg-canvas p-6"><Skeleton className="w-64" /></div>}><Demo /></Suspense>
+    </RequireRole>
+  ) },
   { path: '/drills/:id/report', element: <RequireRole roles={['admin', 'responder']}><DrillReport /></RequireRole> },
   {
     element: <RequireRole roles={['admin']} />,

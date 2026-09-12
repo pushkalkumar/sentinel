@@ -110,19 +110,24 @@ const STEPS: Step[] = [
 export function Steps() {
   return (
     <section id="how" className="py-16 md:py-24 scroll-mt-14" aria-labelledby="how-title">
-      <h2 id="how-title" className="display-h1 text-2xl text-ink">How a report gets out</h2>
-      <ol className="mt-10 md:mt-14 divide-y divide-line border-y border-line">
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
+        <h2 id="how-title" className="display-h1 text-2xl text-ink">How a report gets out</h2>
+        <p className="font-mono text-2xs text-ink-3">4 steps · none of them need the internet</p>
+      </div>
+      <ol className="mt-8 md:mt-10 divide-y divide-line border-y border-line">
         {STEPS.map((s) => (
-          <li key={s.n} className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 py-8 md:py-10 items-center">
-            <div className={clsx('flex gap-6 min-w-0', s.textCols === 7 ? 'md:col-span-7' : 'md:col-span-8', s.visualFirst && 'md:order-2')}>
-              <span className="display-hero text-2xl text-ink-4 leading-none tabular-nums w-10 shrink-0" aria-hidden>{s.n}</span>
-              <div className="min-w-0 max-w-[60ch]">
+          <li key={s.n} className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 py-6 md:py-7 items-center">
+            <div className={clsx('flex gap-5 min-w-0', s.textCols === 7 ? 'md:col-span-7' : 'md:col-span-8', s.visualFirst && 'md:order-2')}>
+              <span className="display-hero text-2xl text-ink-4 leading-none tabular-nums w-8 shrink-0" aria-hidden>{s.n}</span>
+              <div className="min-w-0 max-w-[56ch]">
                 <h3 className="display-h2 text-lg text-ink">{s.title}</h3>
                 <p className="mt-2 text-base text-ink-2">{s.body}</p>
               </div>
             </div>
-            <div className={clsx('hairline rounded-md bg-surface p-4 max-w-[360px] w-full md:max-w-none', s.textCols === 7 ? 'md:col-span-5' : 'md:col-span-4', s.visualFirst && 'md:order-1')}>
-              {s.visual}
+            <div className={clsx('min-w-0', s.textCols === 7 ? 'md:col-span-5' : 'md:col-span-4', s.visualFirst ? 'md:order-1 md:justify-self-start' : 'md:justify-self-end')}>
+              <div className="hairline rounded-md bg-surface p-3 w-full max-w-[300px]">
+                {s.visual}
+              </div>
             </div>
           </li>
         ))}

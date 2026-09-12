@@ -130,7 +130,7 @@ function MiniDecision({ decision }: { decision: HeroDecision }) {
   const m = BAND_META[decision.band]
   const value = useCountUp(decision.pm25)
   return (
-    <div className="p-5 border-b border-line">
+    <div className="p-5 border-b @[480px]:border-b-0 @[640px]:border-b border-line">
       <div className="label-signage text-ink-3">Outdoor activity · field node</div>
       <div className="mt-3 flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
@@ -193,11 +193,11 @@ export function HeroCard({ className }: { className?: string }) {
     <div className={clsx('relative', className)}>
       <div
         aria-hidden
-        className="absolute -inset-16 pointer-events-none"
+        className="absolute -inset-x-24 -inset-y-20 pointer-events-none"
         style={{ background: 'radial-gradient(60% 50% at 50% 40%, rgba(70,210,228,0.06), transparent 70%)' }}
       />
       <section
-        className="relative bg-surface hairline rounded-lg overflow-hidden"
+        className="relative bg-surface hairline rounded-lg overflow-hidden @container"
         aria-label="Sentinel console preview"
         data-phase={frame.phase}
         data-loop-t={reduced ? STATIC_FRAME_MS : Math.round(t)}
@@ -213,8 +213,8 @@ export function HeroCard({ className }: { className?: string }) {
             <SimTag kind="nodes" className="min-w-0" />
           </div>
         </header>
-        <div className="grid grid-cols-1 md:grid-cols-[62fr_38fr]">
-          <div className="relative border-b md:border-b-0 md:border-r border-line bg-canvas">
+        <div className="grid grid-cols-1 @[640px]:grid-cols-[62fr_38fr]">
+          <div className="relative border-b @[640px]:border-b-0 @[640px]:border-r border-line bg-canvas">
             <CampusMap
               compact
               ground="campus"
@@ -233,7 +233,7 @@ export function HeroCard({ className }: { className?: string }) {
             )}
             <span className="absolute right-4 bottom-3 font-mono text-2xs text-ink-4 hidden sm:block">square = gateway · circles = mesh</span>
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 grid grid-cols-1 @[480px]:grid-cols-2 @[640px]:grid-cols-1 @[480px]:divide-x @[640px]:divide-x-0 divide-line">
             <MiniDecision decision={frame.decision} />
             <Feed lines={frame.feed} />
           </div>

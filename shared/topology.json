@@ -1,0 +1,47 @@
+{
+  "viewBox": "0 0 1000 700",
+  "sites": [
+    {
+      "id": 1, "tenant_id": 1, "name": "Roosevelt High School", "kind": "campus",
+      "map_asset": "/maps/roosevelt-campus.svg", "floor_plan_url": null,
+      "address": "1410 NE 66th St, Seattle, WA 98115",
+      "access_notes": "Main office entrance on NE 66th. Fire panel in main hall lobby. Gym has roll-up door on east side.",
+      "geom": {"type":"Polygon","coordinates":[[[-122.312,47.659],[-122.298,47.659],[-122.298,47.651],[-122.312,47.651],[-122.312,47.659]]]},
+      "zones": [
+        {"id": 1, "name": "Campus North", "map_poly": [[40,40],[960,40],[960,290],[40,290]],
+         "geom": {"type":"Polygon","coordinates":[[[-122.312,47.659],[-122.298,47.659],[-122.298,47.6557],[-122.312,47.6557],[-122.312,47.659]]]}},
+        {"id": 2, "name": "Campus South", "map_poly": [[40,290],[960,290],[960,660],[40,660]],
+         "geom": {"type":"Polygon","coordinates":[[[-122.312,47.6557],[-122.298,47.6557],[-122.298,47.651],[-122.312,47.651],[-122.312,47.6557]]]}}
+      ],
+      "nodes": [
+        {"id":"hub",       "label":"Main Hall (gateway)", "zone_id":1, "lat":47.65763, "lng":-122.30500, "map_x":500, "map_y":120, "indoor":true,  "is_gateway":true,  "floor":1, "neighbours":["library","science","cafeteria"]},
+        {"id":"library",   "label":"Library",             "zone_id":1, "lat":47.65671, "lng":-122.30780, "map_x":300, "map_y":200, "indoor":true,  "is_gateway":false, "floor":1, "neighbours":["hub","cafeteria","arts"]},
+        {"id":"science",   "label":"Science Wing",        "zone_id":1, "lat":47.65660, "lng":-122.30220, "map_x":700, "map_y":210, "indoor":true,  "is_gateway":false, "floor":2, "neighbours":["hub","cafeteria","gym"]},
+        {"id":"cafeteria", "label":"Cafeteria",           "zone_id":2, "lat":47.65523, "lng":-122.30528, "map_x":480, "map_y":330, "indoor":true,  "is_gateway":false, "floor":1, "neighbours":["hub","library","science","field","arts"]},
+        {"id":"arts",      "label":"Arts Building",       "zone_id":2, "lat":47.65443, "lng":-122.30892, "map_x":220, "map_y":400, "indoor":true,  "is_gateway":false, "floor":1, "neighbours":["library","cafeteria","parking"]},
+        {"id":"gym",       "label":"Gymnasium",           "zone_id":2, "lat":47.65443, "lng":-122.30136, "map_x":760, "map_y":400, "indoor":true,  "is_gateway":false, "floor":1, "neighbours":["science"]},
+        {"id":"field",     "label":"Athletic Field",      "zone_id":2, "lat":47.65260, "lng":-122.30472, "map_x":520, "map_y":560, "indoor":false, "is_gateway":false, "floor":null, "neighbours":["cafeteria"]},
+        {"id":"parking",   "label":"South Lot",           "zone_id":2, "lat":47.65214, "lng":-122.30976, "map_x":160, "map_y":600, "indoor":false, "is_gateway":false, "floor":null, "neighbours":["arts"]}
+      ]
+    },
+    {
+      "id": 2, "tenant_id": 2, "name": "Harbor Island DC-4", "kind": "floorplan",
+      "map_asset": "/maps/harbor-island-floor1.svg", "floor_plan_url": "/maps/harbor-island-floor1.svg",
+      "address": "3400 13th Ave SW, Seattle, WA 98106",
+      "access_notes": "Truck gate on 13th Ave SW, code 4471. Knox box at dock office. Sprinkler riser room north-west corner. High-rack storage aisles A–B, 9 m.",
+      "geom": {"type":"Polygon","coordinates":[[[-122.352,47.580],[-122.348,47.580],[-122.348,47.578],[-122.352,47.578],[-122.352,47.580]]]},
+      "zones": [
+        {"id": 3, "name": "Floor 1", "map_poly": [[30,30],[970,30],[970,670],[30,670]],
+         "geom": {"type":"Polygon","coordinates":[[[-122.352,47.580],[-122.348,47.580],[-122.348,47.578],[-122.352,47.578],[-122.352,47.580]]]}}
+      ],
+      "nodes": [
+        {"id":"w-dock", "label":"Dock Office (gateway)", "zone_id":3, "lat":47.57910, "lng":-122.35150, "map_x":120, "map_y":620, "indoor":true, "is_gateway":true,  "floor":1, "neighbours":["w-a01","w-b03"]},
+        {"id":"w-a01",  "label":"Aisle A · Row 01",      "zone_id":3, "lat":47.57930, "lng":-122.35120, "map_x":250, "map_y":180, "indoor":true, "is_gateway":false, "floor":1, "neighbours":["w-dock","w-a07"]},
+        {"id":"w-a07",  "label":"Aisle A · Row 07",      "zone_id":3, "lat":47.57930, "lng":-122.35060, "map_x":500, "map_y":180, "indoor":true, "is_gateway":false, "floor":1, "neighbours":["w-a01","w-a14","w-b10"]},
+        {"id":"w-a14",  "label":"Aisle A · Row 14",      "zone_id":3, "lat":47.57930, "lng":-122.35000, "map_x":780, "map_y":180, "indoor":true, "is_gateway":false, "floor":1, "neighbours":["w-a07"]},
+        {"id":"w-b03",  "label":"Aisle B · Row 03",      "zone_id":3, "lat":47.57890, "lng":-122.35100, "map_x":330, "map_y":430, "indoor":true, "is_gateway":false, "floor":1, "neighbours":["w-dock","w-b10"]},
+        {"id":"w-b10",  "label":"Aisle B · Row 10",      "zone_id":3, "lat":47.57890, "lng":-122.35030, "map_x":640, "map_y":430, "indoor":true, "is_gateway":false, "floor":1, "neighbours":["w-b03","w-a07"]}
+      ]
+    }
+  ]
+}

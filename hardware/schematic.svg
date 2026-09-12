@@ -1,0 +1,345 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" font-family="'IBM Plex Mono', ui-monospace, Menlo, monospace">
+<title>Sentinel Node rev A block schematic</title>
+<rect width="1600" height="1000" fill="#0A0908"/>
+<text x="40" y="42" font-size="20" fill="#F2EEE8" text-anchor="start" font-weight="700">SENTINEL NODE</text>
+<text x="214" y="42" font-size="13" fill="#A9A39A" text-anchor="start" font-weight="normal">· block schematic · rev A</text>
+<text x="1560" y="42" font-size="11" fill="#6F6A62" text-anchor="end" font-weight="normal">1 / 1 · designed, not fabricated</text>
+<rect x="40" y="90" width="130" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="105.0" y="108" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">SOLAR</text>
+<text x="105.0" y="123" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">6 V 2 W</text>
+<text x="105.0" y="141" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">120 × 70 mm</text>
+<text x="105.0" y="155" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">lid-mounted</text>
+<rect x="188" y="90" width="150" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="263.0" y="108" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">USB-C 5 V IN</text>
+<text x="263.0" y="123" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">SCHOTTKY OR</text>
+<text x="263.0" y="141" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">2 × SS34 into VIN</text>
+<text x="263.0" y="155" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">mains for indoor</text>
+<rect x="356" y="90" width="170" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="441.0" y="108" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">TP4056</text>
+<text x="441.0" y="123" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">CHARGER</text>
+<text x="441.0" y="141" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">PROG 1.2 kΩ → 1 A</text>
+<text x="441.0" y="155" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">CHRG · STDBY</text>
+<rect x="544" y="90" width="170" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="629.0" y="108" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">DW01 + FS8205</text>
+<text x="629.0" y="123" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">PROTECTION</text>
+<text x="629.0" y="141" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">OVP · UVP · OCP</text>
+<rect x="732" y="90" width="130" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="797.0" y="108" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">18650</text>
+<text x="797.0" y="123" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">3400 mAh</text>
+<text x="797.0" y="141" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">3.6 V nom</text>
+<rect x="880" y="90" width="150" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="955.0" y="108" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">MT3608</text>
+<text x="955.0" y="123" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">BOOST 5 V</text>
+<text x="955.0" y="141" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">EN tied to VIN</text>
+<text x="955.0" y="155" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">fan + heater rail</text>
+<rect x="1048" y="90" width="150" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="1123.0" y="108" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">P-MOSFET</text>
+<text x="1123.0" y="123" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">5V_SW</text>
+<text x="1123.0" y="141" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">gate ← 5V_EN</text>
+<text x="1123.0" y="155" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">cut in sleep</text>
+<rect x="1216" y="90" width="150" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="1291.0" y="108" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">3.3 V</text>
+<text x="1291.0" y="123" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">REGULATOR</text>
+<text x="1291.0" y="141" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">LDO / buck</text>
+<text x="1291.0" y="155" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">600 mA</text>
+<rect x="1384" y="90" width="136" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="1452.0" y="108" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">VBAT SENSE</text>
+<text x="1452.0" y="123" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">÷ 2</text>
+<text x="1452.0" y="141" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">100 k / 100 k</text>
+<text x="1452.0" y="155" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">→ GPIO35</text>
+<text x="164" y="143.5" font-size="11" fill="#A9A39A" text-anchor="end" font-weight="normal">+</text>
+<text x="164" y="188.5" font-size="11" fill="#A9A39A" text-anchor="end" font-weight="normal">−</text>
+<path d="M170,140 L188,140" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="174" y="135" font-size="9" fill="#46D2E4" text-anchor="start" font-weight="normal">SOL+</text>
+<path d="M170,185 L179,185 L179,200" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M170,200 L188,200 M173,204 L185,204 M176,208 L182,208" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<path d="M338,155 L356,155" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="342" y="150" font-size="9" fill="#46D2E4" text-anchor="start" font-weight="normal">VIN</text>
+<path d="M218,200 L218,208" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M209,208 L227,208 M212,212 L224,212 M215,216 L221,216" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<path d="M526,140 L544,140" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="524" y="135" font-size="9" fill="#46D2E4" text-anchor="end" font-weight="normal">BAT+</text>
+<text x="542" y="152" font-size="9" fill="#46D2E4" text-anchor="end" font-weight="normal">P+</text>
+<path d="M386,200 L386,208" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M377,208 L395,208 M380,212 L392,212 M383,216 L389,216" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<text x="399" y="214" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">BAT−</text>
+<circle cx="535" cy="140" r="3" fill="#46D2E4"/>
+<path d="M535,140 L535,70 L1452.0,70" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="541" y="65" font-size="10" fill="#46D2E4" text-anchor="start" font-weight="normal">VBAT</text>
+<path d="M714,140 L732,140" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="717" y="135" font-size="9" fill="#46D2E4" text-anchor="start" font-weight="normal">B+</text>
+<text x="738" y="143.5" font-size="11" fill="#A9A39A" text-anchor="start" font-weight="normal">+</text>
+<path d="M574,200 L574,208" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M565,208 L583,208 M568,212 L580,212 M571,216 L577,216" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<text x="587" y="214" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">P− B−</text>
+<path d="M789.0,170 L789.0,192 M795.0,176 L795.0,186 M801.0,170 L801.0,192 M807.0,176 L807.0,186" stroke="#A9A39A" stroke-width="1.5"/>
+<text x="738" y="188.5" font-size="11" fill="#A9A39A" text-anchor="start" font-weight="normal">−</text>
+<path d="M762,200 L762,208" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M753,208 L771,208 M756,212 L768,212 M759,216 L765,216" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<circle cx="955.0" cy="70" r="3" fill="#46D2E4"/>
+<path d="M955.0,70 L955.0,90" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="959.0" y="85" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">VIN</text>
+<path d="M1030,140 L1048,140" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1033" y="135" font-size="9" fill="#46D2E4" text-anchor="start" font-weight="normal">5V</text>
+<path d="M910,200 L910,208" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M901,208 L919,208 M904,212 L916,212 M907,216 L913,216" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<circle cx="1291.0" cy="70" r="3" fill="#46D2E4"/>
+<path d="M1291.0,70 L1291.0,90" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1295.0" y="85" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">VBAT</text>
+<path d="M1240,200 L1240,208" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M1231,208 L1249,208 M1234,212 L1246,212 M1237,216 L1243,216" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<path d="M1452.0,70 L1452.0,90" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1456.0" y="85" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">VBAT</text>
+<path d="M1408,200 L1408,208" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M1399,208 L1417,208 M1402,212 L1414,212 M1405,216 L1411,216" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<rect x="480" y="300" width="630" height="240" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="795.0" y="318" font-size="14" fill="#F2EEE8" text-anchor="middle" font-weight="600">ESP32-S3-WROOM-1</text>
+<text x="795.0" y="408" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">dual-core 240 MHz · 8 MB flash · WiFi AP + BLE</text>
+<text x="795.0" y="424" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">WiFi AP 192.168.4.1 · captive DNS · BLE · mesh queue 256</text>
+<path d="M940,300 L940,282" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="943.5" y="306" font-size="10" fill="#A9A39A" text-anchor="end" font-weight="normal" transform="rotate(-90 943.5 306)">GPIO35 VBAT_S</text>
+<path d="M1010,300 L1010,282" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1013.5" y="306" font-size="10" fill="#A9A39A" text-anchor="end" font-weight="normal" transform="rotate(-90 1013.5 306)">GPIO33 5V_EN</text>
+<path d="M1090,300 L1090,282" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1093.5" y="306" font-size="10" fill="#A9A39A" text-anchor="end" font-weight="normal" transform="rotate(-90 1093.5 306)">3V3</text>
+<path d="M480,360 L450,360" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="486" y="363.5" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">EN</text>
+<text x="446" y="355" font-size="9" fill="#A9A39A" text-anchor="end" font-weight="normal">10 kΩ → 3V3 · 100 nF</text>
+<path d="M480,400 L450,400" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="486" y="403.5" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">GND</text>
+<path d="M450,400 L450,412" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M441,412 L459,412 M444,416 L456,416 M447,420 L453,420" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<path d="M1110,360 L1128,360" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1104" y="363.5" font-size="10" fill="#A9A39A" text-anchor="end" font-weight="normal">GPIO25 BUZ</text>
+<path d="M1110,400 L1128,400" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1104" y="403.5" font-size="10" fill="#A9A39A" text-anchor="end" font-weight="normal">GPIO2 LED_DIN</text>
+<path d="M1110,440 L1128,440" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1104" y="443.5" font-size="10" fill="#A9A39A" text-anchor="end" font-weight="normal">GPIO0 BTN</text>
+<path d="M500,540 L500,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="503.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 503.5 534)">GPIO16 U2_RX</text>
+<path d="M545,540 L545,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="548.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 548.5 534)">GPIO17 U2_TX</text>
+<path d="M590,540 L590,540" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="593.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 593.5 534)">GPIO4 PMS_SET</text>
+<path d="M635,540 L635,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="638.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 638.5 534)">GPIO21 SDA</text>
+<path d="M680,540 L680,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="683.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 683.5 534)">GPIO22 SCL</text>
+<path d="M725,540 L725,540" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="728.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 728.5 534)">GPIO34 MQ2_A</text>
+<path d="M770,540 L770,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="773.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 773.5 534)">GPIO23 MOSI</text>
+<path d="M805,540 L805,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="808.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 808.5 534)">GPIO19 MISO</text>
+<path d="M840,540 L840,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="843.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 843.5 534)">GPIO18 SCK</text>
+<path d="M875,540 L875,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="878.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 878.5 534)">GPIO5 NSS</text>
+<path d="M910,540 L910,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="913.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 913.5 534)">GPIO26 DIO1</text>
+<path d="M945,540 L945,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="948.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 948.5 534)">GPIO14 RST</text>
+<path d="M980,540 L980,540" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="983.5" y="534" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal" transform="rotate(-90 983.5 534)">GPIO27 BUSY</text>
+<path d="M1010,282 L1010,268 L1065,268 L1065,200" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1016" y="264" font-size="10" fill="#FFB224" text-anchor="start" font-weight="normal">5V_EN</text>
+<text x="1069" y="212" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">GATE</text>
+<path d="M1291.0,200 L1291.0,250 L1090,250 L1090,282" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M1291.0,250 L1548,250 L1548,892" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="1291.0" cy="250" r="3" fill="#46D2E4"/>
+<text x="1096" y="246" font-size="10" fill="#46D2E4" text-anchor="start" font-weight="normal">3V3</text>
+<text x="1544" y="246" font-size="10" fill="#46D2E4" text-anchor="end" font-weight="normal">3V3</text>
+<text x="1544" y="600" font-size="10" fill="#46D2E4" text-anchor="middle" font-weight="normal" transform="rotate(-90 1544 600)">3V3</text>
+<path d="M1452.0,200 L1452.0,286 L940,286 L940,282" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="946" y="282" font-size="10" fill="#FFB224" text-anchor="start" font-weight="normal">VBAT_SENSE</text>
+<path d="M1170,200 L1170,232 L1572,232 L1572,908" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1176" y="228" font-size="10" fill="#46D2E4" text-anchor="start" font-weight="normal">5V_SW</text>
+<text x="1583" y="600" font-size="10" fill="#46D2E4" text-anchor="middle" font-weight="normal" transform="rotate(-90 1583 600)">5V_SW</text>
+<text x="40" y="250" font-size="11" fill="#A9A39A" text-anchor="start" font-weight="normal">Normal ~12 mA avg · disaster 180–250 mA</text>
+<text x="40" y="266" font-size="11" fill="#A9A39A" text-anchor="start" font-weight="normal">3400 mAh ≈ 3 days normal, 12–18 h disaster</text>
+<text x="40" y="282" font-size="11" fill="#6F6A62" text-anchor="start" font-weight="normal">Solar 6 V 2 W: indefinite normal mode, Seattle summer/fall</text>
+<text x="40" y="470" font-size="11" fill="#A9A39A" text-anchor="start" font-weight="normal">Local alarm rules run here.</text>
+<text x="40" y="486" font-size="11" fill="#A9A39A" text-anchor="start" font-weight="normal">No backend needed.</text>
+<text x="40" y="508" font-size="10" fill="#6F6A62" text-anchor="start" font-weight="normal">Rate-of-rise + absolute thresholds (spec §6),</text>
+<text x="40" y="522" font-size="10" fill="#6F6A62" text-anchor="start" font-weight="normal">LED red, buzzer, portal banner, priority mesh msg.</text>
+<rect x="40" y="740" width="190" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="135.0" y="758" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">PMS5003</text>
+<text x="135.0" y="776" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">laser PM1 / 2.5 / 10</text>
+<text x="135.0" y="790" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">fan 30 s per 5 min</text>
+<text x="135.0" y="804" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">continuous in alert</text>
+<rect x="270" y="740" width="160" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="350.0" y="758" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">BME280</text>
+<text x="350.0" y="776" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">addr 0x76</text>
+<text x="350.0" y="790" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">T / RH / P, 60 s</text>
+<rect x="490" y="740" width="120" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="550.0" y="758" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">MQ-2</text>
+<text x="550.0" y="776" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">20 s warm-up</text>
+<text x="550.0" y="790" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">150 mA heater</text>
+<text x="550.0" y="804" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">10 s per 60 s</text>
+<rect x="750" y="740" width="270" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="885.0" y="758" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600"></text>
+<text x="885.0" y="780" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">SX1262 LoRa 915 MHz</text>
+<text x="885.0" y="800" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">+22 dBm · SF9 · BW125</text>
+<text x="885.0" y="816" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">flooding mesh, TTL 8, de-dup by msg_id</text>
+<rect x="1075" y="740" width="90" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="1120.0" y="758" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">HELICAL ANT</text>
+<text x="1120.0" y="776" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">915 MHz</text>
+<text x="1120.0" y="790" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">2 dBi</text>
+<rect x="1175" y="740" width="100" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="1225.0" y="758" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">BUTTON</text>
+<text x="1225.0" y="776" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">&quot;I&#x27;m here&quot;</text>
+<text x="1225.0" y="790" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">10 kΩ pull-down</text>
+<text x="1225.0" y="804" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">debounced in fw</text>
+<rect x="1290" y="740" width="100" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="1340.0" y="758" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">WS2812</text>
+<text x="1340.0" y="776" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">330 Ω series</text>
+<text x="1340.0" y="790" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">100 nF</text>
+<text x="1340.0" y="804" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">off in sleep</text>
+<rect x="1405" y="740" width="120" height="110" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="1465.0" y="758" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">PIEZO</text>
+<text x="1465.0" y="773" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600">BUZZER</text>
+<text x="1465.0" y="791" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">85 dB @ 10 cm</text>
+<text x="1465.0" y="805" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">PWM</text>
+<rect x="270" y="688" width="160" height="34" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="350.0" y="706" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600"></text>
+<text x="350.0" y="709" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">2 × 4.7 kΩ pull-up → 3V3</text>
+<rect x="490" y="688" width="120" height="34" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="550.0" y="706" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600"></text>
+<text x="550.0" y="709" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">÷2 DIVIDER 10 k / 10 k</text>
+<rect x="1405" y="688" width="120" height="34" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="1465.0" y="706" font-size="12" fill="#F2EEE8" text-anchor="middle" font-weight="600"></text>
+<text x="1465.0" y="702" font-size="10" fill="#A9A39A" text-anchor="middle" font-weight="normal">NPN DRIVER</text>
+<text x="1465.0" y="715" font-size="9" fill="#A9A39A" text-anchor="middle" font-weight="normal">1 kΩ base · flyback</text>
+<path d="M1120.0,844 L1120.0,828 M1108.0,814 L1120.0,828 L1132.0,814 M1108.0,814 L1132.0,814" stroke="#B98BF0" stroke-width="1.5" fill="none"/>
+<path d="M1207.0,766 L1217.0,766 M1233.0,766 L1243.0,766 M1215.0,760 L1235.0,765" stroke="#FFB224" stroke-width="1.5" fill="none"/>
+<path d="M90,740 L90,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="94" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">TX</text>
+<path d="M140,740 L140,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="144" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">RX</text>
+<path d="M190,740 L190,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="194" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">SET</text>
+<path d="M320,740 L320,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="324" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">SDA</text>
+<path d="M380,740 L380,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="384" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">SCL</text>
+<path d="M550,740 L550,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="554" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">A0</text>
+<path d="M770,740 L770,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="774" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">MOSI</text>
+<path d="M805,740 L805,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="809" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">MISO</text>
+<path d="M840,740 L840,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="844" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">SCK</text>
+<path d="M875,740 L875,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="879" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">NSS</text>
+<path d="M910,740 L910,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="914" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">DIO1</text>
+<path d="M945,740 L945,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="949" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">RST</text>
+<path d="M980,740 L980,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="984" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">BUSY</text>
+<path d="M1225.0,740 L1225.0,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1229.0" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">OUT</text>
+<path d="M1340.0,740 L1340.0,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1344.0" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">DIN</text>
+<path d="M1465.0,740 L1465.0,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1469.0" y="734" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">IN</text>
+<text x="94" y="862" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">VCC 5V_SW</text>
+<path d="M90,850 L90,908" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="90" cy="908" r="3" fill="#46D2E4"/>
+<path d="M180,850 L180,862" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M171,862 L189,862 M174,866 L186,866 M177,870 L183,870" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<text x="324" y="862" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">VDD 3V3</text>
+<path d="M320,850 L320,892" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="320" cy="892" r="3" fill="#46D2E4"/>
+<path d="M380,850 L380,862" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M371,862 L389,862 M374,866 L386,866 M377,870 L383,870" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<text x="524" y="862" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">H+ 5V_SW</text>
+<path d="M520,850 L520,908" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="520" cy="908" r="3" fill="#46D2E4"/>
+<path d="M580,850 L580,862" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M571,862 L589,862 M574,866 L586,866 M577,870 L583,870" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<text x="593" y="862" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">H−</text>
+<text x="784" y="862" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">3V3</text>
+<path d="M780,850 L780,892" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="780" cy="892" r="3" fill="#46D2E4"/>
+<path d="M1000,850 L1000,862" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M991,862 L1009,862 M994,866 L1006,866 M997,870 L1003,870" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<text x="1204" y="862" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">3V3</text>
+<path d="M1200,850 L1200,892" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="1200" cy="892" r="3" fill="#46D2E4"/>
+<path d="M1250,850 L1250,862" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M1241,862 L1259,862 M1244,866 L1256,866 M1247,870 L1253,870" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<text x="1319" y="862" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">5V_SW</text>
+<path d="M1315,850 L1315,908" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="1315" cy="908" r="3" fill="#46D2E4"/>
+<path d="M1365,850 L1365,862" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M1356,862 L1374,862 M1359,866 L1371,866 M1362,870 L1368,870" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<text x="1434" y="862" font-size="9" fill="#A9A39A" text-anchor="start" font-weight="normal">3V3</text>
+<path d="M1430,850 L1430,892" fill="none" stroke="#46D2E4" stroke-width="1.5" stroke-linejoin="round"/>
+<circle cx="1430" cy="892" r="3" fill="#46D2E4"/>
+<path d="M1500,850 L1500,862" fill="none" stroke="#A9A39A" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M1491,862 L1509,862 M1494,866 L1506,866 M1497,870 L1503,870" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<path d="M60,892 L1548,892" fill="none" stroke="#46D2E4" stroke-width="2" stroke-linejoin="round"/>
+<path d="M60,908 L1572,908" fill="none" stroke="#46D2E4" stroke-width="2" stroke-linejoin="round"/>
+<text x="40" y="895.5" font-size="10" fill="#46D2E4" text-anchor="start" font-weight="normal">3V3</text>
+<text x="28" y="911.5" font-size="10" fill="#46D2E4" text-anchor="start" font-weight="normal">5V_SW</text>
+<path d="M500,540 L500,570 L90,570 L90,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="96" y="566" font-size="10" fill="#5AD46E" text-anchor="start" font-weight="normal">U2_RX</text>
+<path d="M545,540 L545,588 L140,588 L140,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="146" y="584" font-size="10" fill="#5AD46E" text-anchor="start" font-weight="normal">U2_TX</text>
+<path d="M590,540 L590,606 L190,606 L190,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="196" y="602" font-size="10" fill="#FFB224" text-anchor="start" font-weight="normal">PMS_SET</text>
+<path d="M635,540 L635,624 L320,624 L320,688" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="326" y="620" font-size="10" fill="#5AD46E" text-anchor="start" font-weight="normal">SDA</text>
+<path d="M680,540 L680,642 L380,642 L380,688" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="386" y="638" font-size="10" fill="#5AD46E" text-anchor="start" font-weight="normal">SCL</text>
+<path d="M725,540 L725,660 L550,660 L550,688" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="556" y="656" font-size="10" fill="#FFB224" text-anchor="start" font-weight="normal">MQ2_A</text>
+<path d="M320,722 L320,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M380,722 L380,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M550,722 L550,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="300" y="566" font-size="9" fill="#5AD46E" text-anchor="start" font-weight="normal">UART2</text>
+<text x="600" y="620" font-size="9" fill="#5AD46E" text-anchor="start" font-weight="normal">I2C</text>
+<path d="M770,540 L770,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="766" y="640" font-size="9" fill="#5AD46E" text-anchor="middle" font-weight="normal" transform="rotate(-90 766 640)">MOSI</text>
+<path d="M805,540 L805,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="801" y="640" font-size="9" fill="#5AD46E" text-anchor="middle" font-weight="normal" transform="rotate(-90 801 640)">MISO</text>
+<path d="M840,540 L840,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="836" y="640" font-size="9" fill="#5AD46E" text-anchor="middle" font-weight="normal" transform="rotate(-90 836 640)">SCK</text>
+<path d="M875,540 L875,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="871" y="640" font-size="9" fill="#5AD46E" text-anchor="middle" font-weight="normal" transform="rotate(-90 871 640)">NSS</text>
+<path d="M910,540 L910,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="906" y="640" font-size="9" fill="#5AD46E" text-anchor="middle" font-weight="normal" transform="rotate(-90 906 640)">DIO1</text>
+<path d="M945,540 L945,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="941" y="640" font-size="9" fill="#5AD46E" text-anchor="middle" font-weight="normal" transform="rotate(-90 941 640)">RST</text>
+<path d="M980,540 L980,722" fill="none" stroke="#5AD46E" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="976" y="640" font-size="9" fill="#5AD46E" text-anchor="middle" font-weight="normal" transform="rotate(-90 976 640)">BUSY</text>
+<text x="992" y="578" font-size="9" fill="#5AD46E" text-anchor="start" font-weight="normal">SPI · DIO1 · RST · BUSY</text>
+<text x="1014" y="835.5" font-size="10" fill="#A9A39A" text-anchor="end" font-weight="normal">ANT</text>
+<path d="M1020,832 L1075,832" fill="none" stroke="#B98BF0" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1026" y="827" font-size="10" fill="#B98BF0" text-anchor="start" font-weight="normal">RF · u.FL</text>
+<path d="M1128,360 L1465.0,360 L1465.0,688" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1134" y="355" font-size="10" fill="#FFB224" text-anchor="start" font-weight="normal">BUZ</text>
+<path d="M1465.0,722 L1465.0,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M1128,400 L1340.0,400 L1340.0,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1134" y="395" font-size="10" fill="#FFB224" text-anchor="start" font-weight="normal">LED_DIN</text>
+<path d="M1128,440 L1225.0,440 L1225.0,722" fill="none" stroke="#FFB224" stroke-width="1.5" stroke-linejoin="round"/>
+<text x="1134" y="435" font-size="10" fill="#FFB224" text-anchor="start" font-weight="normal">BTN</text>
+<path d="M40,944 L66,944" fill="none" stroke="#46D2E4" stroke-width="3" stroke-linejoin="round"/>
+<text x="74" y="947.5" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">power</text>
+<path d="M140,944 L166,944" fill="none" stroke="#5AD46E" stroke-width="3" stroke-linejoin="round"/>
+<text x="174" y="947.5" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">data bus</text>
+<path d="M262,944 L288,944" fill="none" stroke="#FFB224" stroke-width="3" stroke-linejoin="round"/>
+<text x="296" y="947.5" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">control</text>
+<path d="M372,944 L398,944" fill="none" stroke="#B98BF0" stroke-width="3" stroke-linejoin="round"/>
+<text x="406" y="947.5" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">RF</text>
+<circle cx="440" cy="944" r="3" fill="#A9A39A"/>
+<text x="452" y="947.5" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">junction</text>
+<path d="M539,940 L557,940 M542,944 L554,944 M545,948 L551,948" stroke="#A9A39A" stroke-width="1.5" fill="none"/>
+<text x="566" y="947.5" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">GND</text>
+<text x="40" y="970" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">Hardware designed, not fabricated (organiser guidance). Demo sensors and radio are simulated.</text>
+<rect x="1000" y="928" width="560" height="60" rx="6" fill="#121110" stroke="#2A2825" stroke-width="1.5"/>
+<text x="1014" y="950" font-size="11" fill="#F2EEE8" text-anchor="start" font-weight="600">SENTINEL NODE · rev A · block schematic · 2026-09-12 · not fabricated</text>
+<text x="1014" y="970" font-size="10" fill="#A9A39A" text-anchor="start" font-weight="normal">Pin numbers per spec §3.2 (ESP32 DevKit numbering); S3 remap pending.</text>
+</svg>

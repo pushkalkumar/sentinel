@@ -138,6 +138,7 @@ async def _drain_in_flight() -> None:
     wait they arrive after the reset and put 14:07 readings and advisories back on a 07:30 screen.
     """
     loop = asyncio.get_running_loop()
+
     def newest() -> str:
         return max((r.get("ts", "") for r in state.latest.values()), default="")
     deadline = loop.time() + DRAIN_MAX_S
@@ -156,18 +157,23 @@ async def _wipe_engine_rows(session) -> dict:
     counts = {}
     for name, model in (("sms_log", SmsLog), ("alerts", Alert), ("decision_log", DecisionLog),
                         ("node_evals", NodeEval), ("readings", Reading), ("mesh_log", MeshLog)):
-        for attempt in range(1, WIPE_ATTEMPTS + 1):
-            try:
-                result = await session.execute(delete(model))
-                break
-            except OperationalError:
-                await session.rollback()
-                if attempt == WIPE_ATTEMPTS:
-                    raise
-                log.warning("reset: %s is locked by the ingest, retry %d", name, attempt)
-                await asyncio.sleep(0.25)
-        counts[name] = result.rowcount or 0
+        counts[name] = await _delete_all(session, name, model)
     return counts
+
+
+async def _delete_all(session, name: str, model) -> int:
+    """One DELETE, retried while the ingest holds the single SQLite writer lock."""
+    for attempt in range(1, WIPE_ATTEMPTS + 1):
+        try:
+            result = await session.execute(delete(model))
+            return result.rowcount or 0
+        except OperationalError:
+            await session.rollback()
+            if attempt == WIPE_ATTEMPTS:
+                raise
+            log.warning("reset: %s is locked by the ingest, retry %d", name, attempt)
+            await asyncio.sleep(0.25)
+    return 0
 
 
 async def _resolve_demo_incidents(session) -> list[str]:

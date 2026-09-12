@@ -1,6 +1,7 @@
 """Nodes (CONTRACT §3.3): list, detail with ssid/banner, readings, and the status rule shared with backend-alerts."""
 from __future__ import annotations
 
+import time
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query
@@ -20,6 +21,61 @@ READING_FIELDS = ("ts", "pm1", "pm25", "pm10", "temp_c", "rh", "mq2_raw", "rssi"
 WATCH_BANDS = {"unhealthy", "very_unhealthy", "hazardous"}
 MAX_MINUTES = 1440
 RING_MINUTES = 120
+HARDWARE_ID_PREFIX = "xenon-"
+HARDWARE_FW_PREFIX = "xenon-"
+HARDWARE_LIVE_S = 120.0   # boards report every 5 s while the bridge runs; hide them this long after the last reading
+
+# node_id -> (ts of the ring tail when last observed, wall time it was first observed). Readings carry the
+# simulator clock, not wall time, so arrival is tracked here; ingest reaches this through node_status_payload.
+_hardware_seen: dict[str, tuple[str, float]] = {}
+
+
+def is_hardware(node: Node) -> bool:
+    """Real boards (topology.json hardware=true). Node has no column for it; seed stamps fw_version "xenon-ble-*"
+    and the ids are "xenon-*"."""
+    return node.id.startswith(HARDWARE_ID_PREFIX) or (node.fw_version or "").startswith(HARDWARE_FW_PREFIX)
+
+
+def _ring_tail_ts(node_id: str) -> str | None:
+    ring = state.rings.get(node_id)
+    if not ring:
+        return None
+    tail = ring[-1]
+    return tail.get("ts") if isinstance(tail, dict) else getattr(tail, "ts", None)
+
+
+def hardware_reported_recently(node_id: str, now: float | None = None) -> bool:
+    """True when the node's ring gained a reading within HARDWARE_LIVE_S of wall time."""
+    tail = _ring_tail_ts(node_id)
+    if tail is None:
+        _hardware_seen.pop(node_id, None)
+        return False
+    now = time.time() if now is None else now
+    seen = _hardware_seen.get(node_id)
+    if seen is None or seen[0] != tail:
+        _hardware_seen[node_id] = (tail, now)
+        return True
+    return now - seen[1] <= HARDWARE_LIVE_S
+
+
+def is_visible(node: Node, all_nodes: list[Node] | None = None, now: float | None = None) -> bool:
+    """Sim nodes are always visible. A hardware node is visible while it, or a hardware neighbour relaying for
+    it (xenon-b is the BLE gateway; only xenon-a posts telemetry), reported within HARDWARE_LIVE_S."""
+    if not is_hardware(node):
+        return True
+    if hardware_reported_recently(node.id, now):
+        return True
+    by_id = {n.id: n for n in all_nodes or []}
+    return any(
+        hardware_reported_recently(nid, now)
+        for nid in node.neighbours or []
+        if nid in by_id and is_hardware(by_id[nid])
+    )
+
+
+def visible_nodes(nodes: list[Node], now: float | None = None) -> list[Node]:
+    """Filter for node lists (GET /nodes, site overview): drops hardware nodes that are not reporting."""
+    return [n for n in nodes if is_visible(n, nodes, now)]
 
 
 def reading_to_dict(reading: Any) -> dict:
@@ -97,6 +153,7 @@ async def node_to_dict(session: AsyncSession, node: Node) -> dict:
         "id": node.id, "site_id": node.site_id, "zone_id": node.zone_id, "label": node.label,
         "lat": node.lat, "lng": node.lng, "map_x": node.map_x, "map_y": node.map_y,
         "floor": node.floor, "indoor": node.indoor, "is_gateway": node.is_gateway,
+        "hardware": is_hardware(node),
         "neighbours": list(node.neighbours or []),
         "fw_version": node.fw_version, "last_seen": last_seen,
         "battery_pct": node.battery_pct if node.battery_pct is not None else (latest or {}).get("battery_pct"),
@@ -125,6 +182,8 @@ async def node_status_payload(session: AsyncSession, node_id: str) -> dict:
     node = await session.get(Node, node_id)
     if node is None:
         raise ApiError("NOT_FOUND", f"node {node_id} not found")
+    if is_hardware(node):
+        hardware_reported_recently(node_id)   # ingest calls this per accepted reading: stamps arrival wall time
     latest = await latest_reading(session, node_id)
     alerts = await open_alerts_for(session, node_id)
     policy = await site_policy(session, node.site_id)
@@ -161,7 +220,7 @@ async def list_nodes(session: SessionDep, site_id: int | None = Query(None)) -> 
     stmt = select(Node).order_by(Node.site_id, Node.id)
     if site_id is not None:
         stmt = stmt.where(Node.site_id == site_id)
-    nodes = (await session.execute(stmt)).scalars().all()
+    nodes = visible_nodes(list((await session.execute(stmt)).scalars().all()))
     return ok([await node_to_dict(session, n) for n in nodes])
 
 

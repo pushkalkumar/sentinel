@@ -11,3 +11,10 @@ export const FIELD_INPUT = `w-full ${SLAB} rounded-lg ${RING} text-f-ink placeho
 
 /** Muted footer line: one per page, DESIGN_V2 §2.4. */
 export const HONESTY = 'text-[13px] leading-5 text-f-ink-2/80'
+
+/** CONTRACT §4.4 code alphabet: 0, O, 1, I and L are left out so nobody has to guess. */
+export const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
+export const CODE_CHARS = /[^ABCDEFGHJKMNPQRSTUVWXYZ23456789]/g
+export const CODE_LEN = 4
+/** The one sentence about the alphabet, used on every screen that shows or takes a code. */
+export const CODE_HINT = 'Four characters. No 0, O, 1, I or L.'

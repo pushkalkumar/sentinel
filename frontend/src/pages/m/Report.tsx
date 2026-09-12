@@ -95,7 +95,7 @@ export default function Report() {
           rows={2}
           maxLength={TEXT_MAX}
           placeholder="Room, floor, what you see"
-          className={`${FIELD_INPUT} py-3.5 resize-y`}
+          className={`${FIELD_INPUT} py-3.5 resize-none`}
         />
         <span className="block mt-1.5 text-[14px] text-f-ink-2 tabular-nums text-right">{text.length} / {TEXT_MAX}</span>
       </label>
@@ -120,7 +120,10 @@ export default function Report() {
 
       {error && <p role="alert" className="text-[16px] text-f-alarm">{error}</p>}
 
-      <FieldButton type="submit" variant="ink" loading={busy} disabled={!type}>Send report</FieldButton>
+      {/* The one action on the screen stays reachable without scrolling, whatever the form is doing. */}
+      <div className="sticky bottom-0 -mx-6 px-6 pt-4 pb-3 bg-gradient-to-t from-f-canvas via-f-canvas to-transparent">
+        <FieldButton type="submit" variant="ink" loading={busy} disabled={!type}>Send report</FieldButton>
+      </div>
     </form>
   )
 }

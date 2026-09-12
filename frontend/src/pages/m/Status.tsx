@@ -7,19 +7,31 @@ import { fmtWall, fmtWallZoned } from '@/lib/time'
 import { useIncidentStore } from '@/store/incidents'
 import { StatusTimeline } from '@/features/phone/StatusTimeline'
 import { FieldButton } from '@/features/phone/FieldButton'
-import { SLAB } from '@/features/phone/surface'
+import { CODE_ALPHABET, CODE_HINT, CODE_LEN, SLAB } from '@/features/phone/surface'
 
 const POLL_MS = 10_000
 
 function normaliseCode(raw: string): string {
   const c = raw.trim().toUpperCase().replace(/\s+/g, '')
-  return c.startsWith('SN-') ? c : c.startsWith('SN') ? `SN-${c.slice(2)}` : `SN-${c}`
+  const body = c.startsWith('SN-') ? c.slice(3) : c.startsWith('SN') ? c.slice(2) : c
+  return `SN-${body}`
+}
+
+/** Catches a typo before the server does: a character outside the alphabet can never be a real code. */
+function codeProblem(code: string): string | null {
+  const body = code.slice(3)
+  const bad = [...new Set([...body].filter((ch) => !CODE_ALPHABET.includes(ch)))]
+  if (bad.length > 0) return `${bad.join(', ')} ${bad.length === 1 ? 'is' : 'are'} not in the code alphabet. ${CODE_HINT}`
+  if (body.length !== CODE_LEN) return `A code has ${CODE_LEN} characters after SN-. ${CODE_HINT}`
+  return null
 }
 
 export default function Status() {
   const [params] = useSearchParams()
   const code = normaliseCode(params.get('code') ?? '')
   const hasCode = code.length > 3
+  const problem = hasCode ? codeProblem(code) : null
+  const lookup = hasCode && !problem
 
   const [incident, setIncident] = useState<IncidentPublic | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -31,34 +43,34 @@ export default function Status() {
   const liveStatus = useIncidentStore((s) => s.byCode[code]?.status)
 
   const load = useCallback(async (manual = false) => {
-    if (!hasCode) return
+    if (!lookup) return
     if (manual) setRefreshing(true)
     try {
       setIncident(await getIncidentPublic(code))
       setError(null)
     } catch (e) {
-      if (isApiError(e, 'NOT_FOUND')) setError(`No report with code ${code}. Check the letters: the alphabet has no zero, no letter O, no 1, no I.`)
+      if (isApiError(e, 'NOT_FOUND')) setError(`No report ${code}. ${CODE_HINT}`)
       else setError(errorText(e))
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [code, hasCode])
+  }, [code, lookup])
 
   useEffect(() => { void load() }, [load, liveUpdatedAt])
 
   useEffect(() => {
-    if (!hasCode) return
+    if (!lookup) return
     const id = setInterval(() => { void load() }, POLL_MS)
     return () => clearInterval(id)
-  }, [hasCode, load])
+  }, [lookup, load])
 
   if (!hasCode) {
     return (
       <div className="flex flex-col gap-4 pt-8 font-field">
         <h1 className="text-[26px] font-semibold leading-tight text-f-ink">No code given</h1>
         <p className="text-[17px] text-f-ink-2">Go back and enter the code from your report.</p>
-        <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 text-[17px] font-medium text-f-signal">
+        <Link to="/m" className="inline-flex items-center gap-1.5 min-h-12 text-[17px] font-medium text-f-ink">
           <ArrowLeft size={20} strokeWidth={1.5} aria-hidden /> Back
         </Link>
       </div>
@@ -75,14 +87,18 @@ export default function Status() {
       </Link>
 
       <div>
-        <p className="text-[15px] text-f-ink-2">Your report</p>
+        <p className="text-[15px] text-f-ink-2">{problem ? 'Check this code' : 'Your report'}</p>
         <h1 className="font-field-mono text-[40px] font-semibold leading-none tracking-[0.02em] text-f-ink tabular-nums mt-1">{code}</h1>
       </div>
 
-      {loading && !incident && <p className="text-[16px] text-f-ink-2">Looking up your report</p>}
+      {problem && <p role="alert" className="text-[17px] leading-6 text-f-ink-2 text-pretty">{problem}</p>}
+
+      {lookup && loading && !incident && !error && (
+        <p className="text-[16px] text-f-ink-2" role="status">Looking up {code}</p>
+      )}
 
       {error && !incident && (
-        <p role="alert" className="text-[17px] leading-6 text-f-ink text-pretty">{error}</p>
+        <p role="alert" className="text-[17px] leading-6 text-f-ink-2 text-pretty">{error}</p>
       )}
 
       {incident && status && (
@@ -113,7 +129,7 @@ export default function Status() {
         </>
       )}
 
-      <FieldButton onClick={() => void load(true)} loading={refreshing}>Refresh</FieldButton>
+      {lookup && <FieldButton onClick={() => void load(true)} loading={refreshing}>Refresh</FieldButton>}
     </div>
   )
 }

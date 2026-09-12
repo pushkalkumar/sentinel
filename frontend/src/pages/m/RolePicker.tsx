@@ -4,11 +4,7 @@ import { useSessionStore } from '@/store/session'
 import { usePhoneStore } from '@/features/phone/phoneStore'
 import { FieldButton } from '@/features/phone/FieldButton'
 import { DevToggle } from '@/features/phone/DevToggle'
-import { RING, SLAB } from '@/features/phone/surface'
-
-/** CONTRACT §4.4 alphabet: no 0/O/1/I/L. */
-const CODE_CHARS = /[^ABCDEFGHJKMNPQRSTUVWXYZ23456789]/g
-const CODE_LEN = 4
+import { CODE_CHARS, CODE_HINT, CODE_LEN, RING, SLAB } from '@/features/phone/surface'
 
 export default function RolePicker() {
   const navigate = useNavigate()
@@ -36,7 +32,7 @@ export default function RolePicker() {
           {siteLine}
           {placeLine && <span className="text-f-ink"> {placeLine}</span>}
         </p>
-        <button type="button" onClick={openPicker} className="min-h-12 -ml-1 px-1 text-[16px] font-medium text-f-signal">
+        <button type="button" onClick={openPicker} className="min-h-12 -ml-1 px-1 text-[16px] font-medium text-f-ink underline decoration-[rgba(11,10,9,0.2)] underline-offset-[3px]">
           {pickedNodeId ? 'Change node' : 'Pick the node next to you'}
         </button>
       </div>
@@ -69,7 +65,7 @@ export default function RolePicker() {
           </div>
           <FieldButton type="submit" block={false} className="w-24 shrink-0" disabled={code.length !== CODE_LEN}>Check</FieldButton>
         </div>
-        <p id="code-hint" className="text-[14px] text-f-ink-2">Four letters or numbers. No zero, no letter O.</p>
+        <p id="code-hint" className="text-[14px] text-f-ink-2">{CODE_HINT}</p>
       </form>
     </div>
   )

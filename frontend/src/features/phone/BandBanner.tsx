@@ -1,4 +1,4 @@
-import type { NodeDetail } from '@/lib/types'
+import type { AlertKind, NodeDetail } from '@/lib/types'
 import { BAND_META } from '@/lib/bands'
 
 export interface BandBannerProps {
@@ -10,7 +10,18 @@ export interface BandBannerProps {
 const WHITE = '#FFFFFF'
 const INK = '#0A0908'
 
-/** 44px strip at the top of every /m page. Solid band fill; LOCAL_FIRE or Hazardous turns it into the alarm. */
+/**
+ * One sentence of advice per alert kind. A node spiking on its own means leave the building;
+ * "shelter indoors" is only ever right for regional smoke, never for a fire in this room.
+ */
+function advice(kind: AlertKind, label: string): string | null {
+  if (kind === 'LOCAL_FIRE') return `Fire suspected at ${label}. Leave the building and go to your muster point.`
+  if (kind === 'LOCAL_SMOKE_SUSPECT') return `Smoke at ${label}. Leave the building; staff are checking.`
+  if (kind === 'HAZARDOUS_SMOKE') return `Hazardous air at ${label}. Shelter indoors.`
+  return null
+}
+
+/** 44px strip at the top of every /m page. Solid band fill; a local alert or Hazardous turns it into the alarm. */
 export function BandBanner({ node, loading, error }: BandBannerProps) {
   if (!node) {
     const text = loading ? 'Loading node' : error ? error : 'No node picked'
@@ -21,13 +32,13 @@ export function BandBanner({ node, loading, error }: BandBannerProps) {
     )
   }
 
-  const fire = node.banner.alert?.kind === 'LOCAL_FIRE'
-  const hazardous = node.banner.band === 'hazardous'
-  if (fire || hazardous) {
-    const text = fire ? `Fire reported at ${node.label}. Leave the building.` : `Hazardous air at ${node.label}. Shelter indoors.`
+  const kind = node.banner.alert?.kind ?? null
+  const alarmText = kind ? advice(kind, node.label) : node.banner.band === 'hazardous' ? `Hazardous air at ${node.label}. Shelter indoors.` : null
+
+  if (alarmText) {
     return (
       <div role="alert" className="min-h-11 flex items-center px-6 py-2 bg-f-alarm text-white text-[17px] font-semibold font-field leading-tight">
-        <span>{text}</span>
+        <span>{alarmText}</span>
       </div>
     )
   }

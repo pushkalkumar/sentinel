@@ -31,7 +31,7 @@ export function TypeTiles({ value, onChange }: TypeTilesProps) {
             aria-checked={selected}
             onClick={() => onChange(t.type)}
             className={clsx(
-              'h-[88px] rounded-lg px-3 text-[19px] font-semibold font-field leading-tight text-center',
+              'h-[72px] rounded-lg px-3 text-[19px] font-semibold font-field leading-tight text-center',
               'transition-[background-color,color,scale] duration-[120ms] ease-[var(--ease-exit)] active:scale-[0.98]',
               selected ? 'bg-f-ink text-white' : `bg-f-surface text-f-ink ${RING} active:bg-f-canvas`,
             )}

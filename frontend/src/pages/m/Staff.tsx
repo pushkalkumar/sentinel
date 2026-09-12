@@ -144,7 +144,7 @@ export default function Staff() {
       <button
         type="button"
         onClick={() => { logout(); setActive(null); setEndedView(null) }}
-        className="min-h-12 self-start -ml-1 px-1 text-[16px] font-medium text-f-signal"
+        className="min-h-12 self-start -ml-1 px-1 text-[16px] font-medium text-f-ink underline decoration-[rgba(11,10,9,0.2)] underline-offset-[3px]"
       >
         Use a different code
       </button>

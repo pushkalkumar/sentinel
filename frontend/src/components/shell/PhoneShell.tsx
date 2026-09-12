@@ -12,6 +12,12 @@ import { NodePicker } from '@/features/phone/NodePicker'
 /** Banner refresh cadence when the WS is down or quiet; alert traffic refreshes it sooner. */
 const BANNER_POLL_MS = 15_000
 
+/**
+ * Pages where standing next to a node is the point: the role screen and the report form.
+ * A code lookup, a roll call and the responder queue never need one, so the sheet stays shut.
+ */
+const NODE_PATHS = new Set(['/m', '/m/report'])
+
 /** Light field ground, 390px column on desktop. Banner always present; picker sheet on first visit. */
 export function PhoneShell() {
   const { pathname } = useLocation()
@@ -35,23 +41,26 @@ export function PhoneShell() {
     return () => clearInterval(id)
   }, [pickedNodeId, refresh])
 
+  const nodePage = NODE_PATHS.has(pathname)
+  // An empty strip saying "No node picked" is noise on a page that does not use a node.
+  const showBanner = node !== null || nodePage
+
   return (
     <div data-ground="field" className="min-h-dvh bg-f-canvas text-f-ink font-field">
       <div className="mx-auto w-full max-w-[390px] min-h-dvh flex flex-col">
-        <div className="sticky top-0 z-30">
-          <BandBanner node={node} loading={loading} error={error} />
-        </div>
+        {showBanner && (
+          <div className="sticky top-0 z-30">
+            <BandBanner node={node} loading={loading} error={error} />
+          </div>
+        )}
         <main className="flex-1 px-6 pb-10">
           <Outlet />
         </main>
-        {pathname === '/m' && (
-          <footer className="px-6 pb-8">
-            <p className={HONESTY}>{SIM_TAG_TEXT.phone}</p>
-          </footer>
-        )}
+        <footer className="px-6 pb-8">
+          <p className={HONESTY}>{SIM_TAG_TEXT.phone}</p>
+        </footer>
       </div>
-      {/* Teachers pick a muster point inside the roll call form, so the first-visit picker would only block /m/staff. */}
-      <NodePicker open={pickerOpen && pathname !== '/m/staff'} />
+      <NodePicker open={pickerOpen && nodePage} />
     </div>
   )
 }

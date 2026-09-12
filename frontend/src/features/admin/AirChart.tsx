@@ -8,6 +8,7 @@ import { fmtSim } from '@/lib/time'
 const W = 1000
 const H = 360
 const PAD = { l: 48, r: 72, t: 16, b: 28 }
+const LABEL_GAP = 12
 
 export interface AirChartProps {
   data: AirResponse
@@ -41,13 +42,31 @@ export function AirChart({ data, selected, onSelect }: AirChartProps) {
 
   const ticks = useMemo(() => {
     const span = t1 - t0
-    const stepMs = span > 6 * 3600_000 ? 3600_000 : span > 2 * 3600_000 ? 1800_000 : 600_000
+    const stepMs = span > 6 * 3600_000 ? 3600_000
+      : span > 2 * 3600_000 ? 1800_000
+      : span > 40 * 60_000 ? 600_000
+      : span > 10 * 60_000 ? 300_000
+      : 60_000
     const out: number[] = []
     for (let t = Math.ceil(t0 / stepMs) * stepMs; t <= t1; t += stepMs) out.push(t)
     return out
   }, [t0, t1])
 
   const hoverT = hover === null ? null : t0 + (hover / (W - PAD.l - PAD.r)) * (t1 - t0)
+
+  // Right-edge series labels: nodes at similar PM2.5 would print on top of each other, so stack them at least LABEL_GAP apart.
+  const labelY: Record<string, number> = {}
+  {
+    const items = data.series
+      .filter((s) => s.points.length > 0)
+      .map((s) => ({ id: s.node_id, y: y(s.points[s.points.length - 1].pm25) }))
+      .sort((a, b) => a.y - b.y)
+    let prev = -Infinity
+    for (const it of items) { it.y = Math.max(it.y, prev + LABEL_GAP); prev = it.y }
+    let next = H - PAD.b + 4
+    for (let i = items.length - 1; i >= 0; i -= 1) { items[i].y = Math.min(items[i].y, next - LABEL_GAP); next = items[i].y }
+    for (const it of items) labelY[it.id] = it.y
+  }
 
   const readout = useMemo(() => {
     if (hoverT === null) return null
@@ -119,7 +138,7 @@ export function AirChart({ data, selected, onSelect }: AirChartProps) {
                 points={s.points.map((p) => `${x(Date.parse(p.ts))},${y(p.pm25)}`).join(' ')}
               />
               {last && (isSel || selected === null) && (
-                <text x={x(Date.parse(last.ts)) + 6} y={y(last.pm25) + 4} fontFamily="var(--font-mono)" fontSize={11} fill={isSel ? 'var(--color-ink)' : 'var(--color-ink-3)'}>{s.node_id}</text>
+                <text x={x(Date.parse(last.ts)) + 6} y={(selected === null ? labelY[s.node_id] : y(last.pm25)) + 4} fontFamily="var(--font-mono)" fontSize={11} fill={isSel ? 'var(--color-ink)' : 'var(--color-ink-3)'}>{s.node_id}</text>
               )}
             </g>
           )

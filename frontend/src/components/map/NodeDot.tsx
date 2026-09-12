@@ -5,6 +5,8 @@ import { BAND_META } from '@/lib/bands'
 export const DOT_R = 6
 const OFFLINE_STROKE = '#46423D'
 export const ALARM = '#FF4A3D'
+/** SVG transforms default to transform-box: view-box, so the pulse-ring scale would pivot around the map centre and the rings drift off the node. */
+const PULSE_STYLE = { transformBox: 'fill-box', transformOrigin: 'center' } as const
 
 export interface NodeDotProps {
   node: Node
@@ -45,19 +47,19 @@ export function NodeDot({ node: n, mode, selected, highlighted = false, flash = 
     >
       {fire && (
         <>
-          <circle r={12} fill="none" stroke={ALARM} strokeWidth={1.5} opacity={0.6} className="pulse-ring-alarm" />
-          <circle r={18} fill="none" stroke={ALARM} strokeWidth={1} opacity={0.4} className="pulse-ring-alarm" style={{ animationDelay: '0.6s' }} />
+          <circle r={12} fill="none" stroke={ALARM} strokeWidth={1.5} opacity={0.6} className="pulse-ring-alarm" style={PULSE_STYLE} />
+          <circle r={18} fill="none" stroke={ALARM} strokeWidth={1} opacity={0.4} className="pulse-ring-alarm" style={{ ...PULSE_STYLE, animationDelay: '0.6s' }} />
           <circle r={12} fill="none" stroke={ALARM} strokeWidth={1} opacity={0.35} />
           <circle r={18} fill="none" stroke={ALARM} strokeWidth={1} opacity={0.2} />
         </>
       )}
       {alerting && !offline && (
         <>
-          <circle r={12} fill="none" stroke={bandColor} strokeWidth={1} opacity={0.4} className="pulse-ring" />
+          <circle r={12} fill="none" stroke={bandColor} strokeWidth={1} opacity={0.4} className="pulse-ring" style={PULSE_STYLE} />
           <circle r={12} fill="none" stroke={bandColor} strokeWidth={1} opacity={0.25} />
         </>
       )}
-      {highlighted && <circle r={14} fill="none" stroke="var(--color-signal)" strokeWidth={1} opacity={0.6} className="pulse-ring" />}
+      {highlighted && <circle r={14} fill="none" stroke="var(--color-signal)" strokeWidth={1} opacity={0.6} className="pulse-ring" style={PULSE_STYLE} />}
       {flash && <circle r={12} fill="none" stroke="var(--color-signal)" strokeWidth={2} opacity={0.6} />}
       {selected && <circle r={10} fill="none" stroke="var(--color-signal)" strokeWidth={1} />}
       {n.is_gateway

@@ -28,8 +28,8 @@ export function BandBanner({ node, loading, error }: BandBannerProps) {
     const place = node.label.toUpperCase()
     const text = fire ? `FIRE REPORTED AT ${place} · LEAVE THE BUILDING` : `HAZARDOUS AIR AT ${place} · SHELTER INDOORS`
     return (
-      <div role="alert" className="h-11 flex items-center px-5 bg-f-alarm text-white text-[20px] font-bold font-field leading-none">
-        <span className="truncate">{text}</span>
+      <div role="alert" className="min-h-11 flex items-center px-5 py-2 bg-f-alarm text-white text-[18px] font-bold font-field leading-tight">
+        <span>{text}</span>
       </div>
     )
   }

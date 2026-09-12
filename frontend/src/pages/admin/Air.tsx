@@ -58,7 +58,7 @@ export default function Air() {
         )}
       />
       <div className="flex flex-col gap-4">
-        <Panel title="PM2.5 µg/m³" meta={data ? `${data.step}-min steps · ${data.series.length} nodes` : undefined}>
+        <Panel title="PM2.5" meta={data ? `µg/m³ · ${data.step}-min steps · ${data.series.length} nodes` : 'µg/m³'}>
           {loading && !data && <Skeleton className="w-64" />}
           {error && !data && <p className="text-sm text-alarm">{error}</p>}
           {data && <AirChart data={data} selected={selected} onSelect={selectNode} />}

@@ -20,6 +20,12 @@ export function QueueList({ incidents, selected, onSelect, onOpen, siteName, loa
   const ref = useRef<HTMLUListElement>(null)
   const reduce = useReducedMotion()
 
+  // Focus the list on mount so arrows and Enter work without a click first (DESIGN §8.5 keyboard flow).
+  const hasRows = incidents.length > 0
+  useEffect(() => {
+    if (hasRows && document.activeElement === document.body) ref.current?.focus({ preventScroll: true })
+  }, [hasRows])
+
   // Keep the selected row in view when the order changes under it.
   useEffect(() => {
     if (!selected || !ref.current) return

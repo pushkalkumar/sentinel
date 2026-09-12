@@ -45,7 +45,7 @@ export default function RolePicker() {
       <form onSubmit={submitCode} className="flex flex-col gap-2" noValidate>
         <label htmlFor="have-code" className="text-[18px] text-f-ink">Have a code?</label>
         <div className="flex gap-2">
-          <div className="flex-1 flex items-center h-16 rounded-sm bg-f-surface border border-f-line-strong px-4 focus-within:border-f-signal">
+          <div className="flex-1 min-w-0 flex items-center h-16 rounded-sm bg-f-surface border border-f-line-strong px-4 focus-within:border-f-signal">
             <span aria-hidden className="font-field-mono text-[22px] text-f-ink-2 tabular-nums">SN-</span>
             <input
               id="have-code"

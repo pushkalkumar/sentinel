@@ -49,7 +49,8 @@ export function PhoneShell() {
           </footer>
         )}
       </div>
-      <NodePicker open={pickerOpen} />
+      {/* Teachers pick a muster point inside the roll call form, so the first-visit picker would only block /m/staff. */}
+      <NodePicker open={pickerOpen && pathname !== '/m/staff'} />
     </div>
   )
 }

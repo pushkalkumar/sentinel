@@ -1,4 +1,3 @@
-# OWNER: backend-core
 import os
 
 os.environ["SENTINEL_DB"] = "sqlite+aiosqlite:///:memory:"

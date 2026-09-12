@@ -1,0 +1,10 @@
+backend/.venv
+backend/*.db
+backend/*.db-*
+frontend
+docs
+hardware
+scripts
+.git
+.vercel
+**/__pycache__
